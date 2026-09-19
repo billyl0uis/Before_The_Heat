@@ -48,7 +48,7 @@ export function MurriniEditor() {
           onParamChange={handleParamChange}
           onClear={clearElements}
         />
-        <TechniqueReference shape={selectedShape} />
+        <TechniqueReference shape={selectedShape} params={params} />
       </div>
     </div>
   )

@@ -1,5 +1,7 @@
 // Reference notes on the real glassblowing techniques each digital shape
-// stands in for. Keyed by the same shape id used in engine/murrini/shapes.js.
+// stands in for. Most shape ids map straight to one technique key; polygon
+// is the exception — resolveTechniqueKey() below picks between marvering
+// and an optic mold depending on how many sides are dialed in.
 export const MURRINI_TECHNIQUES = {
   circle: {
     title: 'Simple Cane',
@@ -21,10 +23,21 @@ export const MURRINI_TECHNIQUES = {
       'Reheat and pull the cased gather into a rod — the casing stays as an outer layer the whole length.',
     ],
   },
-  polygon: {
+  marver: {
+    title: 'Marvering (Flat Panels)',
+    summary:
+      "For a small number of flat sides — a square or hexagonal cane — no mold is needed. The gather is shaped by hand against the marver, a flat steel (historically marble) table, pressing one facet at a time.",
+    steps: [
+      'Gather the glass and reheat it to working temperature.',
+      'Press and roll the gather against the flat marver table to flatten one side.',
+      'Rotate the piece by the target angle (90° for a square, 60° for a hexagon) and repeat for each side.',
+      'Pull the faceted gather into a rod once every side is flattened.',
+    ],
+  },
+  opticMold: {
     title: 'Optic / Facet Mold',
     summary:
-      "Instead of pulling a round gather, it's pressed into a ribbed or faceted metal mold first. The mold's flat panels imprint straight facets onto the glass, so the pulled cane has a polygonal cross-section instead of a circle.",
+      'For more facets than can be pressed by hand, the gather goes into a ribbed metal mold instead — a cavity lined with flat panels. Pressing the gather into it imprints every facet in one motion, evenly, which would be impractical to marver one side at a time.',
     steps: [
       'Gather the glass and reheat it to working temperature.',
       'Lower the gather into an optic mold with flat internal panels and press it against the mold walls.',
@@ -51,4 +64,15 @@ export const MURRINI_TECHNIQUES = {
       'Use it by trailing it onto hot glass, or bundle it with other canes before pulling further.',
     ],
   },
+}
+
+// Marvering a fixed number of flat sides by hand stays practical up to
+// about a hexagon; more facets than that is realistically mold territory.
+const MAX_HAND_MARVERED_SIDES = 6
+
+export function resolveTechniqueKey(shape, params = {}) {
+  if (shape === 'polygon') {
+    return params.sides <= MAX_HAND_MARVERED_SIDES ? 'marver' : 'opticMold'
+  }
+  return shape
 }
