@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react'
 import { ColorantPicker } from '../components/murrini/ColorantPicker'
 import { CompatibilityCheck } from '../components/murrini/CompatibilityCheck'
+import { ExtrusionControls } from '../components/murrini/ExtrusionControls'
 import { MurriniCanvas } from '../components/murrini/MurriniCanvas'
 import { PatternControls } from '../components/murrini/PatternControls'
+import { RodPreviewCanvas } from '../components/murrini/RodPreviewCanvas'
 import { ShapeToolbar } from '../components/murrini/ShapeToolbar'
 import { TechniqueReference } from '../components/murrini/TechniqueReference'
 import { GLASS_COLOR_INDEX } from '../content/glassColorIndex'
@@ -16,9 +18,12 @@ export function MurriniEditor({ design }) {
     repeatedElements,
     pattern,
     setPattern,
+    extrusion,
+    setExtrusion,
     addElement,
     clearElements,
   } = design
+  const [viewMode, setViewMode] = useState('flat')
   const [selectedShape, setSelectedShape] = useState('circle')
   const [params, setParams] = useState(SHAPE_TYPES.circle.defaultParams)
 
@@ -67,11 +72,36 @@ export function MurriniEditor({ design }) {
         </p>
       </div>
       <div className="flex flex-col items-start gap-6 lg:flex-row">
-        <MurriniCanvas
-          canvas={canvas}
-          elements={repeatedElements}
-          onPlace={handlePlace}
-        />
+        <div className="flex flex-col gap-3">
+          <div className="flex gap-2">
+            {[
+              { key: 'flat', label: 'Flat pattern' },
+              { key: 'rod', label: 'Rod preview (3D)' },
+            ].map((mode) => (
+              <button
+                key={mode.key}
+                type="button"
+                onClick={() => setViewMode(mode.key)}
+                className={`rounded px-3 py-1.5 text-sm transition-colors ${
+                  mode.key === viewMode
+                    ? 'bg-purple-500 text-white'
+                    : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+                }`}
+              >
+                {mode.label}
+              </button>
+            ))}
+          </div>
+          {viewMode === 'flat' ? (
+            <MurriniCanvas
+              canvas={canvas}
+              elements={repeatedElements}
+              onPlace={handlePlace}
+            />
+          ) : (
+            <RodPreviewCanvas elements={repeatedElements} extrusion={extrusion} />
+          )}
+        </div>
         <div className="flex flex-col gap-6">
           <ShapeToolbar
             selectedShape={selectedShape}
@@ -81,6 +111,7 @@ export function MurriniEditor({ design }) {
             onClear={clearElements}
           />
           <PatternControls pattern={pattern} onChange={setPattern} />
+          <ExtrusionControls extrusion={extrusion} onChange={setExtrusion} />
         </div>
         <div className="flex flex-col gap-6">
           <ColorantPicker

@@ -1,0 +1,35 @@
+const CONTROLS = [
+  { key: 'length', label: 'Length', min: 20, max: 400, step: 10 },
+  { key: 'twistDegrees', label: 'Twist', min: -720, max: 720, step: 10 },
+  { key: 'taper', label: 'Taper (%)', min: 0, max: 90, step: 5 },
+]
+
+export function ExtrusionControls({ extrusion, onChange }) {
+  const setField = (key, value) => onChange({ ...extrusion, [key]: value })
+
+  return (
+    <div className="flex w-64 flex-col gap-3 rounded-lg border border-neutral-800 bg-neutral-900 p-4">
+      <h2 className="text-sm font-medium text-neutral-100">Rod Extrusion</h2>
+      {CONTROLS.map((control) => (
+        <label
+          key={control.key}
+          className="flex flex-col gap-1 text-sm text-neutral-300"
+        >
+          {control.label}: {extrusion[control.key]}
+          <input
+            type="range"
+            min={control.min}
+            max={control.max}
+            step={control.step}
+            value={extrusion[control.key]}
+            onChange={(event) => setField(control.key, Number(event.target.value))}
+          />
+        </label>
+      ))}
+      <p className="text-xs text-neutral-500">
+        Twist spirals the whole bundle around its center as it's pulled
+        (the zanfirico technique). Taper narrows it toward the far end.
+      </p>
+    </div>
+  )
+}

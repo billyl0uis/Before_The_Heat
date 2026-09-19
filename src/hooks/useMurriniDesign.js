@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { DEFAULT_EXTRUSION } from '../engine/murrini/extrude'
 import { DEFAULT_PATTERN } from '../engine/murrini/pattern'
 import { SHAPE_TYPES } from '../engine/murrini/shapes'
 
@@ -7,6 +8,7 @@ const DEFAULT_CANVAS = { width: 500, height: 500, backgroundColor: '#1a1a1a' }
 export function useMurriniDesign(canvas = DEFAULT_CANVAS) {
   const [elements, setElements] = useState([])
   const [pattern, setPattern] = useState(DEFAULT_PATTERN)
+  const [extrusion, setExtrusion] = useState(DEFAULT_EXTRUSION)
 
   const addElement = useCallback((shapeType, x, y, overrides = {}) => {
     const definition = SHAPE_TYPES[shapeType]
@@ -43,6 +45,8 @@ export function useMurriniDesign(canvas = DEFAULT_CANVAS) {
     elements,
     pattern,
     setPattern,
+    extrusion,
+    setExtrusion,
     addElement,
     removeElement,
     clearElements,
