@@ -113,7 +113,7 @@ This is what gets saved to Firestore for a single murrini pattern.
   "id": "string — Firestore document ID",
   "ownerId": "string — Firebase Auth UID",
   "type": "murrini",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "name": "string",
   "description": "string",
   "visibility": "private | public",
@@ -129,14 +129,14 @@ This is what gets saved to Firestore for a single murrini pattern.
   "elements": [
     {
       "id": "string — uuid, unique within this design",
-      "shape": "circle | ring | line | polygon",
+      "shape": "string — key into the shape registry (circle, ring, polygon, star, line, ...)",
       "x": 0,
       "y": 0,
-      "radius": 20,
       "rotation": 0,
       "color": "#ffffff",
       "opacity": 1,
-      "layer": 0
+      "layer": 0,
+      "params": "object — shape-specific fields, e.g. { radius } for circle, { radius, sides } for polygon, { radius, innerRadius, points } for star"
     }
   ],
 
@@ -164,6 +164,15 @@ Field notes:
 - `elements` is the *base* pattern unit the user draws — one repeat cell.
   `pattern` describes how that cell repeats across the rod's cross-section
   (grid for a mosaic cane, radial for a classic murrini "flower", etc.).
+- `shape` is open-ended, not a fixed enum: it's a lookup key into the shape
+  registry at `src/engine/murrini/shapes.js`. `params` holds whatever
+  fields that shape type needs (a circle needs `radius`; a star needs
+  `radius`, `innerRadius`, `points`). Adding a new shape type is one
+  registry entry, not a schema migration.
+- v1 → v2 change: `radius` moved from a top-level element field into
+  `params`, since not every shape has a single radius. A v1 document can
+  be migrated by moving `radius` into `params: { radius }` and defaulting
+  `shape` to `"circle"` if missing.
 - `extrusion` is the module-1 "stretch simulation": `twistDegrees` and
   `taper` let the rod preview show the pattern twisting/thinning along its
   length the way a real pulled cane does, without redrawing `elements`.
