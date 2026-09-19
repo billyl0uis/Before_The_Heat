@@ -1,15 +1,13 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { MurriniCanvas } from '../components/murrini/MurriniCanvas'
 import { PatternControls } from '../components/murrini/PatternControls'
 import { ShapeToolbar } from '../components/murrini/ShapeToolbar'
 import { TechniqueReference } from '../components/murrini/TechniqueReference'
-import { computeRepeatedElements } from '../engine/murrini/pattern'
 import { SHAPE_TYPES } from '../engine/murrini/shapes'
-import { useMurriniDesign } from '../hooks/useMurriniDesign'
 
-export function MurriniEditor() {
-  const { canvas, elements, pattern, setPattern, addElement, clearElements } =
-    useMurriniDesign()
+export function MurriniEditor({ design }) {
+  const { canvas, repeatedElements, pattern, setPattern, addElement, clearElements } =
+    design
   const [selectedShape, setSelectedShape] = useState('circle')
   const [color, setColor] = useState('#c084fc')
   const [params, setParams] = useState(SHAPE_TYPES.circle.defaultParams)
@@ -28,14 +26,6 @@ export function MurriniEditor() {
   const handlePlace = (x, y) => {
     addElement(selectedShape, x, y, { color, params })
   }
-
-  // elements stays the single "base cell" the user actually drew and is
-  // what gets saved later — repetition is purely a render-time expansion
-  // of it, driven by the pattern settings.
-  const repeatedElements = useMemo(
-    () => computeRepeatedElements(elements, pattern),
-    [elements, pattern],
-  )
 
   return (
     <div className="flex flex-col items-center gap-6 p-8">
