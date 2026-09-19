@@ -2,12 +2,14 @@ import { useMemo, useState } from 'react'
 import { computeRepeatedElements } from './engine/murrini/pattern'
 import { useMurriniDesign } from './hooks/useMurriniDesign'
 import { useVesselShape } from './hooks/useVesselShape'
+import { ColorIndexPage } from './pages/ColorIndexPage'
 import { MurriniEditor } from './pages/MurriniEditor'
 import { VesselEditor } from './pages/VesselEditor'
 
 const TABS = [
   { key: 'murrini', label: 'Murrini Pattern' },
   { key: 'vessel', label: 'Vessel Morphograph' },
+  { key: 'colors', label: 'Color Index' },
 ]
 
 function App() {
@@ -45,11 +47,9 @@ function App() {
           </button>
         ))}
       </nav>
-      {activeTab === 'murrini' ? (
-        <MurriniEditor design={design} />
-      ) : (
-        <VesselEditor design={design} vessel={vessel} />
-      )}
+      {activeTab === 'murrini' && <MurriniEditor design={design} />}
+      {activeTab === 'vessel' && <VesselEditor design={design} vessel={vessel} />}
+      {activeTab === 'colors' && <ColorIndexPage />}
     </div>
   )
 }

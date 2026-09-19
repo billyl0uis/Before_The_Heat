@@ -20,6 +20,19 @@ export function TechniqueReference({ shape, params }) {
           </li>
         ))}
       </ol>
+      <p className="border-t border-neutral-800 pt-3 text-xs text-neutral-500">
+        See it done for real:{' '}
+        <a
+          href="https://philabaumglass.com/product-category/wes-hunting"
+          target="_blank"
+          rel="noreferrer"
+          className="text-purple-400 hover:underline"
+        >
+          Wes &amp; Wesley Hunting
+        </a>{' '}
+        work in cane, murrini, and millefiori together at their studio in
+        rural Wisconsin.
+      </p>
     </div>
   )
 }

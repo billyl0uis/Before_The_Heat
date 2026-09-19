@@ -47,11 +47,12 @@ export const MURRINI_TECHNIQUES = {
   star: {
     title: 'Star / Chevron Mold',
     summary:
-      'The classic chevron-bead technique: a gather is pressed into a star-shaped (rosetta) mold, then cased with a contrasting color and pressed into the star mold again — repeated for each layer. Slicing the finished cane shows nested star layers radiating outward.',
+      "The chevron (or rosetta/star) bead technique, documented back to 15th-century Murano: 4-7 layers of alternating color are built up in a star-shaped mold, each new casing pressed into the mold again so it keeps the star outline. The whole layered bundle is then drawn out from both ends at once (a rod on each side, pulled apart), not stretched from a single point like the other canes here — that two-sided pull is what keeps the nested star pattern centered and even along the whole length.",
     steps: [
       'Press a gather into a star-shaped mold so its cross-section becomes star-shaped.',
       'Case that star with a contrasting color, then press into the star mold again so the new layer keeps the star outline.',
-      'Repeat casing for as many nested colors as wanted, then pull the finished bundle into a rod.',
+      'Repeat casing for as many nested colors as wanted (historically 4-7 layers).',
+      'Attach a punty to each end and draw the layered bundle out from both sides at once.',
     ],
   },
   line: {
