@@ -54,6 +54,8 @@ vitrum-designer/
 │   ├── context/                # DesignContext, AuthContext
 │   ├── firebase/                # firebase.js (init), auth.js, firestore.js (CRUD)
 │   ├── schemas/                  # JSON Schema / validators for Design Objects
+│   ├── content/                   # Static reference text/data (e.g. real-world
+│   │                                 glassblowing technique notes), no logic
 │   ├── pages/                     # route-level views (Editor, Vault, Preview)
 │   ├── styles/
 │   ├── App.jsx

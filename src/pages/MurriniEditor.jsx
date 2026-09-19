@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { MurriniCanvas } from '../components/murrini/MurriniCanvas'
 import { ShapeToolbar } from '../components/murrini/ShapeToolbar'
+import { TechniqueReference } from '../components/murrini/TechniqueReference'
 import { SHAPE_TYPES } from '../engine/murrini/shapes'
 import { useMurriniDesign } from '../hooks/useMurriniDesign'
 
@@ -36,7 +37,7 @@ export function MurriniEditor() {
           place it.
         </p>
       </div>
-      <div className="flex flex-col gap-6 sm:flex-row">
+      <div className="flex flex-col items-start gap-6 lg:flex-row">
         <MurriniCanvas canvas={canvas} elements={elements} onPlace={handlePlace} />
         <ShapeToolbar
           selectedShape={selectedShape}
@@ -47,6 +48,7 @@ export function MurriniEditor() {
           onParamChange={handleParamChange}
           onClear={clearElements}
         />
+        <TechniqueReference shape={selectedShape} />
       </div>
     </div>
   )
