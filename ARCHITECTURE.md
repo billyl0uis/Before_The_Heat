@@ -136,6 +136,7 @@ This is what gets saved to Firestore for a single murrini pattern.
       "y": 0,
       "rotation": 0,
       "color": "#ffffff",
+      "colorantId": "string | null — key into GLASS_COLOR_INDEX (src/content/glassColorIndex.js), the real colorant this color came from; null for a free custom color",
       "opacity": 1,
       "layer": 0,
       "params": "object — shape-specific fields, e.g. { radius } for circle, { radius, sides } for polygon, { radius, innerRadius, points } for star"
@@ -175,6 +176,9 @@ Field notes:
   `params`, since not every shape has a single radius. A v1 document can
   be migrated by moving `radius` into `params: { radius }` and defaulting
   `shape` to `"circle"` if missing.
+- `colorantId` is additive, not a breaking change — a v2 document without
+  it just means the color isn't tied to a documented real colorant
+  (equivalent to `null`).
 - `extrusion` is the module-1 "stretch simulation": `twistDegrees` and
   `taper` let the rod preview show the pattern twisting/thinning along its
   length the way a real pulled cane does, without redrawing `elements`.

@@ -1,16 +1,21 @@
 import { useState } from 'react'
+import { ColorantPicker } from '../components/murrini/ColorantPicker'
 import { MurriniCanvas } from '../components/murrini/MurriniCanvas'
 import { PatternControls } from '../components/murrini/PatternControls'
 import { ShapeToolbar } from '../components/murrini/ShapeToolbar'
 import { TechniqueReference } from '../components/murrini/TechniqueReference'
+import { GLASS_COLOR_INDEX } from '../content/glassColorIndex'
 import { SHAPE_TYPES } from '../engine/murrini/shapes'
 
 export function MurriniEditor({ design }) {
   const { canvas, repeatedElements, pattern, setPattern, addElement, clearElements } =
     design
   const [selectedShape, setSelectedShape] = useState('circle')
-  const [color, setColor] = useState('#c084fc')
   const [params, setParams] = useState(SHAPE_TYPES.circle.defaultParams)
+
+  const [colorantId, setColorantId] = useState(GLASS_COLOR_INDEX[0].id)
+  const [useCustomColor, setUseCustomColor] = useState(false)
+  const [customColor, setCustomColor] = useState('#c084fc')
 
   // Swap in that shape's own default params whenever the tool changes, so
   // sliders never show a param the current shape type doesn't have.
@@ -24,7 +29,16 @@ export function MurriniEditor({ design }) {
   }
 
   const handlePlace = (x, y) => {
-    addElement(selectedShape, x, y, { color, params })
+    if (useCustomColor) {
+      addElement(selectedShape, x, y, { color: customColor, params, colorantId: null })
+      return
+    }
+    const colorant = GLASS_COLOR_INDEX.find((entry) => entry.id === colorantId)
+    addElement(selectedShape, x, y, {
+      color: colorant.swatch,
+      params,
+      colorantId: colorant.id,
+    })
   }
 
   return (
@@ -34,8 +48,8 @@ export function MurriniEditor({ design }) {
           Murrini Pattern Engine
         </h1>
         <p className="text-sm text-neutral-400">
-          Pick a shape, set its color and size, then click the canvas to
-          place it. Turn on a repeat to see it as a full cane cross-section.
+          Pick a shape and a real glass color, then click the canvas to place
+          it. Turn on a repeat to see it as a full cane cross-section.
         </p>
       </div>
       <div className="flex flex-col items-start gap-6 lg:flex-row">
@@ -48,15 +62,23 @@ export function MurriniEditor({ design }) {
           <ShapeToolbar
             selectedShape={selectedShape}
             onSelectShape={handleSelectShape}
-            color={color}
-            onColorChange={setColor}
             params={params}
             onParamChange={handleParamChange}
             onClear={clearElements}
           />
           <PatternControls pattern={pattern} onChange={setPattern} />
         </div>
-        <TechniqueReference shape={selectedShape} params={params} />
+        <div className="flex flex-col gap-6">
+          <ColorantPicker
+            colorantId={colorantId}
+            onSelectColorant={setColorantId}
+            useCustom={useCustomColor}
+            onToggleCustom={setUseCustomColor}
+            customColor={customColor}
+            onCustomColorChange={setCustomColor}
+          />
+          <TechniqueReference shape={selectedShape} params={params} />
+        </div>
       </div>
     </div>
   )

@@ -1,7 +1,9 @@
 // Reference entries for real glass colorant chemistry — not a live analysis
-// of whatever hex value someone picks in the pattern editor. An arbitrary
-// RGB color doesn't map to a specific real compound, so this is a curated
-// catalog of well-documented colorants, not a color-matching tool.
+// of whatever hex value someone picks. Swatch hex values are illustrative
+// approximations for the UI, not spectrophotometric measurements; the
+// colorant, family, strikes, devitrifies, and caution fields are the parts
+// checked against sources (Corning Museum of Glass, Wikipedia, patent
+// literature, and other glass-chemistry references) before being written.
 //
 // family: 'transparent' | 'opaque' — opaque entries are opacifiers, not
 //   tints (they scatter light rather than color it).
@@ -29,13 +31,25 @@ export const GLASS_COLOR_INDEX = [
     id: 'copper-turquoise',
     name: 'Copper Turquoise / Green',
     swatch: '#0d9488',
-    colorant: 'Copper oxide',
+    colorant: 'Copper oxide (oxidizing atmosphere)',
     family: 'transparent',
     strikes: false,
     devitrifies: false,
     caution: null,
     notes:
-      'Copper gives a blue-green/turquoise color under normal oxidizing furnace conditions. The same element can instead produce a deep red glass ("copper ruby," historically used as a cheaper substitute for gold ruby) under a reducing atmosphere with careful heat treatment — the color depends on furnace chemistry, not just the colorant.',
+      'Copper gives a blue-green/turquoise color under normal oxidizing furnace conditions — the everyday result of working with copper.',
+  },
+  {
+    id: 'copper-red',
+    name: 'Copper Red (Reduction)',
+    swatch: '#7f1d1d',
+    colorant: 'Copper (reducing atmosphere)',
+    family: 'transparent',
+    strikes: true,
+    devitrifies: false,
+    caution: null,
+    notes:
+      'The same copper that gives turquoise under normal conditions instead gives a deep red — "copper ruby," historically used as a cheaper substitute for gold ruby — under a reducing furnace atmosphere with careful heat treatment. Same colorant, opposite result, purely from atmosphere control, which makes it a genuine strike/redox-sensitive color rather than a fixed tint.',
   },
   {
     id: 'gold-ruby',
@@ -51,7 +65,7 @@ export const GLASS_COLOR_INDEX = [
   },
   {
     id: 'cadmium-selenium-red',
-    name: 'Cadmium/Selenium Red, Orange, Yellow',
+    name: 'Cadmium/Selenium Red & Orange',
     swatch: '#dc2626',
     colorant: 'Cadmium sulfoselenide (CdS/CdSe)',
     family: 'transparent',
@@ -60,7 +74,20 @@ export const GLASS_COLOR_INDEX = [
     caution:
       'Cadmium is toxic in powder or vapor form. The risk is mainly dust from grinding, cutting, or cold-working this color, not the solid glass itself — use ventilation and avoid dry-grinding without dust control.',
     notes:
-      "A genuine striking color: it can come straight out of the furnace looking pale or nearly colorless, and only develops its full red/orange/yellow when reheated near the softening point and held there — cool it too fast and the color never shows. Widely reported by glassworkers as one of the touchier color families to work.",
+      "A genuine striking color: it can come straight out of the furnace looking pale or nearly colorless, and only develops its full red/orange when reheated near the softening point and held there — cool it too fast and the color never shows. Widely reported by glassworkers as one of the touchier color families to work.",
+  },
+  {
+    id: 'cadmium-yellow',
+    name: 'Cadmium Yellow',
+    swatch: '#eab308',
+    colorant: 'Cadmium sulfide (CdS, no selenium)',
+    family: 'transparent',
+    strikes: false,
+    devitrifies: false,
+    caution:
+      'Cadmium sulfide is toxic by inhalation, particularly as dust or vapor. Same handling precautions as the cadmium/selenium reds — ventilation, no dry-grinding.',
+    notes:
+      "The plain-sulfide sibling of the cadmium/selenium reds — cadmium sulfide alone gives a straightforward yellow without needing selenium in the mix, and without the same strike-to-develop behavior the red/orange blends have.",
   },
   {
     id: 'manganese-purple',
@@ -87,16 +114,52 @@ export const GLASS_COLOR_INDEX = [
       'A very strong colorant — small amounts give a clear, dark green; push the concentration higher and it goes nearly black.',
   },
   {
-    id: 'iron-green-amber',
-    name: 'Iron Green-Blue / Amber',
-    swatch: '#78350f',
-    colorant: 'Iron oxide (Fe²⁺ / Fe³⁺)',
+    id: 'iron-blue-green',
+    name: 'Iron Blue-Green (Ferrous)',
+    swatch: '#0f766e',
+    colorant: 'Iron oxide, Fe²⁺ (ferrous)',
     family: 'transparent',
     strikes: false,
     devitrifies: false,
     caution: null,
     notes:
-      'Same colorant, two different results depending on oxidation state: ferrous iron (Fe²⁺) reads blue-green, ferric iron (Fe³⁺) reads yellow-green/amber. Which one you get depends on the furnace atmosphere during working, not just the recipe — a clear example of why "the same" glass color can shift piece to piece.',
+      'Iron in the ferrous (Fe²⁺) state reads blue-green. Which oxidation state you get depends on the furnace atmosphere during working, not just the batch recipe — the same base glass can swing toward this or its ferric sibling.',
+  },
+  {
+    id: 'iron-yellow-green',
+    name: 'Iron Yellow-Green (Ferric)',
+    swatch: '#84cc16',
+    colorant: 'Iron oxide, Fe³⁺ (ferric)',
+    family: 'transparent',
+    strikes: false,
+    devitrifies: false,
+    caution: null,
+    notes:
+      'Same colorant as the ferrous entry, oxidized further: ferric iron (Fe³⁺) reads yellow-green instead of blue-green. A clear example of why "the same" iron-colored glass can shift piece to piece with furnace conditions.',
+  },
+  {
+    id: 'sulfur-carbon-amber',
+    name: 'Amber (Iron/Sulfur/Carbon)',
+    swatch: '#92400e',
+    colorant: 'Iron + sulfur, reduced with carbon',
+    family: 'transparent',
+    strikes: false,
+    devitrifies: false,
+    caution: null,
+    notes:
+      "Classic bottle-glass amber isn't iron alone — it's a specific chromophore formed when iron and sulfide sulfur combine under a reducing (carbon-added) melt. Different chemistry from the plain iron entries above even though the visual family (brown/amber) can look similar.",
+  },
+  {
+    id: 'nickel-violet',
+    name: 'Nickel Violet / Gray-Brown',
+    swatch: '#6d5a7a',
+    colorant: 'Nickel oxide (NiO)',
+    family: 'transparent',
+    strikes: false,
+    devitrifies: false,
+    caution: null,
+    notes:
+      'A strong colorant whose result depends heavily on the base glass: in a potash-based glass it reads violet/blue-violet, in a soda-lime base (the common furnace glass) it tends toward brown or gray instead. Same oxide, different outcome, because of what it\'s melted into — not a fixed color the way some other colorants are.',
   },
   {
     id: 'opal-white',
@@ -109,6 +172,66 @@ export const GLASS_COLOR_INDEX = [
     caution: null,
     notes:
       "Not a tint — an opacifier. It works by growing microscopic crystals in the glass that scatter light instead of transmitting it, which is what makes it opaque rather than colored. Opal and opaque whites are commonly documented as the colors most prone to devitrification (a whitish, rough, crazed surface) after too much time in the flame — worth planning shorter reheats around.",
+  },
+  {
+    id: 'silver-stain-yellow',
+    name: 'Silver Stain Yellow',
+    swatch: '#ca8a04',
+    colorant: 'Silver nitrate (surface stain)',
+    family: 'transparent',
+    strikes: false,
+    devitrifies: false,
+    caution: null,
+    notes:
+      "Different mechanism from every other entry here: it isn't mixed into the melt at all. Silver nitrate is painted onto the surface and fired at a comparatively low temperature (roughly 550-560°C), where it diffuses into the glass surface and becomes part of its structure — the technique that's actually the origin of the term \"stained glass.\" A longer or repeated firing deepens pale yellow toward a richer orange.",
+  },
+  {
+    id: 'neodymium-violet',
+    name: 'Neodymium Violet (Color-Shifting)',
+    swatch: '#c4b5fd',
+    colorant: 'Neodymium oxide',
+    family: 'transparent',
+    strikes: false,
+    devitrifies: false,
+    caution: null,
+    notes:
+      'A rare-earth colorant, weaker than the traditional transition-metal colorants above, so it takes a higher percentage to show color. Reads as pale violet in normal light but shifts noticeably blue under fluorescent lighting — a genuine color-shifting effect, not a trick of the swatch.',
+  },
+  {
+    id: 'praseodymium-green',
+    name: 'Praseodymium Pale Green',
+    swatch: '#86efac',
+    colorant: 'Praseodymium oxide',
+    family: 'transparent',
+    strikes: false,
+    devitrifies: false,
+    caution: null,
+    notes:
+      "Another rare-earth colorant, giving a soft pastel green on its own — combined with other materials it can also produce a notably clean, pure yellow. Like neodymium, it's a weaker colorant than the transition metals, so it stays pastel rather than saturated.",
+  },
+  {
+    id: 'erbium-pink',
+    name: 'Erbium Rose Pink',
+    swatch: '#f9a8d4',
+    colorant: 'Erbium oxide',
+    family: 'transparent',
+    strikes: false,
+    devitrifies: false,
+    caution: null,
+    notes:
+      'A third rare-earth colorant, giving a soft rose pink. Like the other rare earths here, it reads pastel rather than saturated compared to the traditional transition-metal colorants.',
+  },
+  {
+    id: 'black-glass',
+    name: 'Black',
+    swatch: '#18181b',
+    colorant: 'Manganese + chromium + cobalt (or iron + manganese + cobalt)',
+    family: 'transparent',
+    strikes: false,
+    devitrifies: false,
+    caution: null,
+    notes:
+      "True black isn't one colorant — it's a documented multi-oxide recipe, most commonly manganese dioxide, chromium oxide, and cobalt oxide together (an iron/manganese/cobalt combination is also used). Each of those three shows up elsewhere in this index on its own; stacked together in the right ratio, they push the glass past any single hue into black.",
   },
   {
     id: 'uranium-vaseline',
@@ -132,5 +255,5 @@ export const COE_NOTE = {
 
 export const ENCASEMENT_NOTE = {
   title: 'Does a murrino need a clear casing layer?',
-  body: "Often yes, for two documented reasons — not just convention. First, encasing a cane in clear glass protects a striking color's pattern through the repeated reheating and handling a pull requires; striking colors (like the cadmium/selenium family above) specifically need that controlled reheat to develop, so shielding the pattern during it matters. Second, some colors — notably opal whites and certain commercial purples — are documented as prone to devitrification with repeated flame exposure; a clear casing cuts down how much direct flame time that color sees. Not every color needs it, and encasement always changes a cane's size and proportions, so it's a real design tradeoff, not a free win.",
+  body: "Often yes, for two documented reasons — not just convention. First, encasing a cane in clear glass protects a striking color's pattern through the repeated reheating and handling a pull requires; striking colors (like the cadmium and copper-red entries above) specifically need that controlled reheat to develop, so shielding the pattern during it matters. Second, some colors — notably opal whites and certain commercial purples — are documented as prone to devitrification with repeated flame exposure; a clear casing cuts down how much direct flame time that color sees. Not every color needs it, and encasement always changes a cane's size and proportions, so it's a real design tradeoff, not a free win.",
 }

@@ -3,8 +3,6 @@ import { SHAPE_ORDER, SHAPE_TYPES } from '../../engine/murrini/shapes'
 export function ShapeToolbar({
   selectedShape,
   onSelectShape,
-  color,
-  onColorChange,
   params,
   onParamChange,
   onClear,
@@ -29,16 +27,6 @@ export function ShapeToolbar({
           </button>
         ))}
       </div>
-
-      <label className="flex items-center gap-2 text-sm text-neutral-300">
-        Color
-        <input
-          type="color"
-          value={color}
-          onChange={(event) => onColorChange(event.target.value)}
-          className="h-8 w-14 cursor-pointer rounded border border-neutral-700 bg-transparent"
-        />
-      </label>
 
       {definition.controls.map((control) => (
         <label
