@@ -1,15 +1,24 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ColorantPicker } from '../components/murrini/ColorantPicker'
+import { CompatibilityCheck } from '../components/murrini/CompatibilityCheck'
 import { MurriniCanvas } from '../components/murrini/MurriniCanvas'
 import { PatternControls } from '../components/murrini/PatternControls'
 import { ShapeToolbar } from '../components/murrini/ShapeToolbar'
 import { TechniqueReference } from '../components/murrini/TechniqueReference'
 import { GLASS_COLOR_INDEX } from '../content/glassColorIndex'
+import { checkColorCompatibility } from '../engine/murrini/colorCompatibility'
 import { SHAPE_TYPES } from '../engine/murrini/shapes'
 
 export function MurriniEditor({ design }) {
-  const { canvas, repeatedElements, pattern, setPattern, addElement, clearElements } =
-    design
+  const {
+    canvas,
+    elements,
+    repeatedElements,
+    pattern,
+    setPattern,
+    addElement,
+    clearElements,
+  } = design
   const [selectedShape, setSelectedShape] = useState('circle')
   const [params, setParams] = useState(SHAPE_TYPES.circle.defaultParams)
 
@@ -27,6 +36,11 @@ export function MurriniEditor({ design }) {
   const handleParamChange = (key, value) => {
     setParams((prev) => ({ ...prev, [key]: value }))
   }
+
+  const compatibilityWarnings = useMemo(
+    () => checkColorCompatibility(elements),
+    [elements],
+  )
 
   const handlePlace = (x, y) => {
     if (useCustomColor) {
@@ -77,6 +91,7 @@ export function MurriniEditor({ design }) {
             customColor={customColor}
             onCustomColorChange={setCustomColor}
           />
+          <CompatibilityCheck warnings={compatibilityWarnings} />
           <TechniqueReference shape={selectedShape} params={params} />
         </div>
       </div>

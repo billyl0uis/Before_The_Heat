@@ -14,6 +14,9 @@
 //   devitrification (a rough, whitish, crazed surface from too much
 //   flame exposure). 'some' means it varies by specific manufacturer SKU,
 //   not the whole family.
+// hazard: 'cadmium' | 'radioactive' | null — a structured tag (separate
+//   from the free-text `caution`) so the compatibility checker can
+//   reliably detect these without parsing prose.
 export const GLASS_COLOR_INDEX = [
   {
     id: 'cobalt-blue',
@@ -24,6 +27,7 @@ export const GLASS_COLOR_INDEX = [
     strikes: false,
     devitrifies: false,
     caution: null,
+    hazard: null,
     notes:
       'One of the strongest colorants in glass — tiny amounts produce deep blue. Cobalt glasses need more energy to melt and cool noticeably faster than most colors; at high saturation they work stiff, which is why some suppliers blend in extra flux specifically to soften cobalt\'s working range.',
   },
@@ -36,6 +40,7 @@ export const GLASS_COLOR_INDEX = [
     strikes: false,
     devitrifies: false,
     caution: null,
+    hazard: null,
     notes:
       'Copper gives a blue-green/turquoise color under normal oxidizing furnace conditions — the everyday result of working with copper.',
   },
@@ -48,6 +53,7 @@ export const GLASS_COLOR_INDEX = [
     strikes: true,
     devitrifies: false,
     caution: null,
+    hazard: null,
     notes:
       'The same copper that gives turquoise under normal conditions instead gives a deep red — "copper ruby," historically used as a cheaper substitute for gold ruby — under a reducing furnace atmosphere with careful heat treatment. Same colorant, opposite result, purely from atmosphere control, which makes it a genuine strike/redox-sensitive color rather than a fixed tint.',
   },
@@ -60,6 +66,7 @@ export const GLASS_COLOR_INDEX = [
     strikes: false,
     devitrifies: false,
     caution: null,
+    hazard: null,
     notes:
       "Color comes from gold metal nanoparticles suspended in the glass, not a simple dissolved tint — particle size sets the hue, with smaller particles (~60nm) reading red and larger ones shifting toward purple, then blue. Historically one of the most expensive colorants used in glass, which is part of why cranberry glass reads as a luxury color.",
   },
@@ -73,6 +80,7 @@ export const GLASS_COLOR_INDEX = [
     devitrifies: false,
     caution:
       'Cadmium is toxic in powder or vapor form. The risk is mainly dust from grinding, cutting, or cold-working this color, not the solid glass itself — use ventilation and avoid dry-grinding without dust control.',
+    hazard: 'cadmium',
     notes:
       "A genuine striking color: it can come straight out of the furnace looking pale or nearly colorless, and only develops its full red/orange when reheated near the softening point and held there — cool it too fast and the color never shows. Widely reported by glassworkers as one of the touchier color families to work.",
   },
@@ -86,6 +94,7 @@ export const GLASS_COLOR_INDEX = [
     devitrifies: false,
     caution:
       'Cadmium sulfide is toxic by inhalation, particularly as dust or vapor. Same handling precautions as the cadmium/selenium reds — ventilation, no dry-grinding.',
+    hazard: 'cadmium',
     notes:
       "The plain-sulfide sibling of the cadmium/selenium reds — cadmium sulfide alone gives a straightforward yellow without needing selenium in the mix, and without the same strike-to-develop behavior the red/orange blends have.",
   },
@@ -98,6 +107,7 @@ export const GLASS_COLOR_INDEX = [
     strikes: false,
     devitrifies: 'some',
     caution: null,
+    hazard: null,
     notes:
       'Same element does double duty: enough manganese gives a purple/violet glass, but small amounts are also used as a decolorizer to cancel out the green tint that iron impurities cause in "clear" glass. Some specific commercial purples are documented as notably prone to devitrification with repeated flame exposure — this varies by manufacturer, not by manganese content alone.',
   },
@@ -110,6 +120,7 @@ export const GLASS_COLOR_INDEX = [
     strikes: false,
     devitrifies: false,
     caution: null,
+    hazard: null,
     notes:
       'A very strong colorant — small amounts give a clear, dark green; push the concentration higher and it goes nearly black.',
   },
@@ -122,6 +133,7 @@ export const GLASS_COLOR_INDEX = [
     strikes: false,
     devitrifies: false,
     caution: null,
+    hazard: null,
     notes:
       'Iron in the ferrous (Fe²⁺) state reads blue-green. Which oxidation state you get depends on the furnace atmosphere during working, not just the batch recipe — the same base glass can swing toward this or its ferric sibling.',
   },
@@ -134,6 +146,7 @@ export const GLASS_COLOR_INDEX = [
     strikes: false,
     devitrifies: false,
     caution: null,
+    hazard: null,
     notes:
       'Same colorant as the ferrous entry, oxidized further: ferric iron (Fe³⁺) reads yellow-green instead of blue-green. A clear example of why "the same" iron-colored glass can shift piece to piece with furnace conditions.',
   },
@@ -146,6 +159,7 @@ export const GLASS_COLOR_INDEX = [
     strikes: false,
     devitrifies: false,
     caution: null,
+    hazard: null,
     notes:
       "Classic bottle-glass amber isn't iron alone — it's a specific chromophore formed when iron and sulfide sulfur combine under a reducing (carbon-added) melt. Different chemistry from the plain iron entries above even though the visual family (brown/amber) can look similar.",
   },
@@ -158,6 +172,7 @@ export const GLASS_COLOR_INDEX = [
     strikes: false,
     devitrifies: false,
     caution: null,
+    hazard: null,
     notes:
       'A strong colorant whose result depends heavily on the base glass: in a potash-based glass it reads violet/blue-violet, in a soda-lime base (the common furnace glass) it tends toward brown or gray instead. Same oxide, different outcome, because of what it\'s melted into — not a fixed color the way some other colorants are.',
   },
@@ -170,6 +185,7 @@ export const GLASS_COLOR_INDEX = [
     strikes: false,
     devitrifies: true,
     caution: null,
+    hazard: null,
     notes:
       "Not a tint — an opacifier. It works by growing microscopic crystals in the glass that scatter light instead of transmitting it, which is what makes it opaque rather than colored. Opal and opaque whites are commonly documented as the colors most prone to devitrification (a whitish, rough, crazed surface) after too much time in the flame — worth planning shorter reheats around.",
   },
@@ -182,6 +198,7 @@ export const GLASS_COLOR_INDEX = [
     strikes: false,
     devitrifies: false,
     caution: null,
+    hazard: null,
     notes:
       "Different mechanism from every other entry here: it isn't mixed into the melt at all. Silver nitrate is painted onto the surface and fired at a comparatively low temperature (roughly 550-560°C), where it diffuses into the glass surface and becomes part of its structure — the technique that's actually the origin of the term \"stained glass.\" A longer or repeated firing deepens pale yellow toward a richer orange.",
   },
@@ -194,6 +211,7 @@ export const GLASS_COLOR_INDEX = [
     strikes: false,
     devitrifies: false,
     caution: null,
+    hazard: null,
     notes:
       'A rare-earth colorant, weaker than the traditional transition-metal colorants above, so it takes a higher percentage to show color. Reads as pale violet in normal light but shifts noticeably blue under fluorescent lighting — a genuine color-shifting effect, not a trick of the swatch.',
   },
@@ -206,6 +224,7 @@ export const GLASS_COLOR_INDEX = [
     strikes: false,
     devitrifies: false,
     caution: null,
+    hazard: null,
     notes:
       "Another rare-earth colorant, giving a soft pastel green on its own — combined with other materials it can also produce a notably clean, pure yellow. Like neodymium, it's a weaker colorant than the transition metals, so it stays pastel rather than saturated.",
   },
@@ -218,6 +237,7 @@ export const GLASS_COLOR_INDEX = [
     strikes: false,
     devitrifies: false,
     caution: null,
+    hazard: null,
     notes:
       'A third rare-earth colorant, giving a soft rose pink. Like the other rare earths here, it reads pastel rather than saturated compared to the traditional transition-metal colorants.',
   },
@@ -230,6 +250,7 @@ export const GLASS_COLOR_INDEX = [
     strikes: false,
     devitrifies: false,
     caution: null,
+    hazard: null,
     notes:
       "True black isn't one colorant — it's a documented multi-oxide recipe, most commonly manganese dioxide, chromium oxide, and cobalt oxide together (an iron/manganese/cobalt combination is also used). Each of those three shows up elsewhere in this index on its own; stacked together in the right ratio, they push the glass past any single hue into black.",
   },
@@ -243,6 +264,7 @@ export const GLASS_COLOR_INDEX = [
     devitrifies: false,
     caution:
       'Contains a radioactive element. Uncommon in modern studio practice for that reason — listed here for chemistry completeness, not as a recommended working color.',
+    hazard: 'radioactive',
     notes:
       'Famous for glowing green under UV/blacklight because of its uranium content. This is historic "vaseline glass" — rarely sourced by studios today given the regulatory hurdles around a radioactive colorant.',
   },
