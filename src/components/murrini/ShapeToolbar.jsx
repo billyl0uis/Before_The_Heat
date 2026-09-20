@@ -6,6 +6,10 @@ export function ShapeToolbar({
   params,
   onParamChange,
   onClear,
+  onUndo,
+  onRedo,
+  canUndo,
+  canRedo,
 }) {
   const definition = SHAPE_TYPES[selectedShape]
 
@@ -46,6 +50,25 @@ export function ShapeToolbar({
           />
         </label>
       ))}
+
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={onUndo}
+          disabled={!canUndo}
+          className="flex-1 rounded bg-neutral-800 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Undo
+        </button>
+        <button
+          type="button"
+          onClick={onRedo}
+          disabled={!canRedo}
+          className="flex-1 rounded bg-neutral-800 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Redo
+        </button>
+      </div>
 
       <button
         type="button"

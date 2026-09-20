@@ -24,12 +24,16 @@ const ColorIndexPage = lazy(() =>
 const DesignVaultPage = lazy(() =>
   import('./pages/DesignVaultPage').then((m) => ({ default: m.DesignVaultPage })),
 )
+const InspirationPage = lazy(() =>
+  import('./pages/InspirationPage').then((m) => ({ default: m.InspirationPage })),
+)
 
 const TABS = [
   { key: 'murrini', label: 'Murrini Pattern' },
   { key: 'vessel', label: 'Vessel Morphograph' },
   { key: 'colors', label: 'Color Index' },
   { key: 'vault', label: 'Design Vault' },
+  { key: 'inspiration', label: 'Inspiration' },
 ]
 
 function TabLoadingFallback() {
@@ -78,6 +82,7 @@ function App() {
           {activeTab === 'murrini' && <MurriniEditor design={design} />}
           {activeTab === 'vessel' && <VesselEditor design={design} vessel={vessel} />}
           {activeTab === 'colors' && <ColorIndexPage />}
+          {activeTab === 'inspiration' && <InspirationPage />}
           {activeTab === 'vault' && (
             <DesignVaultPage
               design={design}

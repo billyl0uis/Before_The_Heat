@@ -61,6 +61,19 @@ const DIAGRAMS = {
     </>
   ),
   line: () => <rect x="20" y="72" width="120" height="16" rx="8" fill={BASE} />,
+  // A handful of already-pulled canes packed together before the whole
+  // bundle is fused and redrawn as one composite rod.
+  bundle: () => (
+    <>
+      <circle cx="80" cy="80" r="14" fill={MOLD} />
+      <circle cx="80" cy="52" r="15" fill={BASE} />
+      <circle cx="106" cy="66" r="15" fill={CASING} />
+      <circle cx="106" cy="94" r="15" fill={ACCENT} />
+      <circle cx="80" cy="108" r="15" fill={BASE} />
+      <circle cx="54" cy="94" r="15" fill={CASING} />
+      <circle cx="54" cy="66" r="15" fill={ACCENT} />
+    </>
+  ),
 }
 
 export function TechniqueDiagram({ techniqueKey, params = {} }) {

@@ -65,15 +65,38 @@ export const MURRINI_TECHNIQUES = {
       'Use it by trailing it onto hot glass, or bundle it with other canes before pulling further.',
     ],
   },
+  bundle: {
+    title: 'Bundling Canes',
+    summary:
+      "Once more than one shape is on the canvas, this is no longer a single cane — it's a bundle. Each shape placed represents an already-pulled cane (simple, cased, faceted, or chevron) gathered alongside the others and fused into one new composite rod. This is how real complex murrini cross-sections — flower canes, mosaic canes — are actually built: many separate canes stacked together and redrawn as one, not a single pull.",
+    steps: [
+      'Pull each individual cane first, as its own technique — simple, cased, faceted, or chevron.',
+      'Cut the finished canes to matching lengths and pack them together in a bundle, often around a central cane or side by side.',
+      'Fuse the bundle by reheating it as a unit, then draw the whole bundle out from both ends into one new, smaller-diameter composite rod.',
+      'Slice the cooled composite rod crosswise to reveal the full pattern in every slice — this final cut is the murrini technique proper.',
+    ],
+  },
 }
 
 // Marvering a fixed number of flat sides by hand stays practical up to
 // about a hexagon; more facets than that is realistically mold territory.
 const MAX_HAND_MARVERED_SIDES = 6
 
-export function resolveTechniqueKey(shape, params = {}) {
+// Reflects what's actually been built so far, not just whichever tool is
+// selected in the toolbar: two or more placed shapes are no longer a
+// single cane, they're canes bundled together (see MURRINI_TECHNIQUES.bundle)
+// — a real, distinct technique from any one shape alone. Only when there's
+// at most one shape on the canvas does the currently-selected tool (which
+// previews what would be made if it were placed) still apply.
+export function resolveTechniqueKey(elements, fallbackShape, fallbackParams = {}) {
+  if (elements.length > 1) return 'bundle'
+
+  const shape = elements.length === 1 ? elements[0].shape : fallbackShape
+  const params = elements.length === 1 ? elements[0].params : fallbackParams
+
+  if (shape === 'square') return 'marver'
   if (shape === 'polygon') {
-    return params.sides <= MAX_HAND_MARVERED_SIDES ? 'marver' : 'opticMold'
+    return (params.sides ?? 4) <= MAX_HAND_MARVERED_SIDES ? 'marver' : 'opticMold'
   }
   return shape
 }
