@@ -5,6 +5,7 @@ import { VesselControls } from '../components/vessel/VesselControls'
 import { renderPatternTile } from '../engine/murrini/rasterize'
 
 const STAMP_SIZE = 96
+const DEFAULT_STAMP_FRACTION = 0.16
 
 export function VesselEditor({ design, vessel, vesselPattern }) {
   const {
@@ -20,6 +21,7 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
   const { placements, addPlacement, clearPlacements, undo, redo, canUndo, canRedo } =
     vesselPattern
   const [manualMode, setManualMode] = useState(false)
+  const [stampFraction, setStampFraction] = useState(DEFAULT_STAMP_FRACTION)
   const hasPattern = design.elements.length > 0
 
   const handlePlacePattern = (u, v) => {
@@ -30,7 +32,7 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
       undefined,
       true,
     )
-    addPlacement(u, v, stampCanvas)
+    addPlacement(u, v, stampCanvas, stampFraction)
   }
 
   return (
@@ -64,6 +66,19 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
             Place murrini by hand (click the vessel to press a slice on)
           </label>
           {manualMode && (
+            <label className="flex flex-col gap-1 text-sm text-neutral-300">
+              Slice size: {Math.round(stampFraction * 100)}%
+              <input
+                type="range"
+                min={0.06}
+                max={0.35}
+                step={0.01}
+                value={stampFraction}
+                onChange={(event) => setStampFraction(Number(event.target.value))}
+              />
+            </label>
+          )}
+          {manualMode && (
             <div className="flex gap-2">
               <button
                 type="button"
@@ -92,7 +107,7 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
             </div>
           )}
           {!hasPattern && (
-            <p className="max-w-[360px] text-xs text-neutral-500">
+            <p className="max-w-[360px] text-sm text-neutral-400">
               Draw something in the Murrini Pattern tab first, then come
               back here and click the vessel to press slices of it onto the
               wall by hand — like pressing real murrini onto a hot gather.

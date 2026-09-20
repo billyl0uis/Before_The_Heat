@@ -50,7 +50,7 @@ export function ExtrusionControls({ extrusion, onChange }) {
           Sideways
         </button>
       </div>
-      <p className="text-xs text-neutral-500">
+      <p className="text-sm text-neutral-400">
         Twist spirals the whole bundle around its center as it's pulled
         (the zanfirico technique). Taper narrows it toward the far end.
         Sideways flips the pulled rod 90° to run across the view instead

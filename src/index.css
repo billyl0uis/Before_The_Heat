@@ -2,6 +2,10 @@
 
 html {
   color-scheme: dark;
+  /* Every Tailwind text-* size is a rem value, so bumping the root size
+     scales all of them proportionally — the base default (16px) reads
+     small against a dark background at normal viewing distance. */
+  font-size: 18px;
 }
 
 body {

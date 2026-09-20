@@ -43,7 +43,7 @@ const TABS = [
 
 function TabLoadingFallback() {
   return (
-    <div className="flex justify-center p-16 text-sm text-neutral-500">Loading…</div>
+    <div className="flex justify-center p-16 text-sm text-neutral-400">Loading…</div>
   )
 }
 

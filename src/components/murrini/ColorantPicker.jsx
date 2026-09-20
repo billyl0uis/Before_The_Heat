@@ -35,7 +35,7 @@ export function ColorantPicker({
         ))}
       </div>
 
-      <label className="flex items-center gap-2 text-xs text-neutral-400">
+      <label className="flex items-center gap-2 text-sm text-neutral-300">
         <input
           type="checkbox"
           checked={useCustom}
@@ -53,9 +53,9 @@ export function ColorantPicker({
         />
       ) : (
         selected && (
-          <div className="flex flex-col gap-1 border-t border-neutral-800 pt-2 text-xs">
+          <div className="flex flex-col gap-1 border-t border-neutral-800 pt-2 text-sm">
             <p className="font-medium text-neutral-200">{selected.name}</p>
-            <p className="text-neutral-500">{selected.colorant}</p>
+            <p className="text-neutral-400">{selected.colorant}</p>
             {selected.strikes && (
               <p className="text-amber-400">
                 Strikes — needs a controlled reheat to show full color.

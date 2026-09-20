@@ -127,7 +127,7 @@ export function MurriniEditor({ design }) {
           ) : (
             <Suspense
               fallback={
-                <div className="flex h-[420px] w-[360px] items-center justify-center rounded-lg border border-neutral-800 text-sm text-neutral-500">
+                <div className="flex h-[420px] w-[360px] items-center justify-center rounded-lg border border-neutral-800 text-sm text-neutral-400">
                   Loading 3D preview…
                 </div>
               }

@@ -91,7 +91,7 @@ export function SculptControls({
         Reset to gather
       </button>
 
-      <p className="text-xs text-neutral-500">
+      <p className="text-sm text-neutral-400">
         Left-drag on the glass to sculpt. Right-drag to orbit, scroll to
         zoom — left is reserved for the brush so the two never fight.
       </p>

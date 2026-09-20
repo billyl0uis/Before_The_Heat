@@ -35,7 +35,7 @@ export function InspirationPage() {
           refined himself over decades. Together, Wes and Wesley create
           fluid, vibrant vessels and sculptures, each one-of-a-kind.
         </p>
-        <p className="text-xs text-neutral-500">
+        <p className="text-sm text-neutral-400">
           This app is an independent educational simulation tool. It is not
           affiliated with, endorsed by, or built from proprietary designs
           belonging to Wes or Wesley Hunting — the shapes and patterns you

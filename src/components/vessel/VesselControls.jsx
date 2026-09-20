@@ -85,7 +85,7 @@ export function VesselControls({
       </fieldset>
 
       {freeform && (
-        <p className="text-xs text-neutral-500">
+        <p className="text-sm text-neutral-400">
           Drag the points on the silhouette to reshape the wall by hand.
           Switch back to Parametric to use these sliders again.
         </p>
