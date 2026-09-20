@@ -3,6 +3,7 @@ import { computeRepeatedElements } from './engine/murrini/pattern'
 import { useMurriniDesign } from './hooks/useMurriniDesign'
 import { useVesselShape } from './hooks/useVesselShape'
 import { ColorIndexPage } from './pages/ColorIndexPage'
+import { DesignVaultPage } from './pages/DesignVaultPage'
 import { MurriniEditor } from './pages/MurriniEditor'
 import { VesselEditor } from './pages/VesselEditor'
 
@@ -10,6 +11,7 @@ const TABS = [
   { key: 'murrini', label: 'Murrini Pattern' },
   { key: 'vessel', label: 'Vessel Morphograph' },
   { key: 'colors', label: 'Color Index' },
+  { key: 'vault', label: 'Design Vault' },
 ]
 
 function App() {
@@ -50,6 +52,15 @@ function App() {
       {activeTab === 'murrini' && <MurriniEditor design={design} />}
       {activeTab === 'vessel' && <VesselEditor design={design} vessel={vessel} />}
       {activeTab === 'colors' && <ColorIndexPage />}
+      {activeTab === 'vault' && (
+        <DesignVaultPage
+          design={design}
+          onLoadDesign={(saved) => {
+            murriniHook.loadDesign(saved)
+            setActiveTab('murrini')
+          }}
+        />
+      )}
     </div>
   )
 }

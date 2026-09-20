@@ -40,6 +40,15 @@ export function useMurriniDesign(canvas = DEFAULT_CANVAS) {
 
   const clearElements = useCallback(() => setElements([]), [])
 
+  // Wholesale-replaces the live design with a saved one (from the Design
+  // Vault). Distinct from addElement/setPattern/setExtrusion, which only
+  // ever change one piece at a time from user interaction.
+  const loadDesign = useCallback((saved) => {
+    setElements(saved.elements ?? [])
+    setPattern(saved.pattern ?? DEFAULT_PATTERN)
+    setExtrusion(saved.extrusion ?? DEFAULT_EXTRUSION)
+  }, [])
+
   return {
     canvas,
     elements,
@@ -50,5 +59,6 @@ export function useMurriniDesign(canvas = DEFAULT_CANVAS) {
     addElement,
     removeElement,
     clearElements,
+    loadDesign,
   }
 }
