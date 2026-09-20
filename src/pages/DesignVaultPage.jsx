@@ -164,7 +164,7 @@ export function DesignVaultPage({ design, onLoadDesign }) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 p-8">
+    <div className="flex flex-col items-center gap-6 p-4 sm:p-8">
       <div className="max-w-xl text-center">
         <h1 className="text-2xl font-medium text-neutral-100">Design Vault</h1>
         <p className="mt-1 text-sm text-neutral-400">

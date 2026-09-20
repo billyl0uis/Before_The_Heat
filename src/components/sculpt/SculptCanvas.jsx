@@ -145,6 +145,13 @@ export const SculptCanvas = forwardRef(function SculptCanvas(
     // right button (or scroll to zoom) to move the camera instead, like a
     // dedicated sculpting tool rather than a viewer.
     controls.mouseButtons = { LEFT: null, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE }
+    // mouseButtons has no effect on touch input — OrbitControls defaults
+    // a one-finger touch drag to ROTATE regardless, which would fight
+    // the pointerdown/pointermove brush listeners below over the same
+    // gesture on a phone or tablet. Reserve one finger for sculpting
+    // (matching the left-button convention above) and two fingers for
+    // orbit + pinch-zoom together.
+    controls.touches = { ONE: null, TWO: THREE.TOUCH.DOLLY_ROTATE }
 
     const raycaster = new THREE.Raycaster()
     const pointer = new THREE.Vector2()

@@ -67,13 +67,13 @@ function App() {
 
   return (
     <div className="min-h-svh">
-      <nav className="flex justify-center gap-2 border-b border-neutral-800 bg-neutral-900 p-3">
+      <nav className="flex flex-wrap justify-center gap-2 border-b border-neutral-800 bg-neutral-900 p-3">
         {TABS.map((tab) => (
           <button
             key={tab.key}
             type="button"
             onClick={() => setActiveTab(tab.key)}
-            className={`rounded px-4 py-1.5 text-sm transition-colors ${
+            className={`rounded px-3 py-1.5 text-sm transition-colors sm:px-4 ${
               tab.key === activeTab
                 ? 'bg-purple-500 text-white'
                 : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'

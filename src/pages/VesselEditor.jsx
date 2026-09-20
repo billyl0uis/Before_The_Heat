@@ -3,6 +3,7 @@ import { ProfileCurveEditor } from '../components/vessel/ProfileCurveEditor'
 import { VesselCanvas } from '../components/vessel/VesselCanvas'
 import { VesselControls } from '../components/vessel/VesselControls'
 import { renderPatternTile } from '../engine/murrini/rasterize'
+import { useResponsiveCanvasSize } from '../hooks/useResponsiveCanvasSize'
 
 const STAMP_SIZE = 96
 const DEFAULT_STAMP_FRACTION = 0.16
@@ -23,6 +24,10 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
   const [manualMode, setManualMode] = useState(false)
   const [stampFraction, setStampFraction] = useState(DEFAULT_STAMP_FRACTION)
   const hasPattern = design.elements.length > 0
+  const { containerRef: canvasContainerRef, size: canvasSize } = useResponsiveCanvasSize(
+    360,
+    420 / 360,
+  )
 
   const handlePlacePattern = (u, v) => {
     const stampCanvas = renderPatternTile(
@@ -36,7 +41,7 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 p-8">
+    <div className="flex flex-col items-center gap-6 p-4 sm:p-8">
       <div className="text-center">
         <h1 className="text-2xl font-medium text-neutral-100">
           Vessel Morphograph
@@ -46,16 +51,20 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
           blend, and a surface ripple. Drag to orbit, scroll to zoom.
         </p>
       </div>
-      <div className="flex flex-col items-start gap-6 lg:flex-row">
-        <div className="flex flex-col gap-3">
-          <VesselCanvas
-            params={params}
-            freeform={freeform}
-            controlRadii={controlRadii}
-            manualMode={manualMode}
-            placements={placements}
-            onPlacePattern={handlePlacePattern}
-          />
+      <div className="flex w-full min-w-0 flex-col items-start gap-6 lg:flex-row">
+        <div className="flex w-full min-w-0 flex-col gap-3 lg:w-auto">
+          <div ref={canvasContainerRef} className="w-full min-w-0" style={{ maxWidth: 360 }}>
+            <VesselCanvas
+              params={params}
+              freeform={freeform}
+              controlRadii={controlRadii}
+              manualMode={manualMode}
+              placements={placements}
+              onPlacePattern={handlePlacePattern}
+              width={canvasSize.width}
+              height={canvasSize.height}
+            />
+          </div>
           <label className="flex items-center gap-2 text-sm text-neutral-300">
             <input
               type="checkbox"

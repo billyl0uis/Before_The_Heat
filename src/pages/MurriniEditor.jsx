@@ -11,6 +11,7 @@ import { GLASS_COLOR_INDEX } from '../content/glassColorIndex'
 import { checkColorCompatibility } from '../engine/murrini/colorCompatibility'
 import { DEFAULT_EXTRUSION } from '../engine/murrini/extrude'
 import { SHAPE_TYPES, SPIRAL_PITCH_FACTOR } from '../engine/murrini/shapes'
+import { useResponsiveCanvasSize } from '../hooks/useResponsiveCanvasSize'
 
 // Lazy so OrbitControls (and its ~370KB chunk, shared with the Vessel tab)
 // only loads if Rod Preview is actually opened — most visits stay on the
@@ -40,6 +41,14 @@ export function MurriniEditor({ design }) {
   const [viewMode, setViewMode] = useState('flat')
   const [selectedShape, setSelectedShape] = useState('circle')
   const [params, setParams] = useState(SHAPE_TYPES.circle.defaultParams)
+
+  // Both canvases cap at their normal desktop size but shrink to fit a
+  // narrow screen instead of forcing horizontal scrolling.
+  const { containerRef: flatContainerRef, size: flatSize } = useResponsiveCanvasSize(
+    canvas.width,
+    canvas.height / canvas.width,
+  )
+  const { containerRef: rodContainerRef, size: rodSize } = useResponsiveCanvasSize(360, 420 / 360)
 
   const [colorantId, setColorantId] = useState(GLASS_COLOR_INDEX[0].id)
   const [useCustomColor, setUseCustomColor] = useState(false)
@@ -162,7 +171,7 @@ export function MurriniEditor({ design }) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 p-8">
+    <div className="flex flex-col items-center gap-6 p-4 sm:p-8">
       <div className="text-center">
         <h1 className="text-2xl font-medium text-neutral-100">
           Murrini Pattern Engine
@@ -172,8 +181,8 @@ export function MurriniEditor({ design }) {
           it. Turn on a repeat to see it as a full cane cross-section.
         </p>
       </div>
-      <div className="flex flex-col items-start gap-6 lg:flex-row">
-        <div className="flex flex-col gap-3">
+      <div className="flex w-full min-w-0 flex-col items-start gap-6 lg:flex-row">
+        <div className="flex w-full min-w-0 flex-col gap-3 lg:w-auto">
           <div className="flex gap-2">
             {[
               { key: 'flat', label: 'Flat pattern' },
@@ -194,22 +203,36 @@ export function MurriniEditor({ design }) {
             ))}
           </div>
           {viewMode === 'flat' ? (
-            <MurriniCanvas
-              canvas={canvas}
-              elements={repeatedElements}
-              onPlace={handlePlace}
-              preview={preview}
-            />
+            <div ref={flatContainerRef} className="w-full min-w-0" style={{ maxWidth: canvas.width }}>
+              <MurriniCanvas
+                canvas={canvas}
+                elements={repeatedElements}
+                onPlace={handlePlace}
+                preview={preview}
+                displayWidth={flatSize.width}
+                displayHeight={flatSize.height}
+              />
+            </div>
           ) : (
-            <Suspense
-              fallback={
-                <div className="flex h-[420px] w-[360px] items-center justify-center rounded-lg border border-neutral-800 text-sm text-neutral-400">
-                  Loading 3D preview…
-                </div>
-              }
-            >
-              <RodPreviewCanvas elements={repeatedElements} extrusion={extrusion} />
-            </Suspense>
+            <div ref={rodContainerRef} className="w-full min-w-0" style={{ maxWidth: 360 }}>
+              <Suspense
+                fallback={
+                  <div
+                    className="flex items-center justify-center rounded-lg border border-neutral-800 text-sm text-neutral-400"
+                    style={{ width: rodSize.width, height: rodSize.height }}
+                  >
+                    Loading 3D preview…
+                  </div>
+                }
+              >
+                <RodPreviewCanvas
+                  elements={repeatedElements}
+                  extrusion={extrusion}
+                  width={rodSize.width}
+                  height={rodSize.height}
+                />
+              </Suspense>
+            </div>
           )}
         </div>
         <div className="flex flex-col gap-6">

@@ -61,7 +61,7 @@ export function ProfileCurveEditor({ controlRadii, onChangeRadius }) {
     <svg
       ref={svgRef}
       viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
-      className="h-[320px] w-[200px] touch-none rounded-lg border border-neutral-800 bg-neutral-950"
+      className="aspect-[200/320] w-full touch-none rounded-lg border border-neutral-800 bg-neutral-950 sm:w-[200px]"
     >
       <line
         x1={AXIS_X}
