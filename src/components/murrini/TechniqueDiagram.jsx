@@ -1,0 +1,77 @@
+const BASE = '#d97706'
+const CASING = '#38bdf8'
+const ACCENT = '#f472b6'
+const MOLD = '#71717a'
+
+function polygonPoints(cx, cy, radius, sides, rotationDeg = -90) {
+  const points = []
+  for (let i = 0; i < sides; i++) {
+    const angle = ((rotationDeg + (i * 360) / sides) * Math.PI) / 180
+    points.push(`${cx + Math.cos(angle) * radius},${cy + Math.sin(angle) * radius}`)
+  }
+  return points.join(' ')
+}
+
+function starPoints(cx, cy, outerRadius, innerRadius, points) {
+  const coords = []
+  const step = 180 / points
+  for (let i = 0; i < points * 2; i++) {
+    const r = i % 2 === 0 ? outerRadius : innerRadius
+    const angle = ((i * step - 90) * Math.PI) / 180
+    coords.push(`${cx + Math.cos(angle) * r},${cy + Math.sin(angle) * r}`)
+  }
+  return coords.join(' ')
+}
+
+// Schematic cross-sections of the real technique each entry stands in for.
+// Most are static illustrations; marver reflects the live "sides" slider
+// since that's literally the shape being pressed by hand.
+const DIAGRAMS = {
+  circle: () => <circle cx="80" cy="80" r="48" fill={BASE} />,
+  ring: () => (
+    <>
+      <circle cx="80" cy="80" r="50" fill={CASING} />
+      <circle cx="80" cy="80" r="30" fill={BASE} />
+    </>
+  ),
+  marver: (params) => (
+    <>
+      {/* the marver: a flat steel table the gather is pressed against */}
+      <rect x="14" y="118" width="132" height="10" rx="2" fill={MOLD} />
+      <polygon points={polygonPoints(80, 78, 38, params.sides ?? 4)} fill={BASE} />
+    </>
+  ),
+  opticMold: () => (
+    <>
+      <polygon
+        points={polygonPoints(80, 80, 58, 8)}
+        fill="none"
+        stroke={MOLD}
+        strokeDasharray="4 4"
+        strokeWidth="2"
+      />
+      <polygon points={polygonPoints(80, 80, 44, 8)} fill={BASE} />
+    </>
+  ),
+  star: () => (
+    <>
+      <polygon points={starPoints(80, 80, 55, 26, 5)} fill={BASE} />
+      <polygon points={starPoints(80, 80, 38, 18, 5)} fill={CASING} />
+      <polygon points={starPoints(80, 80, 22, 10, 5)} fill={ACCENT} />
+    </>
+  ),
+  line: () => <rect x="20" y="72" width="120" height="16" rx="8" fill={BASE} />,
+}
+
+export function TechniqueDiagram({ techniqueKey, params = {} }) {
+  const renderDiagram = DIAGRAMS[techniqueKey]
+  if (!renderDiagram) return null
+
+  return (
+    <div className="flex items-center justify-center rounded-md bg-neutral-950 p-2">
+      <svg viewBox="0 0 160 160" className="h-32 w-32">
+        {renderDiagram(params)}
+      </svg>
+    </div>
+  )
+}
