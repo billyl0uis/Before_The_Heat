@@ -12,6 +12,17 @@ function polygonPoints(cx, cy, radius, sides, rotationDeg = -90) {
   return points.join(' ')
 }
 
+function spiralPathPoints(cx, cy, innerRadius, turns, pitch) {
+  const points = []
+  const steps = Math.round(turns * 24)
+  for (let i = 0; i <= steps; i++) {
+    const theta = (i / steps) * turns * Math.PI * 2
+    const r = innerRadius + (pitch * theta) / (Math.PI * 2)
+    points.push(`${cx + Math.cos(theta) * r},${cy + Math.sin(theta) * r}`)
+  }
+  return points.join(' ')
+}
+
 function starPoints(cx, cy, outerRadius, innerRadius, points) {
   const coords = []
   const step = 180 / points
@@ -61,6 +72,27 @@ const DIAGRAMS = {
     </>
   ),
   line: () => <rect x="20" y="72" width="120" height="16" rx="8" fill={BASE} />,
+  // Two interleaved spiral strokes (alternating colors, like the real
+  // striped strip) wound into a coil from the center out.
+  spiral: () => (
+    <>
+      <circle cx="80" cy="80" r="56" fill={MOLD} opacity="0.15" />
+      <polyline
+        points={spiralPathPoints(80, 80, 4, 3.2, 7)}
+        fill="none"
+        stroke={ACCENT}
+        strokeWidth="5"
+        strokeLinecap="round"
+      />
+      <polyline
+        points={spiralPathPoints(80, 80, 7.5, 3.2, 7)}
+        fill="none"
+        stroke={BASE}
+        strokeWidth="5"
+        strokeLinecap="round"
+      />
+    </>
+  ),
   // A handful of already-pulled canes packed together before the whole
   // bundle is fused and redrawn as one composite rod.
   bundle: () => (

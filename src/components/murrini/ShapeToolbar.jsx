@@ -10,6 +10,7 @@ export function ShapeToolbar({
   onRedo,
   canUndo,
   canRedo,
+  onJellyrollPreset,
 }) {
   const definition = SHAPE_TYPES[selectedShape]
 
@@ -50,6 +51,14 @@ export function ShapeToolbar({
           />
         </label>
       ))}
+
+      <button
+        type="button"
+        onClick={onJellyrollPreset}
+        className="rounded bg-neutral-800 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-700"
+      >
+        Try a jellyroll spiral
+      </button>
 
       <div className="flex gap-2">
         <button

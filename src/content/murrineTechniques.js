@@ -57,6 +57,17 @@ export const MURRINI_TECHNIQUES = {
       'Attach a punty to each end and draw the layered bundle out from both sides at once.',
     ],
   },
+  spiral: {
+    title: 'Jellyroll (Rolled Spiral)',
+    summary:
+      "A genuinely different technique from twist/zanfirico (which spirals along a rod's length, visible from the side) — this spiral is built into the cross-section itself, visible when you slice straight across. A striped strip of alternating colors is wound into a coil from the center outward, like a jellyroll, so every slice shows the same nested spiral. Real jellyroll canes are typically cased in another color afterward, same as any other cane core.",
+    steps: [
+      'Lay out a thin strip of glass with alternating color bands (stringers, or a striped sheet).',
+      "Starting from one end, wind the strip into a tight coil, building it out from the center — the app's two interleaved spirals (offset by half a turn) stand in for the alternating stripe.",
+      'Heat the coiled strip until it fuses into a single solid disc with a spiral cross-section.',
+      'Pick the fused coil up on a punty, case it in another color if wanted, and pull it into a rod — the spiral holds all the way down the length.',
+    ],
+  },
   line: {
     title: 'Stringer',
     summary:

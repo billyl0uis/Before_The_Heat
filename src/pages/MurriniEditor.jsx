@@ -10,7 +10,7 @@ import { TechniqueReference } from '../components/murrini/TechniqueReference'
 import { GLASS_COLOR_INDEX } from '../content/glassColorIndex'
 import { checkColorCompatibility } from '../engine/murrini/colorCompatibility'
 import { DEFAULT_EXTRUSION } from '../engine/murrini/extrude'
-import { SHAPE_TYPES } from '../engine/murrini/shapes'
+import { SHAPE_TYPES, SPIRAL_PITCH_FACTOR } from '../engine/murrini/shapes'
 
 // Lazy so OrbitControls (and its ~370KB chunk, shared with the Vessel tab)
 // only loads if Rod Preview is actually opened — most visits stay on the
@@ -123,6 +123,44 @@ export function MurriniEditor({ design }) {
     setViewMode('rod')
   }
 
+  // The jellyroll: a genuinely different "spiral" from the twist preset
+  // above. This one is built into the cross-section itself — an
+  // alternating-color strip wound into a coil — visible when you slice
+  // straight across, not a helix along the rod's length. Two Spiral
+  // shapes offset by half the band thickness interleave into alternating
+  // stripes (yellow/white), cased in red, matching how a real jellyroll
+  // cane is actually built and cased.
+  const handleJellyrollPreset = () => {
+    clearElements()
+    const yellow = GLASS_COLOR_INDEX.find((entry) => entry.id === 'cadmium-yellow')
+    const white = GLASS_COLOR_INDEX.find((entry) => entry.id === 'opal-white')
+    const red = GLASS_COLOR_INDEX.find((entry) => entry.id === 'cadmium-selenium-red')
+    const spiralParams = { innerRadius: 2, turns: 2.5, thickness: 4 }
+
+    // The flat canvas layers later-placed elements visually on top of
+    // earlier ones — the casing has to go down first, or it'd be added
+    // last and cover the spiral entirely instead of framing it.
+    addElement('circle', 0, 0, {
+      color: red.swatch,
+      colorantId: red.id,
+      params: { radius: 22 },
+    })
+    addElement('spiral', 0, 0, {
+      color: yellow.swatch,
+      colorantId: yellow.id,
+      params: { ...spiralParams, radialOffset: 0 },
+    })
+    addElement('spiral', 0, 0, {
+      color: white.swatch,
+      colorantId: white.id,
+      params: {
+        ...spiralParams,
+        radialOffset: (spiralParams.thickness * SPIRAL_PITCH_FACTOR) / 2,
+      },
+    })
+    setViewMode('flat')
+  }
+
   return (
     <div className="flex flex-col items-center gap-6 p-8">
       <div className="text-center">
@@ -185,6 +223,7 @@ export function MurriniEditor({ design }) {
             onRedo={redo}
             canUndo={canUndo}
             canRedo={canRedo}
+            onJellyrollPreset={handleJellyrollPreset}
           />
           <PatternControls pattern={pattern} onChange={setPattern} />
           <ExtrusionControls
