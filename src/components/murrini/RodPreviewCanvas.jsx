@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { createExtrudedElementGeometry } from '../../engine/murrini/extrude'
 import { SHAPE_TYPES } from '../../engine/murrini/shapes'
+import { WebGLUnavailable } from '../WebGLUnavailable'
 
 function disposeGroupChildren(group) {
   for (const child of group.children) {
@@ -18,6 +19,7 @@ export function RodPreviewCanvas({ elements, extrusion, width = 360, height = 42
   const rendererRef = useRef(null)
   const cameraRef = useRef(null)
   const controlsRef = useRef(null)
+  const [webglFailed, setWebglFailed] = useState(false)
 
   useEffect(() => {
     const mount = mountRef.current
@@ -28,7 +30,13 @@ export function RodPreviewCanvas({ elements, extrusion, width = 360, height = 42
     const camera = new THREE.PerspectiveCamera(45, width / height, 1, 2000)
     camera.position.set(140, 110, 260)
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true })
+    let renderer
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true })
+    } catch {
+      setWebglFailed(true)
+      return
+    }
     renderer.setSize(width, height)
     renderer.setPixelRatio(window.devicePixelRatio)
     mount.appendChild(renderer.domElement)
@@ -77,7 +85,7 @@ export function RodPreviewCanvas({ elements, extrusion, width = 360, height = 42
   useEffect(() => {
     const group = groupRef.current
     const controls = controlsRef.current
-    if (!group || !controls) return
+    if (!group || !controls || webglFailed) return
 
     disposeGroupChildren(group)
     group.clear()
@@ -106,7 +114,11 @@ export function RodPreviewCanvas({ elements, extrusion, width = 360, height = 42
     // Center the camera's orbit target on the rod's midpoint so twist and
     // taper both stay in view as the length slider changes.
     controls.target.set(0, 0, extrusion.length / 2)
-  }, [elements, extrusion])
+  }, [elements, extrusion, webglFailed])
+
+  if (webglFailed) {
+    return <WebGLUnavailable width={width} height={height} />
+  }
 
   return (
     <div

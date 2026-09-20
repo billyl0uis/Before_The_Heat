@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { renderPatternTile } from '../../engine/murrini/rasterize'
 import { computeTextureRepeat, createVesselGeometry } from '../../engine/vessel/profile'
+import { WebGLUnavailable } from '../WebGLUnavailable'
 
 const GLASS_COLOR = '#d97706'
 
@@ -23,6 +24,7 @@ export function VesselCanvas({
   const texturedMaterialRef = useRef(null)
   const textureRef = useRef(null)
   const textureCanvasRef = useRef(null)
+  const [webglFailed, setWebglFailed] = useState(false)
 
   useEffect(() => {
     const mount = mountRef.current
@@ -33,7 +35,13 @@ export function VesselCanvas({
     const camera = new THREE.PerspectiveCamera(45, width / height, 1, 2000)
     camera.position.set(0, 150, 320)
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true })
+    let renderer
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true })
+    } catch {
+      setWebglFailed(true)
+      return
+    }
     renderer.setSize(width, height)
     renderer.setPixelRatio(window.devicePixelRatio)
     mount.appendChild(renderer.domElement)
@@ -129,7 +137,7 @@ export function VesselCanvas({
 
     const repeat = computeTextureRepeat(params)
     texture.repeat.set(repeat.x, repeat.y)
-  }, [params])
+  }, [params, webglFailed])
 
   useEffect(() => {
     const mesh = meshRef.current
@@ -147,7 +155,11 @@ export function VesselCanvas({
     } else {
       mesh.material = plainMaterialRef.current
     }
-  }, [patternElements, patternCanvas])
+  }, [patternElements, patternCanvas, webglFailed])
+
+  if (webglFailed) {
+    return <WebGLUnavailable width={width} height={height} />
+  }
 
   return (
     <div

@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { SHAPE_TYPES } from '../../engine/murrini/shapes'
+import { WebGLUnavailable } from '../WebGLUnavailable'
 
 function disposeGroupChildren(group) {
   for (const child of group.children) {
@@ -16,6 +17,7 @@ export function MurriniCanvas({ canvas, elements, onPlace }) {
   const rendererRef = useRef(null)
   const cameraRef = useRef(null)
   const onPlaceRef = useRef(onPlace)
+  const [webglFailed, setWebglFailed] = useState(false)
 
   // onPlace is a new closure every render (it captures the current tool
   // and color). Reading it through a ref lets the click listener below
@@ -45,7 +47,13 @@ export function MurriniCanvas({ canvas, elements, onPlace }) {
     )
     camera.position.z = 5
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true })
+    let renderer
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true })
+    } catch {
+      setWebglFailed(true)
+      return
+    }
     renderer.setSize(width, height)
     renderer.setPixelRatio(window.devicePixelRatio)
     mount.appendChild(renderer.domElement)
@@ -78,7 +86,7 @@ export function MurriniCanvas({ canvas, elements, onPlace }) {
 
   useEffect(() => {
     const group = groupRef.current
-    if (!group) return
+    if (!group || webglFailed) return
 
     disposeGroupChildren(group)
     group.clear()
@@ -101,7 +109,11 @@ export function MurriniCanvas({ canvas, elements, onPlace }) {
     }
 
     rendererRef.current.render(sceneRef.current, cameraRef.current)
-  }, [elements])
+  }, [elements, webglFailed])
+
+  if (webglFailed) {
+    return <WebGLUnavailable width={canvas.width} height={canvas.height} />
+  }
 
   return (
     <div
