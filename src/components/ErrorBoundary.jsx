@@ -14,7 +14,7 @@ export class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
-    console.error('Vitrum Designer crashed:', error, info)
+    console.error('Before The Heat crashed:', error, info)
   }
 
   render() {

@@ -1,4 +1,4 @@
-# Vitrum Designer
+# Before The Heat
 
 A glassblowing design & murrini simulation suite. See [ARCHITECTURE.md](./ARCHITECTURE.md)
 for the system design and data schema.
