@@ -1,4 +1,4 @@
-# Vitrum Designer — Phase 1 Blueprint
+# Before The Heat — Phase 1 Blueprint
 
 Status: **Draft — awaiting approval before any code is written.**
 
@@ -36,7 +36,7 @@ scaffold anything.
 ## Folder Structure
 
 ```
-vitrum-designer/
+before-the-heat/
 ├── public/
 ├── src/
 │   ├── assets/
