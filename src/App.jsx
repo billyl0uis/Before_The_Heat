@@ -2,6 +2,7 @@ import { lazy, Suspense, useMemo, useState } from 'react'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { computeRepeatedElements } from './engine/murrini/pattern'
 import { useMurriniDesign } from './hooks/useMurriniDesign'
+import { useVesselPattern } from './hooks/useVesselPattern'
 import { useVesselShape } from './hooks/useVesselShape'
 
 // Lazy-loaded so each tab's code (and its dependencies) only download when
@@ -58,6 +59,7 @@ function App() {
   // VesselEditor, so sculpting isn't lost when you switch tabs to check
   // the pattern and come back.
   const vessel = useVesselShape()
+  const vesselPattern = useVesselPattern()
 
   return (
     <div className="min-h-svh">
@@ -80,7 +82,9 @@ function App() {
       <ErrorBoundary key={activeTab}>
         <Suspense fallback={<TabLoadingFallback />}>
           {activeTab === 'murrini' && <MurriniEditor design={design} />}
-          {activeTab === 'vessel' && <VesselEditor design={design} vessel={vessel} />}
+          {activeTab === 'vessel' && (
+            <VesselEditor design={design} vessel={vessel} vesselPattern={vesselPattern} />
+          )}
           {activeTab === 'colors' && <ColorIndexPage />}
           {activeTab === 'inspiration' && <InspirationPage />}
           {activeTab === 'vault' && (

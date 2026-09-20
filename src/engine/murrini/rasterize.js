@@ -96,17 +96,27 @@ function computePatternBounds(elements) {
 }
 
 // Renders a tight crop around the pattern (not the whole spacious editing
-// canvas) into a square tile, meant to be used with RepeatWrapping so it
-// tiles across a vessel's surface instead of stretching one mostly-empty
-// canvas over the whole thing.
-export function renderPatternTile(elements, backgroundColor, tileSize = 256, targetCanvas) {
+// canvas) into a square tile. transparentBackground skips the background
+// fill — used when the tile is pressed onto something else (like a vessel
+// wall) as a stamp, where only the colored shapes themselves should show,
+// not a rectangular chip of background color around them.
+export function renderPatternTile(
+  elements,
+  backgroundColor,
+  tileSize = 256,
+  targetCanvas,
+  transparentBackground = false,
+) {
   const canvas = targetCanvas ?? document.createElement('canvas')
   canvas.width = tileSize
   canvas.height = tileSize
 
   const ctx = canvas.getContext('2d')
-  ctx.fillStyle = backgroundColor
-  ctx.fillRect(0, 0, tileSize, tileSize)
+  ctx.clearRect(0, 0, tileSize, tileSize)
+  if (!transparentBackground) {
+    ctx.fillStyle = backgroundColor
+    ctx.fillRect(0, 0, tileSize, tileSize)
+  }
 
   const bounds = computePatternBounds(elements)
   if (!bounds) return canvas

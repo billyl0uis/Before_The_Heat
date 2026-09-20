@@ -54,23 +54,3 @@ export function createVesselGeometry(params, radialSegments = 48) {
   const profilePoints = computeProfilePoints(params)
   return new THREE.LatheGeometry(profilePoints, radialSegments)
 }
-
-// How many times the murrini pattern tile repeats around and along the
-// vessel — scaled to the vessel's actual size instead of a fixed count, so
-// a tile stays roughly the same apparent size (like real murrini pieces)
-// whether the vessel is small or large, rather than stretching or
-// shrinking to fit a fixed repeat count. tileSize is in the same
-// arbitrary design units as vessel radius/height; 40 was chosen so the
-// default vessel (height 200, radius ~40-60) reproduces the repeat count
-// this used to be hardcoded to (8x4), so existing designs don't jump.
-export function computeTextureRepeat(params, tileSize = 40) {
-  const profilePoints = computeProfilePoints(params)
-  const averageRadius =
-    profilePoints.reduce((sum, point) => sum + point.x, 0) / profilePoints.length
-  const circumference = 2 * Math.PI * averageRadius
-
-  return {
-    x: Math.max(1, Math.round(circumference / tileSize)),
-    y: Math.max(1, Math.round(params.height / tileSize)),
-  }
-}
