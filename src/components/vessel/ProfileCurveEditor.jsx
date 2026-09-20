@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { sampleMonotonicSpline } from '../../engine/vessel/profile'
 
 const SVG_WIDTH = 200
 const SVG_HEIGHT = 320
@@ -6,25 +7,6 @@ const AXIS_X = 24
 const MAX_RADIUS = 160
 const MIN_RADIUS = 2
 const PREVIEW_SAMPLES = 40
-
-function catmullRomAt(values, u) {
-  const n = values.length
-  const i = Math.floor(u)
-  const t = u - i
-  const p0 = values[Math.max(0, i - 1)]
-  const p1 = values[Math.min(n - 1, i)]
-  const p2 = values[Math.min(n - 1, i + 1)]
-  const p3 = values[Math.min(n - 1, i + 2)]
-  const t2 = t * t
-  const t3 = t2 * t
-  return (
-    0.5 *
-    (2 * p1 +
-      (-p0 + p2) * t +
-      (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 +
-      (-p0 + 3 * p1 - 3 * p2 + p3) * t3)
-  )
-}
 
 function radiusToX(radius) {
   return AXIS_X + (radius / MAX_RADIUS) * (SVG_WIDTH - AXIS_X - 10)
@@ -41,13 +23,11 @@ function tToY(t) {
 export function ProfileCurveEditor({ controlRadii, onChangeRadius }) {
   const svgRef = useRef(null)
 
-  const curvePoints = []
-  for (let i = 0; i <= PREVIEW_SAMPLES; i++) {
+  const sampledRadii = sampleMonotonicSpline(controlRadii, PREVIEW_SAMPLES)
+  const curvePoints = sampledRadii.map((radius, i) => {
     const t = i / PREVIEW_SAMPLES
-    const u = t * (controlRadii.length - 1)
-    const radius = Math.max(MIN_RADIUS, catmullRomAt(controlRadii, u))
-    curvePoints.push(`${radiusToX(radius)},${tToY(t)}`)
-  }
+    return `${radiusToX(Math.max(MIN_RADIUS, radius))},${tToY(t)}`
+  })
 
   const handlePointerDown = (index) => (event) => {
     event.preventDefault()

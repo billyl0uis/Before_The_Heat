@@ -56,28 +56,86 @@ export function createVesselGeometry(params, radialSegments = 48) {
 }
 
 // How many draggable control points the free-form profile editor exposes.
-// Evenly spaced by height fraction, so Catmull-Rom interpolation between
-// them can use plain array-index parameterization instead of needing each
-// point's own position solved for.
+// Evenly spaced by height fraction, so the spline below can use plain
+// array-index parameterization instead of needing each point's own
+// position solved for.
 export const FREEFORM_CONTROL_COUNT = 9
 
-function catmullRomAt(values, u) {
+// Monotone cubic Hermite interpolation (Fritsch–Carlson): unlike a plain
+// Catmull-Rom spline, this never overshoots past either endpoint's value
+// within a segment. Catmull-Rom's overshoot is exactly what made dragging
+// one point to an extreme next to very different neighbors spike out past
+// both of them — a real, visible defect on a shape that's supposed to
+// read as a smooth vessel wall, not fixable by tuning tension, only by
+// using a spline that's shape-preserving by construction.
+function computeMonotonicTangents(values) {
   const n = values.length
-  const i = Math.floor(u)
+  const secants = []
+  for (let i = 0; i < n - 1; i++) secants.push(values[i + 1] - values[i])
+
+  const tangents = new Array(n)
+  tangents[0] = secants[0] ?? 0
+  tangents[n - 1] = secants[n - 2] ?? 0
+  for (let i = 1; i < n - 1; i++) {
+    const mPrev = secants[i - 1]
+    const mNext = secants[i]
+    tangents[i] = mPrev === 0 || mNext === 0 || mPrev > 0 !== mNext > 0
+      ? 0
+      : (mPrev + mNext) / 2
+  }
+
+  // Clamp each tangent pair so the curve can't overshoot the interval's
+  // own endpoints, per Fritsch–Carlson.
+  for (let i = 0; i < n - 1; i++) {
+    const m = secants[i]
+    if (m === 0) {
+      tangents[i] = 0
+      tangents[i + 1] = 0
+      continue
+    }
+    const a = tangents[i] / m
+    const b = tangents[i + 1] / m
+    const s = a * a + b * b
+    if (s > 9) {
+      const scale = 3 / Math.sqrt(s)
+      tangents[i] = scale * a * m
+      tangents[i + 1] = scale * b * m
+    }
+  }
+  return tangents
+}
+
+function hermiteAt(values, tangents, u) {
+  const n = values.length
+  const i = Math.min(n - 2, Math.max(0, Math.floor(u)))
   const t = u - i
-  const p0 = values[Math.max(0, i - 1)]
-  const p1 = values[Math.min(n - 1, i)]
-  const p2 = values[Math.min(n - 1, i + 1)]
-  const p3 = values[Math.min(n - 1, i + 2)]
+  const y0 = values[i]
+  const y1 = values[i + 1]
+  const m0 = tangents[i]
+  const m1 = tangents[i + 1]
   const t2 = t * t
   const t3 = t2 * t
+
   return (
-    0.5 *
-    (2 * p1 +
-      (-p0 + p2) * t +
-      (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 +
-      (-p0 + 3 * p1 - 3 * p2 + p3) * t3)
+    (2 * t3 - 3 * t2 + 1) * y0 +
+    (t3 - 2 * t2 + t) * m0 +
+    (-2 * t3 + 3 * t2) * y1 +
+    (t3 - t2) * m1
   )
+}
+
+// Samples a monotone spline through `values` at `sampleCount + 1` evenly
+// spaced points — shared by the real 3D profile below and the 2D preview
+// curve in ProfileCurveEditor, so the on-screen curve always matches the
+// geometry exactly rather than two independent implementations drifting.
+export function sampleMonotonicSpline(values, sampleCount) {
+  const tangents = computeMonotonicTangents(values)
+  const samples = []
+  for (let i = 0; i <= sampleCount; i++) {
+    const u = (i / sampleCount) * (values.length - 1)
+    samples.push(hermiteAt(values, tangents, u))
+  }
+  return samples
 }
 
 // Radially symmetric free-form silhouette: a smooth curve threaded through
@@ -86,15 +144,10 @@ function catmullRomAt(values, u) {
 // (spun on a pipe) — this keeps that constraint while letting the wall
 // take any shape along its height, not just the taper/bulge/ripple blend.
 export function computeCustomProfilePoints(controlRadii, height) {
-  const n = controlRadii.length
-  const points = []
-  for (let i = 0; i <= PROFILE_SAMPLES; i++) {
-    const t = i / PROFILE_SAMPLES
-    const u = t * (n - 1)
-    const radius = Math.max(MIN_RADIUS, catmullRomAt(controlRadii, u))
-    points.push(new THREE.Vector2(radius, t * height))
-  }
-  return points
+  const radii = sampleMonotonicSpline(controlRadii, PROFILE_SAMPLES)
+  return radii.map(
+    (radius, i) => new THREE.Vector2(Math.max(MIN_RADIUS, radius), (i / PROFILE_SAMPLES) * height),
+  )
 }
 
 export function createCustomVesselGeometry(controlRadii, height, radialSegments = 48) {
