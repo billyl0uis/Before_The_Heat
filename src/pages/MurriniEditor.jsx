@@ -98,15 +98,26 @@ export function MurriniEditor({ design }) {
     clearElements()
     const base = GLASS_COLOR_INDEX.find((entry) => entry.id === 'cobalt-blue')
     const accent = GLASS_COLOR_INDEX.find((entry) => entry.id === 'opal-white')
+    const baseRadius = 20
+    const accentRadius = 4
     addElement('circle', 0, 0, {
       color: base.swatch,
       colorantId: base.id,
-      params: { radius: 20 },
+      params: { radius: baseRadius },
     })
-    addElement('circle', 15, 0, {
+    // Placed just outside the base cane's radius, tangent to its surface
+    // — like a thread trailed onto the outside of a gather before it's
+    // pulled. This also sidesteps a real rendering limit: the Rod Preview
+    // extrudes each element as its own separate solid mesh (only the
+    // built-in Ring shape is one true shape-with-a-hole), so two opaque
+    // meshes with overlapping volume just occlude/z-fight each other
+    // instead of compositing into a visible layered surface. Placing the
+    // accent so the two volumes only touch, never overlap, avoids that
+    // entirely.
+    addElement('circle', baseRadius + accentRadius, 0, {
       color: accent.swatch,
       colorantId: accent.id,
-      params: { radius: 3 },
+      params: { radius: accentRadius },
     })
     setExtrusion({ ...DEFAULT_EXTRUSION, length: 220, twistDegrees: 360 })
     setViewMode('rod')
