@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { repaintVesselTexture } from '../../engine/vessel/paint'
-import { createVesselGeometry } from '../../engine/vessel/profile'
+import { createCustomVesselGeometry, createVesselGeometry } from '../../engine/vessel/profile'
 import { WebGLUnavailable } from '../WebGLUnavailable'
 
 const GLASS_COLOR = '#d97706'
@@ -11,6 +11,8 @@ const STAMP_FRACTION = 0.16
 
 export function VesselCanvas({
   params,
+  freeform,
+  controlRadii,
   manualMode,
   placements,
   onPlacePattern,
@@ -160,9 +162,11 @@ export function VesselCanvas({
     if (!mesh || !controls) return
 
     mesh.geometry.dispose()
-    mesh.geometry = createVesselGeometry(params)
+    mesh.geometry = freeform
+      ? createCustomVesselGeometry(controlRadii, params.height)
+      : createVesselGeometry(params)
     controls.target.set(0, params.height / 2, 0)
-  }, [params, webglFailed])
+  }, [params, freeform, controlRadii, webglFailed])
 
   useEffect(() => {
     const mesh = meshRef.current

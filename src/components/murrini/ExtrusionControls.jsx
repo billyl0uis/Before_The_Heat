@@ -26,9 +26,35 @@ export function ExtrusionControls({ extrusion, onChange }) {
           />
         </label>
       ))}
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => setField('sideways', false)}
+          className={`flex-1 rounded px-3 py-1.5 text-sm transition-colors ${
+            !extrusion.sideways
+              ? 'bg-purple-500 text-white'
+              : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+          }`}
+        >
+          Lengthwise
+        </button>
+        <button
+          type="button"
+          onClick={() => setField('sideways', true)}
+          className={`flex-1 rounded px-3 py-1.5 text-sm transition-colors ${
+            extrusion.sideways
+              ? 'bg-purple-500 text-white'
+              : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+          }`}
+        >
+          Sideways
+        </button>
+      </div>
       <p className="text-xs text-neutral-500">
         Twist spirals the whole bundle around its center as it's pulled
         (the zanfirico technique). Taper narrows it toward the far end.
+        Sideways flips the pulled rod 90° to run across the view instead
+        of away from it.
       </p>
     </div>
   )

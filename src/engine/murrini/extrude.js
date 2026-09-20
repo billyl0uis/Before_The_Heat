@@ -1,6 +1,15 @@
 import * as THREE from 'three'
 
-export const DEFAULT_EXTRUSION = { length: 100, twistDegrees: 0, taper: 0 }
+export const DEFAULT_EXTRUSION = {
+  length: 100,
+  twistDegrees: 0,
+  taper: 0,
+  // Some techniques (rolling a flat cane sheet into a coil before pulling,
+  // rather than pulling straight through) are easier to reason about with
+  // the rod running left-to-right instead of away from the camera — this
+  // rotates the whole pulled rod 90° without changing its geometry.
+  sideways: false,
+}
 
 // Real cane extrusion is a real physical process: a bundle of shapes gets
 // pulled into a rod, narrowing (taper) and sometimes twisted along the

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ProfileCurveEditor } from '../components/vessel/ProfileCurveEditor'
 import { VesselCanvas } from '../components/vessel/VesselCanvas'
 import { VesselControls } from '../components/vessel/VesselControls'
 import { renderPatternTile } from '../engine/murrini/rasterize'
@@ -6,7 +7,16 @@ import { renderPatternTile } from '../engine/murrini/rasterize'
 const STAMP_SIZE = 96
 
 export function VesselEditor({ design, vessel, vesselPattern }) {
-  const { params, setParam, reset } = vessel
+  const {
+    params,
+    setParam,
+    reset,
+    freeform,
+    enterFreeform,
+    exitFreeform,
+    controlRadii,
+    setControlRadius,
+  } = vessel
   const { placements, addPlacement, clearPlacements, undo, redo, canUndo, canRedo } =
     vesselPattern
   const [manualMode, setManualMode] = useState(false)
@@ -38,6 +48,8 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
         <div className="flex flex-col gap-3">
           <VesselCanvas
             params={params}
+            freeform={freeform}
+            controlRadii={controlRadii}
             manualMode={manualMode}
             placements={placements}
             onPlacePattern={handlePlacePattern}
@@ -89,7 +101,17 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
             </p>
           )}
         </div>
-        <VesselControls params={params} onParamChange={setParam} onReset={reset} />
+        {freeform && (
+          <ProfileCurveEditor controlRadii={controlRadii} onChangeRadius={setControlRadius} />
+        )}
+        <VesselControls
+          params={params}
+          onParamChange={setParam}
+          onReset={reset}
+          freeform={freeform}
+          onEnterFreeform={enterFreeform}
+          onExitFreeform={exitFreeform}
+        />
       </div>
     </div>
   )

@@ -111,9 +111,15 @@ export function RodPreviewCanvas({ elements, extrusion, width = 360, height = 42
       group.add(mesh)
     }
 
+    // Rotate the whole pulled rod 90° instead of re-deriving its geometry
+    // — "sideways" is an orientation flip, not a different pull.
+    group.rotation.y = extrusion.sideways ? Math.PI / 2 : 0
+
     // Center the camera's orbit target on the rod's midpoint so twist and
     // taper both stay in view as the length slider changes.
-    controls.target.set(0, 0, extrusion.length / 2)
+    const targetZ = extrusion.sideways ? 0 : extrusion.length / 2
+    const targetX = extrusion.sideways ? extrusion.length / 2 : 0
+    controls.target.set(targetX, 0, targetZ)
   }, [elements, extrusion, webglFailed])
 
   if (webglFailed) {
