@@ -1,4 +1,5 @@
 import { lazy, Suspense, useMemo, useState } from 'react'
+import { BuildPlan } from '../components/murrini/BuildPlan'
 import { ColorantPicker } from '../components/murrini/ColorantPicker'
 import { CompatibilityCheck } from '../components/murrini/CompatibilityCheck'
 import { ExtrusionControls } from '../components/murrini/ExtrusionControls'
@@ -192,6 +193,7 @@ export function MurriniEditor({ design }) {
           />
           <CompatibilityCheck warnings={compatibilityWarnings} />
           <TechniqueReference elements={elements} shape={selectedShape} params={params} />
+          <BuildPlan elements={elements} />
         </div>
       </div>
     </div>

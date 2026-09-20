@@ -118,6 +118,16 @@ function areElementsConcentric(elements) {
   })
 }
 
+// What a single shape, on its own, actually becomes — the base case both
+// resolveTechniqueKey and the per-cluster build plan below reduce to.
+function resolveSingleShapeTechniqueKey(shape, params = {}) {
+  if (shape === 'square') return 'marver'
+  if (shape === 'polygon') {
+    return (params.sides ?? 4) <= MAX_HAND_MARVERED_SIDES ? 'marver' : 'opticMold'
+  }
+  return shape
+}
+
 // Reflects what's actually been built so far, not just whichever tool is
 // selected in the toolbar. Two or more placed shapes could be either of
 // two different real techniques depending on their actual geometry: all
@@ -133,10 +143,64 @@ export function resolveTechniqueKey(elements, fallbackShape, fallbackParams = {}
 
   const shape = elements.length === 1 ? elements[0].shape : fallbackShape
   const params = elements.length === 1 ? elements[0].params : fallbackParams
+  return resolveSingleShapeTechniqueKey(shape, params)
+}
 
-  if (shape === 'square') return 'marver'
-  if (shape === 'polygon') {
-    return (params.sides ?? 4) <= MAX_HAND_MARVERED_SIDES ? 'marver' : 'opticMold'
+// Groups elements into the individual canes they'd actually be pulled as:
+// shapes centered on (roughly) the same point merge into one cluster (one
+// cased/layered cane), everything else stays its own cluster (a separate
+// cane, to be bundled with the rest later). Union-find over pairwise
+// "concentric" checks, same tolerance rule as areElementsConcentric.
+function clusterElements(elements) {
+  const reach = elements.map(computeElementReach)
+  const parent = elements.map((_, i) => i)
+  const find = (i) => {
+    while (parent[i] !== i) i = parent[i]
+    return i
   }
-  return shape
+  const union = (i, j) => {
+    const ri = find(i)
+    const rj = find(j)
+    if (ri !== rj) parent[ri] = rj
+  }
+
+  for (let i = 0; i < elements.length; i++) {
+    for (let j = i + 1; j < elements.length; j++) {
+      const tolerance = Math.max(4, Math.max(reach[i], reach[j]) * 0.2)
+      const dx = elements[i].x - elements[j].x
+      const dy = elements[i].y - elements[j].y
+      if (Math.sqrt(dx * dx + dy * dy) <= tolerance) union(i, j)
+    }
+  }
+
+  const clusters = new Map()
+  elements.forEach((element, i) => {
+    const root = find(i)
+    if (!clusters.has(root)) clusters.set(root, [])
+    clusters.get(root).push(element)
+  })
+  return [...clusters.values()]
+}
+
+// The actual build order for what's currently on the canvas: one step per
+// individual cane (a lone shape, or a casing/layered cluster of nested
+// shapes), then — only if there's more than one cane — a final bundling
+// step tying them together. This is the same geometry analysis
+// resolveTechniqueKey uses, just carried through every cluster instead of
+// collapsing straight to one overall label, so it stays exactly as
+// accurate: it's reading the real layout back, not guessing at intent.
+export function computeBuildPlan(elements) {
+  if (elements.length === 0) return []
+
+  const clusters = clusterElements(elements)
+  const steps = clusters.map((cluster) => ({
+    techniqueKey:
+      cluster.length > 1 ? 'ring' : resolveSingleShapeTechniqueKey(cluster[0].shape, cluster[0].params),
+    caneCount: cluster.length,
+  }))
+
+  if (clusters.length > 1) {
+    steps.push({ techniqueKey: 'bundle', caneCount: elements.length })
+  }
+  return steps
 }
