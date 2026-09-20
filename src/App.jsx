@@ -1,4 +1,5 @@
 import { lazy, Suspense, useMemo, useState } from 'react'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { computeRepeatedElements } from './engine/murrini/pattern'
 import { useMurriniDesign } from './hooks/useMurriniDesign'
 import { useVesselShape } from './hooks/useVesselShape'
@@ -72,20 +73,22 @@ function App() {
           </button>
         ))}
       </nav>
-      <Suspense fallback={<TabLoadingFallback />}>
-        {activeTab === 'murrini' && <MurriniEditor design={design} />}
-        {activeTab === 'vessel' && <VesselEditor design={design} vessel={vessel} />}
-        {activeTab === 'colors' && <ColorIndexPage />}
-        {activeTab === 'vault' && (
-          <DesignVaultPage
-            design={design}
-            onLoadDesign={(saved) => {
-              murriniHook.loadDesign(saved)
-              setActiveTab('murrini')
-            }}
-          />
-        )}
-      </Suspense>
+      <ErrorBoundary key={activeTab}>
+        <Suspense fallback={<TabLoadingFallback />}>
+          {activeTab === 'murrini' && <MurriniEditor design={design} />}
+          {activeTab === 'vessel' && <VesselEditor design={design} vessel={vessel} />}
+          {activeTab === 'colors' && <ColorIndexPage />}
+          {activeTab === 'vault' && (
+            <DesignVaultPage
+              design={design}
+              onLoadDesign={(saved) => {
+                murriniHook.loadDesign(saved)
+                setActiveTab('murrini')
+              }}
+            />
+          )}
+        </Suspense>
+      </ErrorBoundary>
     </div>
   )
 }
