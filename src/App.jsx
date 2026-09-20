@@ -28,10 +28,14 @@ const DesignVaultPage = lazy(() =>
 const InspirationPage = lazy(() =>
   import('./pages/InspirationPage').then((m) => ({ default: m.InspirationPage })),
 )
+const FreeSculptPage = lazy(() =>
+  import('./pages/FreeSculptPage').then((m) => ({ default: m.FreeSculptPage })),
+)
 
 const TABS = [
   { key: 'murrini', label: 'Murrini Pattern' },
   { key: 'vessel', label: 'Vessel Morphograph' },
+  { key: 'sculpt', label: 'Free Sculpt' },
   { key: 'colors', label: 'Color Index' },
   { key: 'vault', label: 'Design Vault' },
   { key: 'inspiration', label: 'Inspiration' },
@@ -85,6 +89,7 @@ function App() {
           {activeTab === 'vessel' && (
             <VesselEditor design={design} vessel={vessel} vesselPattern={vesselPattern} />
           )}
+          {activeTab === 'sculpt' && <FreeSculptPage />}
           {activeTab === 'colors' && <ColorIndexPage />}
           {activeTab === 'inspiration' && <InspirationPage />}
           {activeTab === 'vault' && (
