@@ -27,28 +27,69 @@ function ControlSlider({ control, value, onChange }) {
   )
 }
 
-export function VesselControls({ params, onParamChange, onReset }) {
+export function VesselControls({
+  params,
+  onParamChange,
+  onReset,
+  freeform,
+  onEnterFreeform,
+  onExitFreeform,
+}) {
   return (
     <div className="flex w-64 flex-col gap-4 rounded-lg border border-neutral-800 bg-neutral-900 p-4">
-      <h2 className="text-sm font-medium text-neutral-100">Vessel Profile</h2>
-      {PROFILE_CONTROLS.map((control) => (
-        <ControlSlider
-          key={control.key}
-          control={control}
-          value={params[control.key]}
-          onChange={onParamChange}
-        />
-      ))}
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={onExitFreeform}
+          className={`flex-1 rounded px-3 py-1.5 text-sm transition-colors ${
+            !freeform
+              ? 'bg-purple-500 text-white'
+              : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+          }`}
+        >
+          Parametric
+        </button>
+        <button
+          type="button"
+          onClick={onEnterFreeform}
+          className={`flex-1 rounded px-3 py-1.5 text-sm transition-colors ${
+            freeform
+              ? 'bg-purple-500 text-white'
+              : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+          }`}
+        >
+          Free-form
+        </button>
+      </div>
 
-      <h2 className="mt-2 text-sm font-medium text-neutral-100">Surface Ripple</h2>
-      {WAVE_CONTROLS.map((control) => (
-        <ControlSlider
-          key={control.key}
-          control={control}
-          value={params[control.key]}
-          onChange={onParamChange}
-        />
-      ))}
+      <h2 className="text-sm font-medium text-neutral-100">Vessel Profile</h2>
+      <fieldset disabled={freeform} className="flex flex-col gap-4 disabled:opacity-40">
+        {PROFILE_CONTROLS.map((control) => (
+          <ControlSlider
+            key={control.key}
+            control={control}
+            value={params[control.key]}
+            onChange={onParamChange}
+          />
+        ))}
+
+        <h2 className="mt-2 text-sm font-medium text-neutral-100">Surface Ripple</h2>
+        {WAVE_CONTROLS.map((control) => (
+          <ControlSlider
+            key={control.key}
+            control={control}
+            value={params[control.key]}
+            onChange={onParamChange}
+          />
+        ))}
+      </fieldset>
+
+      {freeform && (
+        <p className="text-xs text-neutral-500">
+          Drag the points on the silhouette to reshape the wall by hand.
+          Switch back to Parametric to use these sliders again.
+        </p>
+      )}
 
       <button
         type="button"

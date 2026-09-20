@@ -80,6 +80,25 @@ export const SHAPE_TYPES = {
     createShape: ({ radius, innerRadius, points }) =>
       starShape(radius, innerRadius, points),
   },
+  square: {
+    label: 'Square',
+    defaultParams: { width: 30, height: 30 },
+    controls: [
+      { key: 'width', label: 'Width', min: 4, max: 100, step: 1 },
+      { key: 'height', label: 'Height', min: 4, max: 100, step: 1 },
+    ],
+    createShape: ({ width, height }) => {
+      const shape = new THREE.Shape()
+      const halfWidth = width / 2
+      const halfHeight = height / 2
+      shape.moveTo(-halfWidth, -halfHeight)
+      shape.lineTo(halfWidth, -halfHeight)
+      shape.lineTo(halfWidth, halfHeight)
+      shape.lineTo(-halfWidth, halfHeight)
+      shape.closePath()
+      return shape
+    },
+  },
   line: {
     label: 'Line',
     defaultParams: { length: 40, thickness: 4 },
@@ -101,4 +120,4 @@ export const SHAPE_TYPES = {
   },
 }
 
-export const SHAPE_ORDER = ['circle', 'ring', 'polygon', 'star', 'line']
+export const SHAPE_ORDER = ['circle', 'square', 'ring', 'polygon', 'star', 'line']

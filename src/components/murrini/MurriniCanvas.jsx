@@ -10,12 +10,13 @@ function disposeGroupChildren(group) {
   }
 }
 
-export function MurriniCanvas({ canvas, elements, onPlace }) {
+export function MurriniCanvas({ canvas, elements, onPlace, preview }) {
   const mountRef = useRef(null)
   const sceneRef = useRef(null)
   const groupRef = useRef(null)
   const rendererRef = useRef(null)
   const cameraRef = useRef(null)
+  const previewMeshRef = useRef(null)
   const onPlaceRef = useRef(onPlace)
   const [webglFailed, setWebglFailed] = useState(false)
 
@@ -61,6 +62,24 @@ export function MurriniCanvas({ canvas, elements, onPlace }) {
     const group = new THREE.Group()
     scene.add(group)
 
+    // Ghost of whatever shape/color is about to be placed, following the
+    // cursor so you can see exactly where and what will land before you
+    // click — not part of `group`, so it's never touched by the elements
+    // effect below.
+    const previewMesh = new THREE.Mesh(
+      new THREE.BufferGeometry(),
+      new THREE.MeshBasicMaterial({
+        color: '#ffffff',
+        transparent: true,
+        opacity: 0.45,
+        depthTest: false,
+      }),
+    )
+    previewMesh.visible = false
+    previewMesh.position.z = 0.1
+    scene.add(previewMesh)
+    previewMeshRef.current = previewMesh
+
     sceneRef.current = scene
     cameraRef.current = camera
     rendererRef.current = renderer
@@ -68,17 +87,38 @@ export function MurriniCanvas({ canvas, elements, onPlace }) {
 
     renderer.render(scene, camera)
 
-    const handleClick = (event) => {
+    const pointerToWorld = (event) => {
       const rect = renderer.domElement.getBoundingClientRect()
       const x = event.clientX - rect.left - width / 2
       const y = height / 2 - (event.clientY - rect.top)
+      return { x, y }
+    }
+
+    const handleClick = (event) => {
+      const { x, y } = pointerToWorld(event)
       onPlaceRef.current(x, y)
     }
+    const handlePointerMove = (event) => {
+      const { x, y } = pointerToWorld(event)
+      previewMesh.position.set(x, y, 0.1)
+      previewMesh.visible = true
+      renderer.render(scene, camera)
+    }
+    const handlePointerLeave = () => {
+      previewMesh.visible = false
+      renderer.render(scene, camera)
+    }
     renderer.domElement.addEventListener('click', handleClick)
+    renderer.domElement.addEventListener('pointermove', handlePointerMove)
+    renderer.domElement.addEventListener('pointerleave', handlePointerLeave)
 
     return () => {
       renderer.domElement.removeEventListener('click', handleClick)
+      renderer.domElement.removeEventListener('pointermove', handlePointerMove)
+      renderer.domElement.removeEventListener('pointerleave', handlePointerLeave)
       disposeGroupChildren(group)
+      previewMesh.geometry.dispose()
+      previewMesh.material.dispose()
       renderer.dispose()
       mount.removeChild(renderer.domElement)
     }
@@ -110,6 +150,20 @@ export function MurriniCanvas({ canvas, elements, onPlace }) {
 
     rendererRef.current.render(sceneRef.current, cameraRef.current)
   }, [elements, webglFailed])
+
+  useEffect(() => {
+    const mesh = previewMeshRef.current
+    if (!mesh || webglFailed) return
+
+    const definition = SHAPE_TYPES[preview.shape]
+    if (!definition) return
+
+    mesh.geometry.dispose()
+    mesh.geometry = new THREE.ShapeGeometry(definition.createShape(preview.params))
+    mesh.material.color.set(preview.color)
+
+    rendererRef.current.render(sceneRef.current, cameraRef.current)
+  }, [preview.shape, preview.params, preview.color, webglFailed])
 
   if (webglFailed) {
     return <WebGLUnavailable width={canvas.width} height={canvas.height} />

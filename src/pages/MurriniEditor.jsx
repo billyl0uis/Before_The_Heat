@@ -30,6 +30,10 @@ export function MurriniEditor({ design }) {
     setExtrusion,
     addElement,
     clearElements,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
   } = design
   const [viewMode, setViewMode] = useState('flat')
   const [selectedShape, setSelectedShape] = useState('circle')
@@ -53,6 +57,19 @@ export function MurriniEditor({ design }) {
   const compatibilityWarnings = useMemo(
     () => checkColorCompatibility(elements),
     [elements],
+  )
+
+  // What handlePlace would actually place right now — used to render the
+  // hover preview so it always matches the real click outcome exactly.
+  const previewColor = useMemo(() => {
+    if (useCustomColor) return customColor
+    const colorant = GLASS_COLOR_INDEX.find((entry) => entry.id === colorantId)
+    return colorant?.swatch ?? customColor
+  }, [useCustomColor, customColor, colorantId])
+
+  const preview = useMemo(
+    () => ({ shape: selectedShape, params, color: previewColor }),
+    [selectedShape, params, previewColor],
   )
 
   const handlePlace = (x, y) => {
@@ -105,6 +122,7 @@ export function MurriniEditor({ design }) {
               canvas={canvas}
               elements={repeatedElements}
               onPlace={handlePlace}
+              preview={preview}
             />
           ) : (
             <Suspense
@@ -125,6 +143,10 @@ export function MurriniEditor({ design }) {
             params={params}
             onParamChange={handleParamChange}
             onClear={clearElements}
+            onUndo={undo}
+            onRedo={redo}
+            canUndo={canUndo}
+            canRedo={canRedo}
           />
           <PatternControls pattern={pattern} onChange={setPattern} />
           <ExtrusionControls extrusion={extrusion} onChange={setExtrusion} />
@@ -139,7 +161,7 @@ export function MurriniEditor({ design }) {
             onCustomColorChange={setCustomColor}
           />
           <CompatibilityCheck warnings={compatibilityWarnings} />
-          <TechniqueReference shape={selectedShape} params={params} />
+          <TechniqueReference elements={elements} shape={selectedShape} params={params} />
         </div>
       </div>
     </div>
