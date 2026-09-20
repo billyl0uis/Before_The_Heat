@@ -66,6 +66,7 @@ export function useDesignVault() {
           elements: designData.elements,
           pattern: designData.pattern,
           extrusion: designData.extrusion,
+          thumbnailUrl: designData.thumbnailUrl ?? null,
         })
         setStatus('idle')
       } catch (err) {

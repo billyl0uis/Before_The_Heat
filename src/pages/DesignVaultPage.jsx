@@ -1,5 +1,8 @@
 import { useState } from 'react'
+import { renderElementsToCanvas } from '../engine/murrini/rasterize'
 import { useDesignVault } from '../hooks/useDesignVault'
+
+const THUMBNAIL_SIZE = 160
 
 function NotConfiguredNotice() {
   return (
@@ -44,11 +47,23 @@ export function DesignVaultPage({ design, onLoadDesign }) {
   const handleSave = (event) => {
     event.preventDefault()
     if (!designName.trim()) return
+
+    // Thumbnail is the full pattern-repeated cross-section (what the
+    // editor actually shows), not just the base cell — a thumbnail of an
+    // unrepeated single shape wouldn't represent the saved design well.
+    const thumbnailCanvas = renderElementsToCanvas(
+      design.repeatedElements,
+      design.canvas,
+      undefined,
+      THUMBNAIL_SIZE,
+    )
+
     saveDesign(designName.trim(), {
       canvas: design.canvas,
       elements: design.elements,
       pattern: design.pattern,
       extrusion: design.extrusion,
+      thumbnailUrl: thumbnailCanvas.toDataURL('image/png'),
     })
     setDesignName('')
   }
@@ -100,9 +115,18 @@ export function DesignVaultPage({ design, onLoadDesign }) {
               savedDesigns.map((saved) => (
                 <div
                   key={saved.id}
-                  className="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-900 p-3"
+                  className="flex items-center gap-3 rounded-lg border border-neutral-800 bg-neutral-900 p-3"
                 >
-                  <span className="text-sm text-neutral-200">{saved.name}</span>
+                  {saved.thumbnailUrl ? (
+                    <img
+                      src={saved.thumbnailUrl}
+                      alt=""
+                      className="h-12 w-12 shrink-0 rounded border border-neutral-800 object-cover"
+                    />
+                  ) : (
+                    <div className="h-12 w-12 shrink-0 rounded border border-neutral-800 bg-neutral-950" />
+                  )}
+                  <span className="flex-1 text-sm text-neutral-200">{saved.name}</span>
                   <div className="flex gap-2">
                     <button
                       type="button"

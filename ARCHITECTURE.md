@@ -158,7 +158,7 @@ This is what gets saved to Firestore for a single murrini pattern.
     "taper": 0
   },
 
-  "thumbnailUrl": "string | null — Firebase Storage URL",
+  "thumbnailUrl": "string | null — inline base64 PNG data URL (not a Firebase Storage URL, see field notes)",
   "tags": ["string"]
 }
 ```
@@ -179,6 +179,14 @@ Field notes:
 - `colorantId` is additive, not a breaking change — a v2 document without
   it just means the color isn't tied to a documented real colorant
   (equivalent to `null`).
+- `thumbnailUrl` deliberately deviates from the original plan of a
+  Firebase Storage URL: it's an inline base64 PNG data URL instead,
+  generated client-side by `renderElementsToCanvas` (the same rasterizer
+  the vessel texture connection uses) at a small fixed size. That avoids
+  needing Storage as a second Firebase product to set up just for
+  thumbnails, and at this size (a few KB) stays well within Firestore's
+  per-document limit. Worth revisiting if designs ever need full-size
+  exported images — that's a real Storage use case, this isn't it.
 - `extrusion` is the module-1 "stretch simulation": `twistDegrees` and
   `taper` let the rod preview show the pattern twisting/thinning along its
   length the way a real pulled cane does, without redrawing `elements`.

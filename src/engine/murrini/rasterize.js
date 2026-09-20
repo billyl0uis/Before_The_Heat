@@ -27,20 +27,24 @@ function fillShapePath(ctx, shape, divisions = 24) {
 // Draws the pattern-repeated elements onto a 2D canvas for use as a
 // texture (or later, a saved thumbnail). Reuses an existing canvas element
 // when given one, so callers can avoid reallocating on every update.
-export function renderElementsToCanvas(elements, canvasConfig, targetCanvas) {
+export function renderElementsToCanvas(elements, canvasConfig, targetCanvas, outputSize) {
+  const size = outputSize ?? canvasConfig.width
   const canvas = targetCanvas ?? document.createElement('canvas')
-  canvas.width = canvasConfig.width
-  canvas.height = canvasConfig.height
+  canvas.width = size
+  canvas.height = size
 
   const ctx = canvas.getContext('2d')
   ctx.fillStyle = canvasConfig.backgroundColor
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  ctx.fillRect(0, 0, size, size)
 
   // Engine coordinates are centered on (0,0) with +y up, matching the
   // orthographic editor view; canvas 2D has (0,0) top-left with +y down.
+  // outputSize (e.g. for a Vault thumbnail) scales everything down
+  // proportionally rather than just cropping the center.
+  const scale = size / canvasConfig.width
   ctx.save()
-  ctx.translate(canvas.width / 2, canvas.height / 2)
-  ctx.scale(1, -1)
+  ctx.translate(size / 2, size / 2)
+  ctx.scale(scale, -scale)
 
   for (const element of elements) {
     const definition = SHAPE_TYPES[element.shape]
