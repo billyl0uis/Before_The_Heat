@@ -4,6 +4,25 @@ import { useDesignVault } from '../hooks/useDesignVault'
 
 const THUMBNAIL_SIZE = 160
 
+// Thumbnail is the full pattern-repeated cross-section (what the editor
+// actually shows), not just the base cell — a thumbnail of an unrepeated
+// single shape wouldn't represent the saved design well.
+function buildDesignPayload(design) {
+  const thumbnailCanvas = renderElementsToCanvas(
+    design.repeatedElements,
+    design.canvas,
+    undefined,
+    THUMBNAIL_SIZE,
+  )
+  return {
+    canvas: design.canvas,
+    elements: design.elements,
+    pattern: design.pattern,
+    extrusion: design.extrusion,
+    thumbnailUrl: thumbnailCanvas.toDataURL('image/png'),
+  }
+}
+
 function NotConfiguredNotice() {
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-3 rounded-lg border border-neutral-800 bg-neutral-900 p-6">
@@ -39,33 +58,109 @@ function NotConfiguredNotice() {
   )
 }
 
+function SavedDesignRow({ saved, onLoadDesign, onOverwrite, onRename, onDelete }) {
+  const [isRenaming, setIsRenaming] = useState(false)
+  const [nameDraft, setNameDraft] = useState(saved.name)
+
+  const commitRename = () => {
+    setIsRenaming(false)
+    if (nameDraft.trim() && nameDraft.trim() !== saved.name) {
+      onRename(saved.id, nameDraft.trim())
+    } else {
+      setNameDraft(saved.name)
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-3 rounded-lg border border-neutral-800 bg-neutral-900 p-3">
+      {saved.thumbnailUrl ? (
+        <img
+          src={saved.thumbnailUrl}
+          alt=""
+          className="h-12 w-12 shrink-0 rounded border border-neutral-800 object-cover"
+        />
+      ) : (
+        <div className="h-12 w-12 shrink-0 rounded border border-neutral-800 bg-neutral-950" />
+      )}
+
+      {isRenaming ? (
+        <input
+          type="text"
+          autoFocus
+          value={nameDraft}
+          onChange={(event) => setNameDraft(event.target.value)}
+          onBlur={commitRename}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') commitRename()
+            if (event.key === 'Escape') {
+              setNameDraft(saved.name)
+              setIsRenaming(false)
+            }
+          }}
+          className="flex-1 rounded border border-neutral-700 bg-neutral-950 px-2 py-1 text-sm text-neutral-100"
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={() => setIsRenaming(true)}
+          title="Click to rename"
+          className="flex-1 truncate text-left text-sm text-neutral-200 hover:text-white"
+        >
+          {saved.name}
+        </button>
+      )}
+
+      <div className="flex shrink-0 gap-2">
+        <button
+          type="button"
+          onClick={() => onLoadDesign(saved)}
+          className="rounded bg-neutral-800 px-3 py-1 text-xs text-neutral-300 hover:bg-neutral-700"
+        >
+          Load
+        </button>
+        <button
+          type="button"
+          onClick={() => onOverwrite(saved.id)}
+          title="Replace this saved design with what's currently in the editor"
+          className="rounded bg-neutral-800 px-3 py-1 text-xs text-neutral-300 hover:bg-neutral-700"
+        >
+          Overwrite
+        </button>
+        <button
+          type="button"
+          onClick={() => onDelete(saved.id)}
+          className="rounded bg-neutral-800 px-3 py-1 text-xs text-red-300 hover:bg-red-950/50"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export function DesignVaultPage({ design, onLoadDesign }) {
-  const { isConfigured, user, savedDesigns, status, error, saveDesign, deleteDesign } =
-    useDesignVault()
+  const {
+    isConfigured,
+    user,
+    savedDesigns,
+    status,
+    error,
+    saveDesign,
+    deleteDesign,
+    overwriteDesign,
+    renameDesign,
+  } = useDesignVault()
   const [designName, setDesignName] = useState('')
 
   const handleSave = (event) => {
     event.preventDefault()
     if (!designName.trim()) return
-
-    // Thumbnail is the full pattern-repeated cross-section (what the
-    // editor actually shows), not just the base cell — a thumbnail of an
-    // unrepeated single shape wouldn't represent the saved design well.
-    const thumbnailCanvas = renderElementsToCanvas(
-      design.repeatedElements,
-      design.canvas,
-      undefined,
-      THUMBNAIL_SIZE,
-    )
-
-    saveDesign(designName.trim(), {
-      canvas: design.canvas,
-      elements: design.elements,
-      pattern: design.pattern,
-      extrusion: design.extrusion,
-      thumbnailUrl: thumbnailCanvas.toDataURL('image/png'),
-    })
+    saveDesign(designName.trim(), buildDesignPayload(design))
     setDesignName('')
+  }
+
+  const handleOverwrite = (id) => {
+    overwriteDesign(id, buildDesignPayload(design))
   }
 
   return (
@@ -113,37 +208,14 @@ export function DesignVaultPage({ design, onLoadDesign }) {
               <p className="text-sm text-neutral-500">No saved designs yet.</p>
             ) : (
               savedDesigns.map((saved) => (
-                <div
+                <SavedDesignRow
                   key={saved.id}
-                  className="flex items-center gap-3 rounded-lg border border-neutral-800 bg-neutral-900 p-3"
-                >
-                  {saved.thumbnailUrl ? (
-                    <img
-                      src={saved.thumbnailUrl}
-                      alt=""
-                      className="h-12 w-12 shrink-0 rounded border border-neutral-800 object-cover"
-                    />
-                  ) : (
-                    <div className="h-12 w-12 shrink-0 rounded border border-neutral-800 bg-neutral-950" />
-                  )}
-                  <span className="flex-1 text-sm text-neutral-200">{saved.name}</span>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => onLoadDesign(saved)}
-                      className="rounded bg-neutral-800 px-3 py-1 text-xs text-neutral-300 hover:bg-neutral-700"
-                    >
-                      Load
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => deleteDesign(saved.id)}
-                      className="rounded bg-neutral-800 px-3 py-1 text-xs text-red-300 hover:bg-red-950/50"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
+                  saved={saved}
+                  onLoadDesign={onLoadDesign}
+                  onOverwrite={handleOverwrite}
+                  onRename={renameDesign}
+                  onDelete={deleteDesign}
+                />
               ))
             )}
           </div>

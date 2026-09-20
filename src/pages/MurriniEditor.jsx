@@ -1,15 +1,23 @@
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { ColorantPicker } from '../components/murrini/ColorantPicker'
 import { CompatibilityCheck } from '../components/murrini/CompatibilityCheck'
 import { ExtrusionControls } from '../components/murrini/ExtrusionControls'
 import { MurriniCanvas } from '../components/murrini/MurriniCanvas'
 import { PatternControls } from '../components/murrini/PatternControls'
-import { RodPreviewCanvas } from '../components/murrini/RodPreviewCanvas'
 import { ShapeToolbar } from '../components/murrini/ShapeToolbar'
 import { TechniqueReference } from '../components/murrini/TechniqueReference'
 import { GLASS_COLOR_INDEX } from '../content/glassColorIndex'
 import { checkColorCompatibility } from '../engine/murrini/colorCompatibility'
 import { SHAPE_TYPES } from '../engine/murrini/shapes'
+
+// Lazy so OrbitControls (and its ~370KB chunk, shared with the Vessel tab)
+// only loads if Rod Preview is actually opened — most visits stay on the
+// flat pattern view and never need it.
+const RodPreviewCanvas = lazy(() =>
+  import('../components/murrini/RodPreviewCanvas').then((m) => ({
+    default: m.RodPreviewCanvas,
+  })),
+)
 
 export function MurriniEditor({ design }) {
   const {
@@ -99,7 +107,15 @@ export function MurriniEditor({ design }) {
               onPlace={handlePlace}
             />
           ) : (
-            <RodPreviewCanvas elements={repeatedElements} extrusion={extrusion} />
+            <Suspense
+              fallback={
+                <div className="flex h-[420px] w-[360px] items-center justify-center rounded-lg border border-neutral-800 text-sm text-neutral-500">
+                  Loading 3D preview…
+                </div>
+              }
+            >
+              <RodPreviewCanvas elements={repeatedElements} extrusion={extrusion} />
+            </Suspense>
           )}
         </div>
         <div className="flex flex-col gap-6">

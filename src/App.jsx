@@ -1,11 +1,28 @@
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { computeRepeatedElements } from './engine/murrini/pattern'
 import { useMurriniDesign } from './hooks/useMurriniDesign'
 import { useVesselShape } from './hooks/useVesselShape'
-import { ColorIndexPage } from './pages/ColorIndexPage'
-import { DesignVaultPage } from './pages/DesignVaultPage'
-import { MurriniEditor } from './pages/MurriniEditor'
-import { VesselEditor } from './pages/VesselEditor'
+
+// Lazy-loaded so each tab's code (and its dependencies) only download when
+// actually visited. The biggest win is Design Vault: it's the only tab
+// that pulls in the Firebase SDK, which was otherwise sitting in every
+// visitor's initial bundle even if they never touch the Vault. Murrini
+// and Vessel still share Three.js eagerly through the design/vessel hooks
+// below (needed for cross-tab state persistence — see their comments),
+// so splitting their page components saves less, but costs nothing to do
+// consistently across all four tabs.
+const MurriniEditor = lazy(() =>
+  import('./pages/MurriniEditor').then((m) => ({ default: m.MurriniEditor })),
+)
+const VesselEditor = lazy(() =>
+  import('./pages/VesselEditor').then((m) => ({ default: m.VesselEditor })),
+)
+const ColorIndexPage = lazy(() =>
+  import('./pages/ColorIndexPage').then((m) => ({ default: m.ColorIndexPage })),
+)
+const DesignVaultPage = lazy(() =>
+  import('./pages/DesignVaultPage').then((m) => ({ default: m.DesignVaultPage })),
+)
 
 const TABS = [
   { key: 'murrini', label: 'Murrini Pattern' },
@@ -13,6 +30,12 @@ const TABS = [
   { key: 'colors', label: 'Color Index' },
   { key: 'vault', label: 'Design Vault' },
 ]
+
+function TabLoadingFallback() {
+  return (
+    <div className="flex justify-center p-16 text-sm text-neutral-500">Loading…</div>
+  )
+}
 
 function App() {
   const [activeTab, setActiveTab] = useState('murrini')
@@ -49,18 +72,20 @@ function App() {
           </button>
         ))}
       </nav>
-      {activeTab === 'murrini' && <MurriniEditor design={design} />}
-      {activeTab === 'vessel' && <VesselEditor design={design} vessel={vessel} />}
-      {activeTab === 'colors' && <ColorIndexPage />}
-      {activeTab === 'vault' && (
-        <DesignVaultPage
-          design={design}
-          onLoadDesign={(saved) => {
-            murriniHook.loadDesign(saved)
-            setActiveTab('murrini')
-          }}
-        />
-      )}
+      <Suspense fallback={<TabLoadingFallback />}>
+        {activeTab === 'murrini' && <MurriniEditor design={design} />}
+        {activeTab === 'vessel' && <VesselEditor design={design} vessel={vessel} />}
+        {activeTab === 'colors' && <ColorIndexPage />}
+        {activeTab === 'vault' && (
+          <DesignVaultPage
+            design={design}
+            onLoadDesign={(saved) => {
+              murriniHook.loadDesign(saved)
+              setActiveTab('murrini')
+            }}
+          />
+        )}
+      </Suspense>
     </div>
   )
 }

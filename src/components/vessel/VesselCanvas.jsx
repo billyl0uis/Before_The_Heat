@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { renderPatternTile } from '../../engine/murrini/rasterize'
-import { createVesselGeometry } from '../../engine/vessel/profile'
+import { computeTextureRepeat, createVesselGeometry } from '../../engine/vessel/profile'
 
 const GLASS_COLOR = '#d97706'
 
@@ -61,9 +61,10 @@ export function VesselCanvas({
     const texture = new THREE.CanvasTexture(textureCanvas)
     texture.wrapS = THREE.RepeatWrapping
     texture.wrapT = THREE.RepeatWrapping
-    // Fixed for now — tying these to the vessel's actual circumference and
-    // height (so tile count reflects real proportions) is follow-up work.
-    texture.repeat.set(8, 4)
+    // Real repeat count is scaled to the vessel's actual size in the
+    // params effect below — this placeholder just avoids an undefined
+    // texture.repeat before that first runs.
+    texture.repeat.set(1, 1)
     const texturedMaterial = new THREE.MeshStandardMaterial({
       map: texture,
       color: 0xffffff,
@@ -119,11 +120,15 @@ export function VesselCanvas({
   useEffect(() => {
     const mesh = meshRef.current
     const controls = controlsRef.current
-    if (!mesh || !controls) return
+    const texture = textureRef.current
+    if (!mesh || !controls || !texture) return
 
     mesh.geometry.dispose()
     mesh.geometry = createVesselGeometry(params)
     controls.target.set(0, params.height / 2, 0)
+
+    const repeat = computeTextureRepeat(params)
+    texture.repeat.set(repeat.x, repeat.y)
   }, [params])
 
   useEffect(() => {

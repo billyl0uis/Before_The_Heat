@@ -7,6 +7,7 @@ import {
   onSnapshot,
   query,
   serverTimestamp,
+  updateDoc,
   where,
 } from 'firebase/firestore'
 import { useCallback, useEffect, useState } from 'react'
@@ -86,6 +87,42 @@ export function useDesignVault() {
     }
   }, [])
 
+  // Overwrites an existing saved design's content in place (same doc id,
+  // same createdAt) rather than creating a second copy — the Vault only
+  // had save-new and delete before, no way to update one you'd already
+  // saved without deleting and re-saving it under the same name.
+  const overwriteDesign = useCallback(async (id, designData) => {
+    if (!isFirebaseConfigured) return
+    setStatus('saving')
+    setError(null)
+    try {
+      await updateDoc(doc(db, 'designs', id), {
+        updatedAt: serverTimestamp(),
+        canvas: designData.canvas,
+        elements: designData.elements,
+        pattern: designData.pattern,
+        extrusion: designData.extrusion,
+        thumbnailUrl: designData.thumbnailUrl ?? null,
+      })
+      setStatus('idle')
+    } catch (err) {
+      setError(err.message)
+      setStatus('error')
+    }
+  }, [])
+
+  const renameDesign = useCallback(async (id, name) => {
+    if (!isFirebaseConfigured || !name.trim()) return
+    try {
+      await updateDoc(doc(db, 'designs', id), {
+        name: name.trim(),
+        updatedAt: serverTimestamp(),
+      })
+    } catch (err) {
+      setError(err.message)
+    }
+  }, [])
+
   return {
     isConfigured: isFirebaseConfigured,
     user,
@@ -94,5 +131,7 @@ export function useDesignVault() {
     error,
     saveDesign,
     deleteDesign,
+    overwriteDesign,
+    renameDesign,
   }
 }
