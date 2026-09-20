@@ -17,8 +17,20 @@ export const DEFAULT_EXTRUSION = { length: 100, twistDegrees: 0, taper: 0 }
 // vertices around the shared (0,0) axis is what makes that happen.
 export function createExtrudedElementGeometry(shape, extrusion, offset = { x: 0, y: 0 }) {
   const { length, twistDegrees, taper } = extrusion
+
+  // ExtrudeGeometry defaults to steps: 1 — no subdivision along the depth
+  // axis at all, just two end caps joined by straight, unsubdivided side
+  // walls. That's fine for taper (a straight-edged cone still looks like a
+  // cone), but for twist it's wrong: the side walls become a straight-line
+  // "shortcut" between two very differently-rotated end caps instead of a
+  // helix, which pinches into a bowtie/blade shape once the twist is more
+  // than a few degrees. One subdivision per ~8° of total twist keeps each
+  // step's rotation small enough to read as a smooth spiral.
+  const steps = Math.max(1, Math.min(128, Math.ceil(Math.abs(twistDegrees) / 8)))
+
   const geometry = new THREE.ExtrudeGeometry(shape, {
     depth: length,
+    steps,
     bevelEnabled: false,
     curveSegments: 16,
   })
