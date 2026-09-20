@@ -4,12 +4,19 @@ const CONTROLS = [
   { key: 'taper', label: 'Taper (%)', min: 0, max: 90, step: 5 },
 ]
 
-export function ExtrusionControls({ extrusion, onChange }) {
+export function ExtrusionControls({ extrusion, onChange, onSpiralPreset }) {
   const setField = (key, value) => onChange({ ...extrusion, [key]: value })
 
   return (
     <div className="flex w-64 flex-col gap-3 rounded-lg border border-neutral-800 bg-neutral-900 p-4">
       <h2 className="text-sm font-medium text-neutral-100">Rod Extrusion</h2>
+      <button
+        type="button"
+        onClick={onSpiralPreset}
+        className="rounded bg-neutral-800 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-700"
+      >
+        Try a spiral cane
+      </button>
       {CONTROLS.map((control) => (
         <label
           key={control.key}
@@ -50,11 +57,15 @@ export function ExtrusionControls({ extrusion, onChange }) {
           Sideways
         </button>
       </div>
-      <p className="text-xs text-neutral-500">
+      <p className="text-sm text-neutral-400">
         Twist spirals the whole bundle around its center as it's pulled
-        (the zanfirico technique). Taper narrows it toward the far end.
-        Sideways flips the pulled rod 90° to run across the view instead
-        of away from it.
+        (the zanfirico technique). It only shows up on shapes placed
+        off-center — a single shape sitting dead-center in the pattern has
+        nothing off-axis to spiral, so twisting it looks like nothing
+        happened. "Try a spiral cane" sets up a real example: a base color
+        with one thin accent thread off to the side. Taper narrows the rod
+        toward the far end. Sideways flips the pulled rod 90° to run
+        across the view instead of away from it.
       </p>
     </div>
   )

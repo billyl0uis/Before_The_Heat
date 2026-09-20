@@ -1,3 +1,5 @@
+import { SHAPE_TYPES } from '../engine/murrini/shapes'
+
 // Reference notes on the real glassblowing techniques each digital shape
 // stands in for. Most shape ids map straight to one technique key; polygon
 // is the exception — resolveTechniqueKey() below picks between marvering
@@ -68,7 +70,7 @@ export const MURRINI_TECHNIQUES = {
   bundle: {
     title: 'Bundling Canes',
     summary:
-      "Once more than one shape is on the canvas, this is no longer a single cane — it's a bundle. Each shape placed represents an already-pulled cane (simple, cased, faceted, or chevron) gathered alongside the others and fused into one new composite rod. This is how real complex murrini cross-sections — flower canes, mosaic canes — are actually built: many separate canes stacked together and redrawn as one, not a single pull.",
+      "When multiple shapes sit apart from each other — not nested inside one another — each one represents an already-pulled cane (simple, cased, faceted, or chevron) gathered alongside the others and fused into one new composite rod. This is how real complex murrini cross-sections — flower canes, mosaic canes — are actually built: separate canes packed side by side and redrawn as one, not a single pull. (A smaller shape placed inside a larger one is a different technique — see Casing.)",
     steps: [
       'Pull each individual cane first, as its own technique — simple, cased, faceted, or chevron.',
       'Cut the finished canes to matching lengths and pack them together in a bundle, often around a central cane or side by side.',
@@ -82,21 +84,123 @@ export const MURRINI_TECHNIQUES = {
 // about a hexagon; more facets than that is realistically mold territory.
 const MAX_HAND_MARVERED_SIDES = 6
 
-// Reflects what's actually been built so far, not just whichever tool is
-// selected in the toolbar: two or more placed shapes are no longer a
-// single cane, they're canes bundled together (see MURRINI_TECHNIQUES.bundle)
-// — a real, distinct technique from any one shape alone. Only when there's
-// at most one shape on the canvas does the currently-selected tool (which
-// previews what would be made if it were placed) still apply.
-export function resolveTechniqueKey(elements, fallbackShape, fallbackParams = {}) {
-  if (elements.length > 1) return 'bundle'
+// How far a shape's outline reaches from its own local (0,0) — used to
+// tell "nested inside another shape" from "sitting apart from it" without
+// hardcoding each shape type's own radius/width/height param names.
+function computeElementReach(element) {
+  const definition = SHAPE_TYPES[element.shape]
+  if (!definition) return 0
+  const { shape: points } = definition.createShape(element.params).extractPoints(16)
+  let maxDist = 0
+  for (const point of points) {
+    const dist = Math.sqrt(point.x * point.x + point.y * point.y)
+    if (dist > maxDist) maxDist = dist
+  }
+  return maxDist
+}
 
-  const shape = elements.length === 1 ? elements[0].shape : fallbackShape
-  const params = elements.length === 1 ? elements[0].params : fallbackParams
+// True when every shape is centered on (roughly) the same point — a
+// smaller color nested inside a larger one, i.e. casing — as opposed to
+// shapes placed apart from each other, i.e. separate canes bundled
+// together. Tolerance scales with the largest shape's own size so it
+// still reads as "centered" at any zoom/scale, not just a fixed pixel
+// radius.
+function areElementsConcentric(elements) {
+  const avgX = elements.reduce((sum, el) => sum + el.x, 0) / elements.length
+  const avgY = elements.reduce((sum, el) => sum + el.y, 0) / elements.length
+  const maxReach = Math.max(...elements.map(computeElementReach))
+  const tolerance = Math.max(4, maxReach * 0.2)
 
+  return elements.every((el) => {
+    const dx = el.x - avgX
+    const dy = el.y - avgY
+    return Math.sqrt(dx * dx + dy * dy) <= tolerance
+  })
+}
+
+// What a single shape, on its own, actually becomes — the base case both
+// resolveTechniqueKey and the per-cluster build plan below reduce to.
+function resolveSingleShapeTechniqueKey(shape, params = {}) {
   if (shape === 'square') return 'marver'
   if (shape === 'polygon') {
     return (params.sides ?? 4) <= MAX_HAND_MARVERED_SIDES ? 'marver' : 'opticMold'
   }
   return shape
+}
+
+// Reflects what's actually been built so far, not just whichever tool is
+// selected in the toolbar. Two or more placed shapes could be either of
+// two different real techniques depending on their actual geometry: all
+// centered on the same point (one color inside another) is casing — the
+// same technique as the ring shape — not bundling; only shapes genuinely
+// placed apart from each other are canes bundled side by side. Only when
+// there's at most one shape on the canvas does the currently-selected
+// tool (which previews what would be made if it were placed) still apply.
+export function resolveTechniqueKey(elements, fallbackShape, fallbackParams = {}) {
+  if (elements.length > 1) {
+    return areElementsConcentric(elements) ? 'ring' : 'bundle'
+  }
+
+  const shape = elements.length === 1 ? elements[0].shape : fallbackShape
+  const params = elements.length === 1 ? elements[0].params : fallbackParams
+  return resolveSingleShapeTechniqueKey(shape, params)
+}
+
+// Groups elements into the individual canes they'd actually be pulled as:
+// shapes centered on (roughly) the same point merge into one cluster (one
+// cased/layered cane), everything else stays its own cluster (a separate
+// cane, to be bundled with the rest later). Union-find over pairwise
+// "concentric" checks, same tolerance rule as areElementsConcentric.
+function clusterElements(elements) {
+  const reach = elements.map(computeElementReach)
+  const parent = elements.map((_, i) => i)
+  const find = (i) => {
+    while (parent[i] !== i) i = parent[i]
+    return i
+  }
+  const union = (i, j) => {
+    const ri = find(i)
+    const rj = find(j)
+    if (ri !== rj) parent[ri] = rj
+  }
+
+  for (let i = 0; i < elements.length; i++) {
+    for (let j = i + 1; j < elements.length; j++) {
+      const tolerance = Math.max(4, Math.max(reach[i], reach[j]) * 0.2)
+      const dx = elements[i].x - elements[j].x
+      const dy = elements[i].y - elements[j].y
+      if (Math.sqrt(dx * dx + dy * dy) <= tolerance) union(i, j)
+    }
+  }
+
+  const clusters = new Map()
+  elements.forEach((element, i) => {
+    const root = find(i)
+    if (!clusters.has(root)) clusters.set(root, [])
+    clusters.get(root).push(element)
+  })
+  return [...clusters.values()]
+}
+
+// The actual build order for what's currently on the canvas: one step per
+// individual cane (a lone shape, or a casing/layered cluster of nested
+// shapes), then — only if there's more than one cane — a final bundling
+// step tying them together. This is the same geometry analysis
+// resolveTechniqueKey uses, just carried through every cluster instead of
+// collapsing straight to one overall label, so it stays exactly as
+// accurate: it's reading the real layout back, not guessing at intent.
+export function computeBuildPlan(elements) {
+  if (elements.length === 0) return []
+
+  const clusters = clusterElements(elements)
+  const steps = clusters.map((cluster) => ({
+    techniqueKey:
+      cluster.length > 1 ? 'ring' : resolveSingleShapeTechniqueKey(cluster[0].shape, cluster[0].params),
+    caneCount: cluster.length,
+  }))
+
+  if (clusters.length > 1) {
+    steps.push({ techniqueKey: 'bundle', caneCount: elements.length })
+  }
+  return steps
 }

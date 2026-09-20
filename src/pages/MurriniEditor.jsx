@@ -1,4 +1,5 @@
 import { lazy, Suspense, useMemo, useState } from 'react'
+import { BuildPlan } from '../components/murrini/BuildPlan'
 import { ColorantPicker } from '../components/murrini/ColorantPicker'
 import { CompatibilityCheck } from '../components/murrini/CompatibilityCheck'
 import { ExtrusionControls } from '../components/murrini/ExtrusionControls'
@@ -8,6 +9,7 @@ import { ShapeToolbar } from '../components/murrini/ShapeToolbar'
 import { TechniqueReference } from '../components/murrini/TechniqueReference'
 import { GLASS_COLOR_INDEX } from '../content/glassColorIndex'
 import { checkColorCompatibility } from '../engine/murrini/colorCompatibility'
+import { DEFAULT_EXTRUSION } from '../engine/murrini/extrude'
 import { SHAPE_TYPES } from '../engine/murrini/shapes'
 
 // Lazy so OrbitControls (and its ~370KB chunk, shared with the Vessel tab)
@@ -85,6 +87,31 @@ export function MurriniEditor({ design }) {
     })
   }
 
+  // A spiral cane (filigrana/reticello) is a real, specific setup: a base
+  // color with one thin accent thread off-center, then the whole bundle
+  // twisted as it's pulled — the twist rotates that off-center thread into
+  // a visible helix along the rod's length. Twisting a shape sitting dead
+  // center (like a single plain circle) is invisible, since there's
+  // nothing off-axis to spiral — that's the gap this preset closes: it
+  // sets up geometry the twist can actually show.
+  const handleSpiralPreset = () => {
+    clearElements()
+    const base = GLASS_COLOR_INDEX.find((entry) => entry.id === 'cobalt-blue')
+    const accent = GLASS_COLOR_INDEX.find((entry) => entry.id === 'opal-white')
+    addElement('circle', 0, 0, {
+      color: base.swatch,
+      colorantId: base.id,
+      params: { radius: 20 },
+    })
+    addElement('circle', 15, 0, {
+      color: accent.swatch,
+      colorantId: accent.id,
+      params: { radius: 3 },
+    })
+    setExtrusion({ ...DEFAULT_EXTRUSION, length: 220, twistDegrees: 360 })
+    setViewMode('rod')
+  }
+
   return (
     <div className="flex flex-col items-center gap-6 p-8">
       <div className="text-center">
@@ -127,7 +154,7 @@ export function MurriniEditor({ design }) {
           ) : (
             <Suspense
               fallback={
-                <div className="flex h-[420px] w-[360px] items-center justify-center rounded-lg border border-neutral-800 text-sm text-neutral-500">
+                <div className="flex h-[420px] w-[360px] items-center justify-center rounded-lg border border-neutral-800 text-sm text-neutral-400">
                   Loading 3D preview…
                 </div>
               }
@@ -149,7 +176,11 @@ export function MurriniEditor({ design }) {
             canRedo={canRedo}
           />
           <PatternControls pattern={pattern} onChange={setPattern} />
-          <ExtrusionControls extrusion={extrusion} onChange={setExtrusion} />
+          <ExtrusionControls
+            extrusion={extrusion}
+            onChange={setExtrusion}
+            onSpiralPreset={handleSpiralPreset}
+          />
         </div>
         <div className="flex flex-col gap-6">
           <ColorantPicker
@@ -162,6 +193,7 @@ export function MurriniEditor({ design }) {
           />
           <CompatibilityCheck warnings={compatibilityWarnings} />
           <TechniqueReference elements={elements} shape={selectedShape} params={params} />
+          <BuildPlan elements={elements} />
         </div>
       </div>
     </div>

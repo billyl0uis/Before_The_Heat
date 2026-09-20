@@ -1,11 +1,27 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js'
 import { WebGLUnavailable } from '../WebGLUnavailable'
 
 const GLASS_COLOR = '#d97706'
 const BASE_RADIUS = 60
-const ICOSPHERE_DETAIL = 4
+const ICOSPHERE_DETAIL = 5
+
+// IcosahedronGeometry (like other Polyhedron-based geometries) builds a
+// non-indexed buffer — every triangle owns its own unique corner vertices,
+// even where they sit at the same position as a neighboring triangle's
+// corner. computeVertexNormals() only averages normals across *shared*
+// vertices, so on a non-indexed geometry it has nothing to average and
+// every triangle stays flat-shaded regardless of subdivision level —
+// that's the faceted/pixelated look. mergeVertices collapses coincident
+// corners into shared, indexed vertices first, so normals actually blend
+// across triangle seams and the surface reads as smooth.
+function createSculptGeometry() {
+  const geometry = mergeVertices(new THREE.IcosahedronGeometry(BASE_RADIUS, ICOSPHERE_DETAIL))
+  geometry.computeVertexNormals()
+  return geometry
+}
 
 // A real 3D sculpting tool: push/pull vertices of a subdivided blob along
 // their own normals wherever the cursor drags, with smooth falloff. Not
@@ -71,7 +87,7 @@ export const SculptCanvas = forwardRef(function SculptCanvas(
       const position = mesh.geometry.attributes.position
       pastRef.current.push(position.array.slice())
       futureRef.current = []
-      const fresh = new THREE.IcosahedronGeometry(BASE_RADIUS, ICOSPHERE_DETAIL)
+      const fresh = createSculptGeometry()
       position.array.set(fresh.attributes.position.array)
       position.needsUpdate = true
       mesh.geometry.computeVertexNormals()
@@ -116,7 +132,7 @@ export const SculptCanvas = forwardRef(function SculptCanvas(
       opacity: 0.9,
       side: THREE.DoubleSide,
     })
-    const geometry = new THREE.IcosahedronGeometry(BASE_RADIUS, ICOSPHERE_DETAIL)
+    const geometry = createSculptGeometry()
     const mesh = new THREE.Mesh(geometry, material)
     scene.add(mesh)
     meshRef.current = mesh

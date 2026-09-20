@@ -20,8 +20,11 @@ export function useVesselPattern() {
   )
 
   const addPlacement = useCallback(
-    (u, v, stampCanvas) => {
-      applyPlacements([...placements, { id: crypto.randomUUID(), u, v, stampCanvas }])
+    (u, v, stampCanvas, sizeFraction) => {
+      applyPlacements([
+        ...placements,
+        { id: crypto.randomUUID(), u, v, stampCanvas, sizeFraction },
+      ])
     },
     [placements, applyPlacements],
   )

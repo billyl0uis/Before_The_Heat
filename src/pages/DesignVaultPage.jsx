@@ -198,14 +198,14 @@ export function DesignVaultPage({ design, onLoadDesign }) {
           </form>
 
           {error && (
-            <p className="rounded border border-red-900/50 bg-red-950/30 p-2 text-xs text-red-300">
+            <p className="rounded border border-red-900/50 bg-red-950/30 p-2 text-sm text-red-300">
               {error}
             </p>
           )}
 
           <div className="flex flex-col gap-2">
             {savedDesigns.length === 0 ? (
-              <p className="text-sm text-neutral-500">No saved designs yet.</p>
+              <p className="text-sm text-neutral-400">No saved designs yet.</p>
             ) : (
               savedDesigns.map((saved) => (
                 <SavedDesignRow

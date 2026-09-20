@@ -11,11 +11,11 @@ export function TechniqueReference({ elements, shape, params }) {
       <h2 className="text-sm font-medium text-neutral-100">How it's really made</h2>
       <TechniqueDiagram techniqueKey={techniqueKey} params={params} />
       <p className="text-sm font-medium text-neutral-200">{technique.title}</p>
-      <p className="text-xs text-neutral-400">{technique.summary}</p>
-      <ol className="flex flex-col gap-1 text-xs text-neutral-400">
+      <p className="text-sm text-neutral-300">{technique.summary}</p>
+      <ol className="flex flex-col gap-1 text-sm text-neutral-300">
         {technique.steps.map((step, index) => (
           <li key={step} className="flex gap-2">
-            <span className="text-neutral-600">{index + 1}.</span>
+            <span className="text-neutral-400">{index + 1}.</span>
             <span>{step}</span>
           </li>
         ))}

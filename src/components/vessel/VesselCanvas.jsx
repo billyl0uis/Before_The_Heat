@@ -7,7 +7,6 @@ import { WebGLUnavailable } from '../WebGLUnavailable'
 
 const GLASS_COLOR = '#d97706'
 const TEXTURE_SIZE = 512
-const STAMP_FRACTION = 0.16
 
 export function VesselCanvas({
   params,
@@ -180,7 +179,7 @@ export function VesselCanvas({
     }
 
     const ctx = canvas.getContext('2d')
-    repaintVesselTexture(ctx, TEXTURE_SIZE, GLASS_COLOR, placements, STAMP_FRACTION)
+    repaintVesselTexture(ctx, TEXTURE_SIZE, GLASS_COLOR, placements)
     texture.needsUpdate = true
     mesh.material = texturedMaterialRef.current
   }, [manualMode, placements, webglFailed])
