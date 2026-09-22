@@ -100,10 +100,21 @@ export const MURRINI_TECHNIQUES = {
       'Use it by trailing it onto hot glass, or bundle it with other canes before pulling further.',
     ],
   },
+  embeddedThread: {
+    title: 'Embedded Thread',
+    summary:
+      "A thin thread trailed into a gather at one spot, then covered back over — an accent color sitting inside the glass at one point, not sheeting all the way around it the way a full casing does. On its own it's just an inclusion; twist the bundle while pulling (the Rod Extrusion twist) and that off-center thread spirals into a visible helix — the zanfirico/filigrana technique.",
+    steps: [
+      'Gather the base color first.',
+      'Trail a thin thread of the accent color onto one spot on the gather and marver it in so it fuses with the surface.',
+      'Reheat and gather a thin layer of the base color back over it, re-covering the thread.',
+      'Pull into a rod — twisting as you pull spirals the embedded thread into a helix (zanfirico); pulling straight keeps it as one visible seam along the length instead.',
+    ],
+  },
   bundle: {
     title: 'Bundling Canes',
     summary:
-      "When multiple shapes sit apart from each other — not nested inside one another — each one represents an already-pulled cane (simple, cased, faceted, or chevron) gathered alongside the others and fused into one new composite rod. This is how real complex murrini cross-sections — flower canes, mosaic canes — are actually built: separate canes packed side by side and redrawn as one, not a single pull. (A smaller shape placed inside a larger one is a different technique — see Casing.)",
+      "When multiple shapes sit apart from each other — not nested inside one another — each one represents an already-pulled cane (simple, cased, faceted, or chevron) gathered alongside the others and fused into one new composite rod. This is how real complex murrini cross-sections — flower canes, mosaic canes — are actually built: separate canes packed side by side and redrawn as one, not a single pull. (A smaller shape nested inside a larger one is a different technique — see Casing or Embedded Thread.)",
     steps: [
       'Pull each individual cane first, as its own technique — simple, cased, faceted, or chevron.',
       'Cut the finished canes to matching lengths and pack them together in a bundle, often around a central cane or side by side.',
@@ -132,23 +143,37 @@ function computeElementReach(element) {
   return maxDist
 }
 
-// True when every shape is centered on (roughly) the same point — a
-// smaller color nested inside a larger one, i.e. casing — as opposed to
-// shapes placed apart from each other, i.e. separate canes bundled
-// together. Tolerance scales with the largest shape's own size so it
-// still reads as "centered" at any zoom/scale, not just a fixed pixel
-// radius.
-function areElementsConcentric(elements) {
-  const avgX = elements.reduce((sum, el) => sum + el.x, 0) / elements.length
-  const avgY = elements.reduce((sum, el) => sum + el.y, 0) / elements.length
-  const maxReach = Math.max(...elements.map(computeElementReach))
-  const tolerance = Math.max(4, maxReach * 0.2)
+// True when b's bounding circle fits entirely inside a's — the correct
+// general test for "nested inside," which is broader than "centered on
+// the same point." A cased color doesn't have to be dead-center: an
+// off-center thread embedded in a gather (the setup a zanfirico twist
+// needs) is still one color nested inside another, not two separate
+// canes bundled side by side. Concentric placement is just the special
+// case of this where the offset happens to be zero. Tolerance scales
+// with the bigger shape's own size so it still reads as "nested" at any
+// zoom/scale, not just a fixed pixel radius.
+function isNested(a, reachA, b, reachB) {
+  const bigger = Math.max(reachA, reachB)
+  const smaller = Math.min(reachA, reachB)
+  const tolerance = Math.max(4, bigger * 0.15)
+  const dx = a.x - b.x
+  const dy = a.y - b.y
+  const dist = Math.sqrt(dx * dx + dy * dy)
+  return dist + smaller <= bigger + tolerance
+}
 
-  return elements.every((el) => {
-    const dx = el.x - avgX
-    const dy = el.y - avgY
-    return Math.sqrt(dx * dx + dy * dy) <= tolerance
-  })
+// True when every shape in the set nests inside the single largest one —
+// the whole group reads as one cased/layered cane, not separate canes
+// bundled together.
+function allElementsNested(elements) {
+  const reach = elements.map(computeElementReach)
+  let outerIndex = 0
+  for (let i = 1; i < elements.length; i++) {
+    if (reach[i] > reach[outerIndex]) outerIndex = i
+  }
+  return elements.every(
+    (el, i) => i === outerIndex || isNested(elements[outerIndex], reach[outerIndex], el, reach[i]),
+  )
 }
 
 // What a single shape, on its own, actually becomes — the base case both
@@ -176,6 +201,28 @@ function resolveCompoundTechniqueKey(group) {
   return null
 }
 
+// For a group that's already confirmed nested (allElementsNested), tells
+// a full casing apart from an off-center embedded thread: casing coats
+// the whole core, so the inner shape sits dead-center on the outer one;
+// anything meaningfully off that center is a localized inclusion instead
+// — the setup a zanfirico twist needs, not a coating.
+function classifyNestedGroup(elements) {
+  const reach = elements.map(computeElementReach)
+  let outerIndex = 0
+  for (let i = 1; i < elements.length; i++) {
+    if (reach[i] > reach[outerIndex]) outerIndex = i
+  }
+  const outer = elements[outerIndex]
+  const concentricTolerance = Math.max(4, reach[outerIndex] * 0.15)
+  const allConcentric = elements.every((el, i) => {
+    if (i === outerIndex) return true
+    const dx = el.x - outer.x
+    const dy = el.y - outer.y
+    return Math.sqrt(dx * dx + dy * dy) <= concentricTolerance
+  })
+  return allConcentric ? 'ring' : 'embeddedThread'
+}
+
 // Reflects what's actually been built so far, not just whichever tool is
 // selected in the toolbar. Two or more placed shapes could be either of
 // two different real techniques depending on their actual geometry: all
@@ -186,8 +233,8 @@ function resolveCompoundTechniqueKey(group) {
 // tool (which previews what would be made if it were placed) still apply.
 export function resolveTechniqueKey(elements, fallbackShape, fallbackParams = {}) {
   if (elements.length > 1) {
-    if (!areElementsConcentric(elements)) return 'bundle'
-    return resolveCompoundTechniqueKey(elements) ?? 'ring'
+    if (!allElementsNested(elements)) return 'bundle'
+    return resolveCompoundTechniqueKey(elements) ?? classifyNestedGroup(elements)
   }
 
   const shape = elements.length === 1 ? elements[0].shape : fallbackShape
@@ -196,10 +243,11 @@ export function resolveTechniqueKey(elements, fallbackShape, fallbackParams = {}
 }
 
 // Groups elements into the individual canes they'd actually be pulled as:
-// shapes centered on (roughly) the same point merge into one cluster (one
-// cased/layered cane), everything else stays its own cluster (a separate
-// cane, to be bundled with the rest later). Union-find over pairwise
-// "concentric" checks, same tolerance rule as areElementsConcentric.
+// shapes that nest inside each other (one color inside another, however
+// it's offset) merge into one cluster (one cased/layered cane), everything
+// else stays its own cluster (a separate cane, to be bundled with the rest
+// later). Union-find over pairwise nesting checks, same rule as
+// allElementsNested.
 function clusterElements(elements) {
   const reach = elements.map(computeElementReach)
   const parent = elements.map((_, i) => i)
@@ -215,10 +263,7 @@ function clusterElements(elements) {
 
   for (let i = 0; i < elements.length; i++) {
     for (let j = i + 1; j < elements.length; j++) {
-      const tolerance = Math.max(4, Math.max(reach[i], reach[j]) * 0.2)
-      const dx = elements[i].x - elements[j].x
-      const dy = elements[i].y - elements[j].y
-      if (Math.sqrt(dx * dx + dy * dy) <= tolerance) union(i, j)
+      if (isNested(elements[i], reach[i], elements[j], reach[j])) union(i, j)
     }
   }
 
@@ -245,7 +290,7 @@ export function computeBuildPlan(elements) {
   const steps = clusters.map((cluster) => ({
     techniqueKey:
       cluster.length > 1
-        ? (resolveCompoundTechniqueKey(cluster) ?? 'ring')
+        ? (resolveCompoundTechniqueKey(cluster) ?? classifyNestedGroup(cluster))
         : resolveSingleShapeTechniqueKey(cluster[0].shape, cluster[0].params),
     caneCount: cluster.length,
   }))

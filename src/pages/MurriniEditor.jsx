@@ -131,13 +131,23 @@ export function MurriniEditor({ design }) {
     })
   }
 
-  // A spiral cane (filigrana/reticello) is a real, specific setup: a base
-  // color with one thin accent thread off-center, then the whole bundle
-  // twisted as it's pulled — the twist rotates that off-center thread into
-  // a visible helix along the rod's length. Twisting a shape sitting dead
-  // center (like a single plain circle) is invisible, since there's
+  // A zanfirico/filigrana cane is a real, specific setup: one or more
+  // thin threads embedded in a casing, off-center, then the whole bundle
+  // twisted as it's pulled — the twist rotates that off-center thread
+  // into a visible helix along the rod's length. Twisting a shape sitting
+  // dead center (like a single plain circle) is invisible, since there's
   // nothing off-axis to spiral — that's the gap this preset closes: it
   // sets up geometry the twist can actually show.
+  //
+  // The thread has to sit genuinely embedded inside the casing (not just
+  // touching its outside surface) to match how it's really made — a
+  // trailed thread sinks into and fuses with the hot gather it's laid
+  // onto, it doesn't balance on the surface at a single point of contact.
+  // For that embedded thread to still be visible in an opaque render, the
+  // casing needs actual transparency, not just a "transparent" label —
+  // cobalt blue is a real transparent-family colorant for exactly this
+  // reason (see content/glassColorIndex.js), so a lowered opacity here
+  // reflects that rather than being an arbitrary rendering trick.
   const handleSpiralPreset = () => {
     clearElements()
     const base = GLASS_COLOR_INDEX.find((entry) => entry.id === 'cobalt-blue')
@@ -147,18 +157,10 @@ export function MurriniEditor({ design }) {
     addElement('circle', 0, 0, {
       color: base.swatch,
       colorantId: base.id,
+      opacity: 0.55,
       params: { radius: baseRadius },
     })
-    // Placed just outside the base cane's radius, tangent to its surface
-    // — like a thread trailed onto the outside of a gather before it's
-    // pulled. This also sidesteps a real rendering limit: the Rod Preview
-    // extrudes each element as its own separate solid mesh (only the
-    // built-in Ring shape is one true shape-with-a-hole), so two opaque
-    // meshes with overlapping volume just occlude/z-fight each other
-    // instead of compositing into a visible layered surface. Placing the
-    // accent so the two volumes only touch, never overlap, avoids that
-    // entirely.
-    addElement('circle', baseRadius + accentRadius, 0, {
+    addElement('circle', baseRadius - accentRadius * 2, 0, {
       color: accent.swatch,
       colorantId: accent.id,
       params: { radius: accentRadius },

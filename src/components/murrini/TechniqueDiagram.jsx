@@ -113,6 +113,14 @@ const DIAGRAMS = {
       />
     </>
   ),
+  // A thin accent thread embedded off-center in a base gather — distinct
+  // from 'ring' (a full casing dead-center on the core).
+  embeddedThread: () => (
+    <>
+      <circle cx="80" cy="80" r="52" fill={BASE} />
+      <circle cx="112" cy="80" r="9" fill={CASING} />
+    </>
+  ),
   // The jellyroll coil (same two interleaved strokes as 'spiral' above)
   // with the casing layer it's typically pulled under afterward.
   jellyroll: () => (
