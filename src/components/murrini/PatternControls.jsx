@@ -4,8 +4,8 @@ export function PatternControls({ pattern, onChange }) {
   const setField = (key, value) => onChange({ ...pattern, [key]: value })
 
   return (
-    <div className="flex w-64 flex-col gap-4 rounded-lg border border-neutral-800 bg-neutral-900 p-4">
-      <h2 className="text-sm font-medium text-neutral-100">Pattern Repeat</h2>
+    <div className="flex w-64 flex-col gap-4 rounded-lg border border-neutral-800 bg-neutral-900 p-5">
+      <h2 className="text-base font-medium text-neutral-100">Pattern Repeat</h2>
 
       <div className="flex gap-2">
         {REPEAT_TYPES.map((type) => (
@@ -13,7 +13,7 @@ export function PatternControls({ pattern, onChange }) {
             key={type}
             type="button"
             onClick={() => setField('repeatType', type)}
-            className={`rounded px-3 py-1.5 text-sm capitalize transition-colors ${
+            className={`rounded px-3 py-1.5 text-base capitalize transition-colors ${
               type === pattern.repeatType
                 ? 'bg-purple-500 text-white'
                 : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
@@ -26,7 +26,7 @@ export function PatternControls({ pattern, onChange }) {
 
       {pattern.repeatType === 'grid' && (
         <>
-          <label className="flex flex-col gap-1 text-sm text-neutral-300">
+          <label className="flex flex-col gap-1 text-base text-neutral-300">
             Rows: {pattern.rows}
             <input
               type="range"
@@ -37,7 +37,7 @@ export function PatternControls({ pattern, onChange }) {
               onChange={(event) => setField('rows', Number(event.target.value))}
             />
           </label>
-          <label className="flex flex-col gap-1 text-sm text-neutral-300">
+          <label className="flex flex-col gap-1 text-base text-neutral-300">
             Columns: {pattern.columns}
             <input
               type="range"
@@ -48,7 +48,7 @@ export function PatternControls({ pattern, onChange }) {
               onChange={(event) => setField('columns', Number(event.target.value))}
             />
           </label>
-          <label className="flex flex-col gap-1 text-sm text-neutral-300">
+          <label className="flex flex-col gap-1 text-base text-neutral-300">
             Spacing X: {pattern.spacingX}
             <input
               type="range"
@@ -59,7 +59,7 @@ export function PatternControls({ pattern, onChange }) {
               onChange={(event) => setField('spacingX', Number(event.target.value))}
             />
           </label>
-          <label className="flex flex-col gap-1 text-sm text-neutral-300">
+          <label className="flex flex-col gap-1 text-base text-neutral-300">
             Spacing Y: {pattern.spacingY}
             <input
               type="range"
@@ -74,7 +74,7 @@ export function PatternControls({ pattern, onChange }) {
       )}
 
       {pattern.repeatType === 'radial' && (
-        <label className="flex flex-col gap-1 text-sm text-neutral-300">
+        <label className="flex flex-col gap-1 text-base text-neutral-300">
           Repeats: {pattern.radialCount}
           <input
             type="range"

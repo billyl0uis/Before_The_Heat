@@ -9,8 +9,9 @@ import { ShapeToolbar } from '../components/murrini/ShapeToolbar'
 import { TechniqueReference } from '../components/murrini/TechniqueReference'
 import { GLASS_COLOR_INDEX } from '../content/glassColorIndex'
 import { checkColorCompatibility } from '../engine/murrini/colorCompatibility'
+import { buildCompoundElements, COMPOUND_SHAPE_TYPES } from '../engine/murrini/compoundShapes'
 import { DEFAULT_EXTRUSION } from '../engine/murrini/extrude'
-import { SHAPE_TYPES, SPIRAL_PITCH_FACTOR } from '../engine/murrini/shapes'
+import { SHAPE_TYPES } from '../engine/murrini/shapes'
 import { useResponsiveCanvasSize } from '../hooks/useResponsiveCanvasSize'
 
 // Lazy so OrbitControls (and its ~370KB chunk, shared with the Vessel tab)
@@ -32,6 +33,7 @@ export function MurriniEditor({ design }) {
     extrusion,
     setExtrusion,
     addElement,
+    addElements,
     clearElements,
     undo,
     redo,
@@ -58,7 +60,8 @@ export function MurriniEditor({ design }) {
   // sliders never show a param the current shape type doesn't have.
   const handleSelectShape = (shapeKey) => {
     setSelectedShape(shapeKey)
-    setParams(SHAPE_TYPES[shapeKey].defaultParams)
+    const definition = SHAPE_TYPES[shapeKey] ?? COMPOUND_SHAPE_TYPES[shapeKey]
+    setParams(definition.defaultParams)
   }
 
   const handleParamChange = (key, value) => {
@@ -83,7 +86,39 @@ export function MurriniEditor({ design }) {
     [selectedShape, params, previewColor],
   )
 
+  // What a compound tool (Jellyroll, Pinwheel) actually places: your
+  // currently selected color as the primary, plus an automatically
+  // chosen contrasting accent and casing color — real glass colorants,
+  // picked to never collide with whatever you've already chosen. Because
+  // this reads the current selection instead of hardcoding fixed colors,
+  // the same tool produces a different result each time you change color
+  // before clicking, instead of always the same fixed demo.
+  const resolveColorTrio = () => {
+    const primary = useCustomColor
+      ? { swatch: customColor, id: null }
+      : (() => {
+          const colorant = GLASS_COLOR_INDEX.find((entry) => entry.id === colorantId)
+          return { swatch: colorant.swatch, id: colorant.id }
+        })()
+    const accentId = primary.id === 'opal-white' ? 'black-glass' : 'opal-white'
+    const accent = GLASS_COLOR_INDEX.find((entry) => entry.id === accentId)
+    const casingId =
+      ['cadmium-selenium-red', 'black-glass', 'cobalt-blue'].find(
+        (id) => id !== primary.id && id !== accentId,
+      ) ?? 'cobalt-blue'
+    const casing = GLASS_COLOR_INDEX.find((entry) => entry.id === casingId)
+    return {
+      primary,
+      accent: { swatch: accent.swatch, id: accent.id },
+      casing: { swatch: casing.swatch, id: casing.id },
+    }
+  }
+
   const handlePlace = (x, y) => {
+    if (COMPOUND_SHAPE_TYPES[selectedShape]) {
+      addElements(buildCompoundElements(selectedShape, x, y, params, resolveColorTrio()))
+      return
+    }
     if (useCustomColor) {
       addElement(selectedShape, x, y, { color: customColor, params, colorantId: null })
       return
@@ -132,51 +167,13 @@ export function MurriniEditor({ design }) {
     setViewMode('rod')
   }
 
-  // The jellyroll: a genuinely different "spiral" from the twist preset
-  // above. This one is built into the cross-section itself — an
-  // alternating-color strip wound into a coil — visible when you slice
-  // straight across, not a helix along the rod's length. Two Spiral
-  // shapes offset by half the band thickness interleave into alternating
-  // stripes (yellow/white), cased in red, matching how a real jellyroll
-  // cane is actually built and cased.
-  const handleJellyrollPreset = () => {
-    clearElements()
-    const yellow = GLASS_COLOR_INDEX.find((entry) => entry.id === 'cadmium-yellow')
-    const white = GLASS_COLOR_INDEX.find((entry) => entry.id === 'opal-white')
-    const red = GLASS_COLOR_INDEX.find((entry) => entry.id === 'cadmium-selenium-red')
-    const spiralParams = { innerRadius: 2, turns: 2.5, thickness: 4 }
-
-    // The flat canvas layers later-placed elements visually on top of
-    // earlier ones — the casing has to go down first, or it'd be added
-    // last and cover the spiral entirely instead of framing it.
-    addElement('circle', 0, 0, {
-      color: red.swatch,
-      colorantId: red.id,
-      params: { radius: 22 },
-    })
-    addElement('spiral', 0, 0, {
-      color: yellow.swatch,
-      colorantId: yellow.id,
-      params: { ...spiralParams, radialOffset: 0 },
-    })
-    addElement('spiral', 0, 0, {
-      color: white.swatch,
-      colorantId: white.id,
-      params: {
-        ...spiralParams,
-        radialOffset: (spiralParams.thickness * SPIRAL_PITCH_FACTOR) / 2,
-      },
-    })
-    setViewMode('flat')
-  }
-
   return (
     <div className="flex flex-col items-center gap-6 p-4 sm:p-8">
       <div className="text-center">
         <h1 className="text-2xl font-medium text-neutral-100">
           Murrini Pattern Engine
         </h1>
-        <p className="text-sm text-neutral-400">
+        <p className="text-base leading-relaxed text-neutral-400">
           Pick a shape and a real glass color, then click the canvas to place
           it. Turn on a repeat to see it as a full cane cross-section.
         </p>
@@ -192,7 +189,7 @@ export function MurriniEditor({ design }) {
                 key={mode.key}
                 type="button"
                 onClick={() => setViewMode(mode.key)}
-                className={`rounded px-3 py-1.5 text-sm transition-colors ${
+                className={`rounded px-3 py-1.5 text-base transition-colors ${
                   mode.key === viewMode
                     ? 'bg-purple-500 text-white'
                     : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
@@ -218,7 +215,7 @@ export function MurriniEditor({ design }) {
               <Suspense
                 fallback={
                   <div
-                    className="flex items-center justify-center rounded-lg border border-neutral-800 text-sm text-neutral-400"
+                    className="flex items-center justify-center rounded-lg border border-neutral-800 text-base text-neutral-400"
                     style={{ width: rodSize.width, height: rodSize.height }}
                   >
                     Loading 3D preview…
@@ -246,7 +243,6 @@ export function MurriniEditor({ design }) {
             onRedo={redo}
             canUndo={canUndo}
             canRedo={canRedo}
-            onJellyrollPreset={handleJellyrollPreset}
           />
           <PatternControls pattern={pattern} onChange={setPattern} />
           <ExtrusionControls

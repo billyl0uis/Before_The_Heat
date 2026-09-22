@@ -34,6 +34,12 @@ export function MurriniCanvas({
   const cameraRef = useRef(null)
   const previewMeshRef = useRef(null)
   const onPlaceRef = useRef(onPlace)
+  // Read by the pointermove handler below, which is set up once (its
+  // effect doesn't depend on `preview`) — a compound tool (jellyroll,
+  // pinwheel) isn't a single SHAPE_TYPES entry, so there's no one ghost
+  // shape to show; keeping this in sync lets pointermove know to keep the
+  // preview hidden instead of showing whatever shape was last selected.
+  const previewShapeKeyRef = useRef(preview.shape)
   const [webglFailed, setWebglFailed] = useState(false)
 
   // onPlace is a new closure every render (it captures the current tool
@@ -43,6 +49,10 @@ export function MurriniCanvas({
   useEffect(() => {
     onPlaceRef.current = onPlace
   }, [onPlace])
+
+  useEffect(() => {
+    previewShapeKeyRef.current = preview.shape
+  }, [preview.shape])
 
   useEffect(() => {
     const mount = mountRef.current

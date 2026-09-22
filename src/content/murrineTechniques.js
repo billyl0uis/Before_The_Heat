@@ -68,6 +68,28 @@ export const MURRINI_TECHNIQUES = {
       'Pick the fused coil up on a punty, case it in another color if wanted, and pull it into a rod — the spiral holds all the way down the length.',
     ],
   },
+  jellyroll: {
+    title: 'Jellyroll, Cased',
+    summary:
+      'A jellyroll coil built first (see Jellyroll (Rolled Spiral) for that step), then cased in another color afterward — real jellyroll canes are typically encased the same way any other cane core would be, which protects the coiled pattern through the rest of the working process.',
+    steps: [
+      "Lay out a thin strip of glass with alternating color bands and wind it into a tight coil from the center outward — the app's two interleaved spirals stand in for the alternating stripe.",
+      'Heat the coiled strip until it fuses into a single solid disc with a spiral cross-section.',
+      'Gather the casing color over the fused coil, coating it evenly.',
+      'Reheat and pull the cased gather into a rod — the casing stays as an outer layer the whole length, with the spiral visible in the core.',
+    ],
+  },
+  pinwheel: {
+    title: 'Pinwheel Cane',
+    summary:
+      'Alternating colored wedges — like slices of a pie — bundled side by side around a center point, then twisted as the whole bundle is drawn out. The straight wedge seams curve into a swirling pinwheel pattern as the twist works its way through the pull; more twist (or a longer pull) curves the blades further.',
+    steps: [
+      'Pull each wedge-shaped color as its own simple cane, cut to matching lengths.',
+      'Pack the wedges together around a center point, alternating colors, so the cross-section looks like a pie sliced into equal wedges.',
+      "Fuse the bundle with a reheat, then twist it as it's drawn out from both ends — the twist is what curves the straight wedge seams into the pinwheel's characteristic swirl.",
+      'Slice the cooled rod crosswise — every slice shows the same curved pinwheel pattern.',
+    ],
+  },
   line: {
     title: 'Stringer',
     summary:
@@ -136,7 +158,22 @@ function resolveSingleShapeTechniqueKey(shape, params = {}) {
   if (shape === 'polygon') {
     return (params.sides ?? 4) <= MAX_HAND_MARVERED_SIDES ? 'marver' : 'opticMold'
   }
+  // A lone leftover pinwheel blade (e.g. after undoing away its siblings)
+  // still reads as the pinwheel technique, not a shape of its own.
+  if (shape === 'pinwheelBlade') return 'pinwheel'
   return shape
+}
+
+// True when every element in a concentric group was placed together by
+// the same compound tool (jellyroll, pinwheel) — read from the tag each
+// element carries, not guessed from shape/color, so a coincidentally
+// concentric mix of hand-placed shapes still reads as plain casing.
+function resolveCompoundTechniqueKey(group) {
+  const compoundType = group[0]?.compoundType
+  if (compoundType && group.every((el) => el.compoundType === compoundType)) {
+    return compoundType
+  }
+  return null
 }
 
 // Reflects what's actually been built so far, not just whichever tool is
@@ -149,7 +186,8 @@ function resolveSingleShapeTechniqueKey(shape, params = {}) {
 // tool (which previews what would be made if it were placed) still apply.
 export function resolveTechniqueKey(elements, fallbackShape, fallbackParams = {}) {
   if (elements.length > 1) {
-    return areElementsConcentric(elements) ? 'ring' : 'bundle'
+    if (!areElementsConcentric(elements)) return 'bundle'
+    return resolveCompoundTechniqueKey(elements) ?? 'ring'
   }
 
   const shape = elements.length === 1 ? elements[0].shape : fallbackShape
@@ -206,7 +244,9 @@ export function computeBuildPlan(elements) {
   const clusters = clusterElements(elements)
   const steps = clusters.map((cluster) => ({
     techniqueKey:
-      cluster.length > 1 ? 'ring' : resolveSingleShapeTechniqueKey(cluster[0].shape, cluster[0].params),
+      cluster.length > 1
+        ? (resolveCompoundTechniqueKey(cluster) ?? 'ring')
+        : resolveSingleShapeTechniqueKey(cluster[0].shape, cluster[0].params),
     caneCount: cluster.length,
   }))
 

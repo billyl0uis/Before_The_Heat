@@ -6,11 +6,11 @@ const SEVERITY_STYLES = {
 
 export function CompatibilityCheck({ warnings }) {
   return (
-    <div className="flex w-64 flex-col gap-3 rounded-lg border border-neutral-800 bg-neutral-900 p-4">
-      <h2 className="text-sm font-medium text-neutral-100">Compatibility Check</h2>
+    <div className="flex w-64 flex-col gap-4 rounded-lg border border-neutral-800 bg-neutral-900 p-5">
+      <h2 className="text-base font-medium text-neutral-100">Compatibility Check</h2>
 
       {warnings.length === 0 ? (
-        <p className="text-sm text-neutral-400">
+        <p className="text-base leading-relaxed text-neutral-400">
           No flags for the real colorants placed so far. This only checks
           what's documented in the Color Index — not a full safety or
           chemistry review.
@@ -20,10 +20,10 @@ export function CompatibilityCheck({ warnings }) {
           {warnings.map((warning) => (
             <li
               key={warning.id}
-              className={`rounded border p-2 text-sm leading-relaxed ${SEVERITY_STYLES[warning.severity]}`}
+              className={`rounded border p-2 text-base leading-relaxed ${SEVERITY_STYLES[warning.severity]}`}
             >
               <p className="font-medium">{warning.title}</p>
-              <p className="mt-1 opacity-90">{warning.body}</p>
+              <p className="mt-1 leading-relaxed opacity-90">{warning.body}</p>
             </li>
           ))}
         </ul>

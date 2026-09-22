@@ -43,7 +43,7 @@ const TABS = [
 
 function TabLoadingFallback() {
   return (
-    <div className="flex justify-center p-16 text-sm text-neutral-400">Loading…</div>
+    <div className="flex justify-center p-16 text-base text-neutral-400">Loading…</div>
   )
 }
 
@@ -73,7 +73,7 @@ function App() {
             key={tab.key}
             type="button"
             onClick={() => setActiveTab(tab.key)}
-            className={`rounded px-3 py-1.5 text-sm transition-colors sm:px-4 ${
+            className={`rounded px-3 py-1.5 text-base transition-colors sm:px-4 ${
               tab.key === activeTab
                 ? 'bg-purple-500 text-white'
                 : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'

@@ -62,6 +62,39 @@ export function useMurriniDesign(canvas = DEFAULT_CANVAS) {
     [applyElements],
   )
 
+  // Places several elements as one undoable step — for a compound tool
+  // (jellyroll, pinwheel) that places multiple real shapes at once, so
+  // undo removes the whole thing in one action instead of one shape at a
+  // time.
+  const addElements = useCallback(
+    (specs) => {
+      if (specs.length === 0) return
+      applyElements((prev) => {
+        const next = [...prev]
+        for (const spec of specs) {
+          const definition = SHAPE_TYPES[spec.shape]
+          if (!definition) continue
+          next.push({
+            id: crypto.randomUUID(),
+            shape: spec.shape,
+            x: spec.x,
+            y: spec.y,
+            rotation: spec.rotation ?? 0,
+            color: spec.color ?? '#c084fc',
+            colorantId: spec.colorantId ?? null,
+            opacity: spec.opacity ?? 1,
+            layer: next.length,
+            params: { ...definition.defaultParams, ...spec.params },
+            compoundId: spec.compoundId,
+            compoundType: spec.compoundType,
+          })
+        }
+        return next
+      })
+    },
+    [applyElements],
+  )
+
   const removeElement = useCallback(
     (id) => applyElements((prev) => prev.filter((element) => element.id !== id)),
     [applyElements],
@@ -110,6 +143,7 @@ export function useMurriniDesign(canvas = DEFAULT_CANVAS) {
     extrusion,
     setExtrusion,
     addElement,
+    addElements,
     removeElement,
     clearElements,
     loadDesign,

@@ -23,6 +23,26 @@ function spiralPathPoints(cx, cy, innerRadius, turns, pitch) {
   return points.join(' ')
 }
 
+// One pinwheel blade's outline (leading edge out, trailing edge back) —
+// same curved-wedge math as engine/murrini/shapes.js's pinwheelBladeShape,
+// just producing an SVG point list instead of a THREE.Shape.
+function pinwheelBladePoints(cx, cy, innerRadius, outerRadius, angleWidthDeg, curveDeg, startAngleDeg) {
+  const segments = 10
+  const half = (angleWidthDeg * Math.PI) / 360
+  const curve = (curveDeg * Math.PI) / 180
+  const start = (startAngleDeg * Math.PI) / 180
+  const leading = []
+  const trailing = []
+  for (let i = 0; i <= segments; i++) {
+    const t = i / segments
+    const r = innerRadius + (outerRadius - innerRadius) * t
+    const sweep = start + curve * t
+    leading.push(`${cx + Math.cos(sweep - half) * r},${cy + Math.sin(sweep - half) * r}`)
+    trailing.push(`${cx + Math.cos(sweep + half) * r},${cy + Math.sin(sweep + half) * r}`)
+  }
+  return [...leading, ...trailing.reverse()].join(' ')
+}
+
 function starPoints(cx, cy, outerRadius, innerRadius, points) {
   const coords = []
   const step = 180 / points
@@ -93,6 +113,45 @@ const DIAGRAMS = {
       />
     </>
   ),
+  // The jellyroll coil (same two interleaved strokes as 'spiral' above)
+  // with the casing layer it's typically pulled under afterward.
+  jellyroll: () => (
+    <>
+      <circle cx="80" cy="80" r="58" fill={CASING} />
+      <polyline
+        points={spiralPathPoints(80, 80, 4, 3.2, 6)}
+        fill="none"
+        stroke={ACCENT}
+        strokeWidth="5"
+        strokeLinecap="round"
+      />
+      <polyline
+        points={spiralPathPoints(80, 80, 7.5, 3.2, 6)}
+        fill="none"
+        stroke={BASE}
+        strokeWidth="5"
+        strokeLinecap="round"
+      />
+    </>
+  ),
+  // Alternating curved wedges fanning out from center — the swirl a
+  // twisted bundle of straight-sided wedge canes develops as it's pulled.
+  pinwheel: (params) => {
+    const blades = params.blades ?? 6
+    const angleWidth = 360 / blades
+    const curve = angleWidth * 0.7
+    return (
+      <>
+        {Array.from({ length: blades }, (_, i) => (
+          <polygon
+            key={i}
+            points={pinwheelBladePoints(80, 80, 6, 58, angleWidth, curve, i * angleWidth - 90)}
+            fill={i % 2 === 0 ? BASE : CASING}
+          />
+        ))}
+      </>
+    )
+  },
   // A handful of already-pulled canes packed together before the whole
   // bundle is fused and redrawn as one composite rod.
   bundle: () => (

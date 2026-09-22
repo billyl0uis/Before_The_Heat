@@ -37,6 +37,7 @@ export const SculptCanvas = forwardRef(function SculptCanvas(
   const meshRef = useRef(null)
   const isSculptingRef = useRef(false)
   const strokeStartRef = useRef(null)
+  const lastStampRef = useRef(null)
   const pastRef = useRef([])
   const futureRef = useRef([])
   const brushRef = useRef({ radius: brushRadius, strength: brushStrength, mode: brushMode })
@@ -158,6 +159,7 @@ export const SculptCanvas = forwardRef(function SculptCanvas(
 
     const applyBrush = (worldHit) => {
       const position = mesh.geometry.attributes.position
+      const normal = mesh.geometry.attributes.normal
       const { radius, strength, mode } = brushRef.current
       const sign = mode === 'pull' ? -1 : 1
       const localHit = mesh.worldToLocal(worldHit.clone())
@@ -174,13 +176,41 @@ export const SculptCanvas = forwardRef(function SculptCanvas(
 
         const falloff = 1 - dist / radius
         const smooth = falloff * falloff * (3 - 2 * falloff)
-        const len = Math.sqrt(vx * vx + vy * vy + vz * vz) || 1
         const amount = sign * strength * smooth
-        position.setXYZ(i, vx + (vx / len) * amount, vy + (vy / len) * amount, vz + (vz / len) * amount)
+        // Push along the vertex's own surface normal, not the vector from
+        // the mesh's center — those two only agree on an untouched
+        // sphere. Once a stroke has pushed part of the surface out of
+        // round, "from center" and "along the surface" increasingly
+        // diverge, and pushing further along the wrong one is what was
+        // actually producing spikes rather than smooth bumps as sculpting
+        // continued.
+        position.setXYZ(
+          i,
+          vx + normal.getX(i) * amount,
+          vy + normal.getY(i) * amount,
+          vz + normal.getZ(i) * amount,
+        )
       }
       position.needsUpdate = true
       mesh.geometry.computeVertexNormals()
       mesh.geometry.computeBoundingSphere()
+    }
+
+    // Browsers fire pointermove far faster than a real hand moves the
+    // mouse — a slow drag can deliver a dozen events without the cursor
+    // meaningfully moving. Applying a full-strength dab on every one of
+    // those stacks displacement on nearly the same spot, which is what
+    // was actually making the brush look spiky rather than a smooth bump:
+    // not the falloff math, but the same push reapplied many times in a
+    // row before the stroke had gone anywhere. Spacing dabs by distance
+    // (the same approach every paint/sculpt tool uses) fixes it — a stamp
+    // only lands once the cursor has moved a fraction of the brush radius
+    // since the last one, regardless of how many events fired in between.
+    const MIN_STAMP_SPACING_FACTOR = 0.35
+    const shouldStamp = (worldHit) => {
+      const last = lastStampRef.current
+      if (!last) return true
+      return worldHit.distanceTo(last) >= brushRef.current.radius * MIN_STAMP_SPACING_FACTOR
     }
 
     const getHitPoint = (event) => {
@@ -200,12 +230,15 @@ export const SculptCanvas = forwardRef(function SculptCanvas(
       controls.enabled = false
       strokeStartRef.current = mesh.geometry.attributes.position.array.slice()
       applyBrush(hitPoint)
+      lastStampRef.current = hitPoint.clone()
     }
     const handlePointerMove = (event) => {
       if (!isSculptingRef.current) return
       const hitPoint = getHitPoint(event)
       if (!hitPoint) return
+      if (!shouldStamp(hitPoint)) return
       applyBrush(hitPoint)
+      lastStampRef.current = hitPoint.clone()
     }
     const endStroke = () => {
       if (!isSculptingRef.current) return
@@ -214,6 +247,7 @@ export const SculptCanvas = forwardRef(function SculptCanvas(
       pastRef.current.push(strokeStartRef.current)
       futureRef.current = []
       strokeStartRef.current = null
+      lastStampRef.current = null
       reportHistory()
     }
 

@@ -15,7 +15,7 @@ export function FreeSculptPage() {
     <div className="flex flex-col items-center gap-6 p-4 sm:p-8">
       <div className="max-w-xl text-center">
         <h1 className="text-2xl font-medium text-neutral-100">Free Sculpt</h1>
-        <p className="text-sm text-neutral-400">
+        <p className="text-base leading-relaxed text-neutral-400">
           Not a vessel — just a gather of hot glass, worked by hand. Push
           and pull the surface freely; unlike the Vessel Morphograph, this
           doesn't have to stay radially symmetric.

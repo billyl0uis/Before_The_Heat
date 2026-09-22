@@ -58,6 +58,37 @@ function spiralRibbonShape(innerRadius, turns, thickness, radialOffset) {
   return shape
 }
 
+// A single pinwheel blade: a wedge whose two long edges curve as radius
+// grows, the same way a bundle of straight-sided wedge canes (packed
+// around a center point like slices of a pie) curves into "blades" when
+// twisted during the pull — that's the real pinwheel cane technique. Only
+// one edge geometry is needed since both leading/trailing edges sweep by
+// the same amount at each radius, `angleWidth` apart; approximating the
+// outer/inner rims with a straight chord between the two edges (rather
+// than a true arc) is a fine simplification for a blade this thin.
+function pinwheelBladeShape(innerRadius, outerRadius, angleWidth, curveDegrees) {
+  const segments = 20
+  const curve = (curveDegrees * Math.PI) / 180
+  const halfWidth = (angleWidth * Math.PI) / 180 / 2
+  const leading = []
+  const trailing = []
+
+  for (let i = 0; i <= segments; i++) {
+    const t = i / segments
+    const r = innerRadius + (outerRadius - innerRadius) * t
+    const sweep = curve * t
+    leading.push([Math.cos(sweep - halfWidth) * r, Math.sin(sweep - halfWidth) * r])
+    trailing.push([Math.cos(sweep + halfWidth) * r, Math.sin(sweep + halfWidth) * r])
+  }
+
+  const shape = new THREE.Shape()
+  shape.moveTo(leading[0][0], leading[0][1])
+  for (const [x, y] of leading.slice(1)) shape.lineTo(x, y)
+  for (const [x, y] of trailing.slice().reverse()) shape.lineTo(x, y)
+  shape.closePath()
+  return shape
+}
+
 function starShape(outerRadius, innerRadius, points) {
   const shape = new THREE.Shape()
   const step = Math.PI / points
@@ -155,6 +186,23 @@ export const SHAPE_TYPES = {
     ],
     createShape: ({ innerRadius, turns, thickness, radialOffset }) =>
       spiralRibbonShape(innerRadius, turns, thickness, radialOffset),
+  },
+  // Not in SHAPE_ORDER — placed at rotation 0 only, it's not useful as a
+  // standalone hand-placed tool (there's no per-click rotation control).
+  // It exists so the Pinwheel compound tool (compoundShapes.js) can place
+  // several of these at once, each pre-rotated to fan out around a center
+  // point.
+  pinwheelBlade: {
+    label: 'Pinwheel Blade',
+    defaultParams: { innerRadius: 2, outerRadius: 24, angleWidth: 60, curveDegrees: 40 },
+    controls: [
+      { key: 'innerRadius', label: 'Inner radius', min: 0, max: 20, step: 1 },
+      { key: 'outerRadius', label: 'Outer radius', min: 6, max: 100, step: 1 },
+      { key: 'angleWidth', label: 'Blade width', min: 10, max: 90, step: 1 },
+      { key: 'curveDegrees', label: 'Curve', min: 0, max: 90, step: 1 },
+    ],
+    createShape: ({ innerRadius, outerRadius, angleWidth, curveDegrees }) =>
+      pinwheelBladeShape(innerRadius, outerRadius, angleWidth, curveDegrees),
   },
   line: {
     label: 'Line',

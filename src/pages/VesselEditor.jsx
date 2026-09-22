@@ -46,7 +46,7 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
         <h1 className="text-2xl font-medium text-neutral-100">
           Vessel Morphograph
         </h1>
-        <p className="text-sm text-neutral-400">
+        <p className="text-base leading-relaxed text-neutral-400">
           Sculpt a vessel silhouette from math — taper, bulge, a spherical
           blend, and a surface ripple. Drag to orbit, scroll to zoom.
         </p>
@@ -65,7 +65,7 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
               height={canvasSize.height}
             />
           </div>
-          <label className="flex items-center gap-2 text-sm text-neutral-300">
+          <label className="flex items-center gap-2 text-base text-neutral-300">
             <input
               type="checkbox"
               checked={manualMode}
@@ -75,7 +75,7 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
             Place murrini by hand (click the vessel to press a slice on)
           </label>
           {manualMode && (
-            <label className="flex flex-col gap-1 text-sm text-neutral-300">
+            <label className="flex flex-col gap-1 text-base text-neutral-300">
               Slice size: {Math.round(stampFraction * 100)}%
               <input
                 type="range"
@@ -93,7 +93,7 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
                 type="button"
                 onClick={undo}
                 disabled={!canUndo}
-                className="flex-1 rounded bg-neutral-800 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex-1 rounded bg-neutral-800 px-3 py-1.5 text-base text-neutral-300 hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Undo
               </button>
@@ -101,7 +101,7 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
                 type="button"
                 onClick={redo}
                 disabled={!canRedo}
-                className="flex-1 rounded bg-neutral-800 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex-1 rounded bg-neutral-800 px-3 py-1.5 text-base text-neutral-300 hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Redo
               </button>
@@ -109,14 +109,14 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
                 type="button"
                 onClick={clearPlacements}
                 disabled={placements.length === 0}
-                className="flex-1 rounded bg-neutral-800 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex-1 rounded bg-neutral-800 px-3 py-1.5 text-base text-neutral-300 hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Clear
               </button>
             </div>
           )}
           {!hasPattern && (
-            <p className="max-w-[360px] text-sm text-neutral-400">
+            <p className="max-w-[360px] text-base leading-relaxed text-neutral-400">
               Draw something in the Murrini Pattern tab first, then come
               back here and click the vessel to press slices of it onto the
               wall by hand — like pressing real murrini onto a hot gather.

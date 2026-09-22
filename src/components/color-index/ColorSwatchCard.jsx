@@ -5,7 +5,7 @@ function Badge({ children, tone = 'neutral' }) {
     red: 'bg-red-900/40 text-red-300',
   }
   return (
-    <span className={`rounded px-2 py-0.5 text-xs ${tones[tone]}`}>
+    <span className={`rounded px-2 py-0.5 text-sm ${tones[tone]}`}>
       {children}
     </span>
   )
@@ -20,8 +20,8 @@ export function ColorSwatchCard({ color }) {
           style={{ backgroundColor: color.swatch }}
         />
         <div>
-          <p className="text-sm font-medium text-neutral-100">{color.name}</p>
-          <p className="text-sm text-neutral-400">{color.colorant}</p>
+          <p className="text-base font-medium text-neutral-100">{color.name}</p>
+          <p className="text-base leading-relaxed text-neutral-400">{color.colorant}</p>
         </div>
       </div>
 
@@ -34,10 +34,10 @@ export function ColorSwatchCard({ color }) {
         )}
       </div>
 
-      <p className="text-sm leading-relaxed text-neutral-300">{color.notes}</p>
+      <p className="text-base leading-relaxed text-neutral-300">{color.notes}</p>
 
       {color.caution && (
-        <p className="rounded border border-red-900/50 bg-red-950/30 p-2 text-sm leading-relaxed text-red-300">
+        <p className="rounded border border-red-900/50 bg-red-950/30 p-2 text-base leading-relaxed text-red-300">
           {color.caution}
         </p>
       )}
