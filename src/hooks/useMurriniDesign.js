@@ -100,6 +100,39 @@ export function useMurriniDesign(canvas = DEFAULT_CANVAS) {
     [applyElements],
   )
 
+  // Resizing an already-placed shape is a continuous drag (a range
+  // input fires onChange on every tick, not just at the end), and
+  // pushing every tick through applyElements would both spam the undo
+  // stack with dozens of near-identical steps for one drag and force a
+  // full re-render/WebGL rebuild each tick. beginElementEdit snapshots
+  // the pre-drag state; updateElementLive mutates elements directly
+  // (skipping undo bookkeeping) for a responsive live preview while
+  // dragging; commitElementEdit folds the whole gesture into one undo
+  // step once the drag ends, the same way a single addElement call does.
+  const dragSnapshotRef = useRef(null)
+
+  const beginElementEdit = useCallback(() => {
+    dragSnapshotRef.current = elementsRef.current
+  }, [])
+
+  const updateElementLive = useCallback((id, updates) => {
+    const next = elementsRef.current.map((element) =>
+      element.id === id
+        ? { ...element, ...updates, params: { ...element.params, ...updates.params } }
+        : element,
+    )
+    elementsRef.current = next
+    setElements(next)
+  }, [])
+
+  const commitElementEdit = useCallback(() => {
+    const before = dragSnapshotRef.current
+    dragSnapshotRef.current = null
+    if (!before || before === elementsRef.current) return
+    setPast((p) => [...p, before])
+    setFuture([])
+  }, [])
+
   const clearElements = useCallback(() => {
     if (elementsRef.current.length > 0) applyElements([])
   }, [applyElements])
@@ -145,6 +178,9 @@ export function useMurriniDesign(canvas = DEFAULT_CANVAS) {
     addElement,
     addElements,
     removeElement,
+    beginElementEdit,
+    updateElementLive,
+    commitElementEdit,
     clearElements,
     loadDesign,
     undo,

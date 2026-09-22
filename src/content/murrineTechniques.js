@@ -1,4 +1,4 @@
-import { SHAPE_TYPES } from '../engine/murrini/shapes'
+import { computeShapeReach } from '../engine/murrini/shapes'
 
 // Reference notes on the real glassblowing techniques each digital shape
 // stands in for. Most shape ids map straight to one technique key; polygon
@@ -128,19 +128,8 @@ export const MURRINI_TECHNIQUES = {
 // about a hexagon; more facets than that is realistically mold territory.
 const MAX_HAND_MARVERED_SIDES = 6
 
-// How far a shape's outline reaches from its own local (0,0) — used to
-// tell "nested inside another shape" from "sitting apart from it" without
-// hardcoding each shape type's own radius/width/height param names.
 function computeElementReach(element) {
-  const definition = SHAPE_TYPES[element.shape]
-  if (!definition) return 0
-  const { shape: points } = definition.createShape(element.params).extractPoints(16)
-  let maxDist = 0
-  for (const point of points) {
-    const dist = Math.sqrt(point.x * point.x + point.y * point.y)
-    if (dist > maxDist) maxDist = dist
-  }
-  return maxDist
+  return computeShapeReach(element.shape, element.params)
 }
 
 // True when b's bounding circle fits entirely inside a's — the correct

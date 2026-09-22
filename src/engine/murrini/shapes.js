@@ -226,3 +226,20 @@ export const SHAPE_TYPES = {
 }
 
 export const SHAPE_ORDER = ['circle', 'square', 'ring', 'polygon', 'star', 'spiral', 'line']
+
+// How far a shape's outline reaches from its own local (0,0) — used for
+// approximate click-to-select hit-testing, and for telling "nested inside
+// another shape" from "sitting apart from it" (see
+// content/murrineTechniques.js), without hardcoding each shape type's own
+// radius/width/height param names.
+export function computeShapeReach(shapeKey, params) {
+  const definition = SHAPE_TYPES[shapeKey]
+  if (!definition) return 0
+  const { shape: points } = definition.createShape(params).extractPoints(16)
+  let maxDist = 0
+  for (const point of points) {
+    const dist = Math.sqrt(point.x * point.x + point.y * point.y)
+    if (dist > maxDist) maxDist = dist
+  }
+  return maxDist
+}

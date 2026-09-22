@@ -11,7 +11,7 @@ import { GLASS_COLOR_INDEX } from '../content/glassColorIndex'
 import { checkColorCompatibility } from '../engine/murrini/colorCompatibility'
 import { buildCompoundElements, COMPOUND_SHAPE_TYPES } from '../engine/murrini/compoundShapes'
 import { DEFAULT_EXTRUSION } from '../engine/murrini/extrude'
-import { SHAPE_TYPES } from '../engine/murrini/shapes'
+import { computeShapeReach, SHAPE_TYPES } from '../engine/murrini/shapes'
 import { useResponsiveCanvasSize } from '../hooks/useResponsiveCanvasSize'
 
 // Lazy so OrbitControls (and its ~370KB chunk, shared with the Vessel tab)
@@ -34,6 +34,10 @@ export function MurriniEditor({ design }) {
     setExtrusion,
     addElement,
     addElements,
+    removeElement,
+    beginElementEdit,
+    updateElementLive,
+    commitElementEdit,
     clearElements,
     undo,
     redo,
@@ -43,6 +47,15 @@ export function MurriniEditor({ design }) {
   const [viewMode, setViewMode] = useState('flat')
   const [selectedShape, setSelectedShape] = useState('circle')
   const [params, setParams] = useState(SHAPE_TYPES.circle.defaultParams)
+  const [selectMode, setSelectMode] = useState(false)
+  const [selectedElementId, setSelectedElementId] = useState(null)
+  const selectedElement = elements.find((element) => element.id === selectedElementId) ?? null
+  // Selecting/resizing an existing shape only makes sense against the
+  // single base cell you're actually editing — with a repeat on, the
+  // canvas shows tiled copies at positions that don't match the base
+  // cell's own coordinates, so hit-testing against it would pick the
+  // wrong thing (or nothing) at the point you actually clicked.
+  const canSelect = pattern.repeatType === 'none'
 
   // Both canvases cap at their normal desktop size but shrink to fit a
   // narrow screen instead of forcing horizontal scrolling.
@@ -58,10 +71,36 @@ export function MurriniEditor({ design }) {
 
   // Swap in that shape's own default params whenever the tool changes, so
   // sliders never show a param the current shape type doesn't have.
+  // Picking a placement tool is a clear signal you want to place
+  // something next, not keep editing whatever was selected — so it also
+  // exits Select mode.
   const handleSelectShape = (shapeKey) => {
+    setSelectMode(false)
+    setSelectedElementId(null)
     setSelectedShape(shapeKey)
     const definition = SHAPE_TYPES[shapeKey] ?? COMPOUND_SHAPE_TYPES[shapeKey]
     setParams(definition.defaultParams)
+  }
+
+  const handleToggleSelectMode = () => {
+    setSelectMode((prev) => !prev)
+    setSelectedElementId(null)
+  }
+
+  const handleClear = () => {
+    clearElements()
+    setSelectedElementId(null)
+  }
+
+  const handleEditParamChange = (key, value) => {
+    if (!selectedElementId) return
+    updateElementLive(selectedElementId, { params: { [key]: value } })
+  }
+
+  const handleDeleteSelected = () => {
+    if (!selectedElementId) return
+    removeElement(selectedElementId)
+    setSelectedElementId(null)
   }
 
   const handleParamChange = (key, value) => {
@@ -81,9 +120,13 @@ export function MurriniEditor({ design }) {
     return colorant?.swatch ?? customColor
   }, [useCustomColor, customColor, colorantId])
 
+  // No placement ghost while selecting — a click in Select mode edits an
+  // existing shape instead of placing a new one, so a preview of "the
+  // next shape to place" would be misleading. `null` isn't a real shape
+  // id, so MurriniCanvas's preview lookup naturally hides the mesh.
   const preview = useMemo(
-    () => ({ shape: selectedShape, params, color: previewColor }),
-    [selectedShape, params, previewColor],
+    () => ({ shape: selectMode ? null : selectedShape, params, color: previewColor }),
+    [selectMode, selectedShape, params, previewColor],
   )
 
   // What a compound tool (Jellyroll, Pinwheel) actually places: your
@@ -112,6 +155,29 @@ export function MurriniEditor({ design }) {
       accent: { swatch: accent.swatch, id: accent.id },
       casing: { swatch: casing.swatch, id: casing.id },
     }
+  }
+
+  // A circular bounding-box hit test (same reach measure used for the
+  // casing/nesting geometry checks) — good enough for click-to-select
+  // without needing an exact per-shape point-in-polygon test. Checked
+  // topmost element first, since later-placed elements render on top.
+  const hitTestElement = (x, y) => {
+    for (let i = elements.length - 1; i >= 0; i--) {
+      const element = elements[i]
+      const dx = x - element.x
+      const dy = y - element.y
+      const reach = computeShapeReach(element.shape, element.params)
+      if (Math.sqrt(dx * dx + dy * dy) <= reach) return element
+    }
+    return null
+  }
+
+  const handleCanvasClick = (x, y) => {
+    if (selectMode) {
+      setSelectedElementId(hitTestElement(x, y)?.id ?? null)
+      return
+    }
+    handlePlace(x, y)
   }
 
   const handlePlace = (x, y) => {
@@ -206,7 +272,7 @@ export function MurriniEditor({ design }) {
               <MurriniCanvas
                 canvas={canvas}
                 elements={repeatedElements}
-                onPlace={handlePlace}
+                onPlace={handleCanvasClick}
                 preview={preview}
                 displayWidth={flatSize.width}
                 displayHeight={flatSize.height}
@@ -240,11 +306,19 @@ export function MurriniEditor({ design }) {
             onSelectShape={handleSelectShape}
             params={params}
             onParamChange={handleParamChange}
-            onClear={clearElements}
+            onClear={handleClear}
             onUndo={undo}
             onRedo={redo}
             canUndo={canUndo}
             canRedo={canRedo}
+            selectMode={selectMode}
+            onToggleSelectMode={handleToggleSelectMode}
+            canSelect={canSelect}
+            selectedElement={selectedElement}
+            onEditParamChange={handleEditParamChange}
+            onBeginEdit={beginElementEdit}
+            onCommitEdit={commitElementEdit}
+            onDeleteSelected={handleDeleteSelected}
           />
           <PatternControls pattern={pattern} onChange={setPattern} />
           <ExtrusionControls
