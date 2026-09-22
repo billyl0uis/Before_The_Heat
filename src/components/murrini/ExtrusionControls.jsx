@@ -8,19 +8,19 @@ export function ExtrusionControls({ extrusion, onChange, onSpiralPreset }) {
   const setField = (key, value) => onChange({ ...extrusion, [key]: value })
 
   return (
-    <div className="flex w-64 flex-col gap-3 rounded-lg border border-neutral-800 bg-neutral-900 p-4">
-      <h2 className="text-sm font-medium text-neutral-100">Rod Extrusion</h2>
+    <div className="flex w-64 flex-col gap-4 rounded-lg border border-neutral-800 bg-neutral-900 p-5">
+      <h2 className="text-base font-medium text-neutral-100">Rod Extrusion</h2>
       <button
         type="button"
         onClick={onSpiralPreset}
-        className="rounded bg-neutral-800 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-700"
+        className="rounded bg-neutral-800 px-3 py-1.5 text-base text-neutral-300 hover:bg-neutral-700"
       >
-        Try a spiral cane
+        Try a twisted thread (zanfirico)
       </button>
       {CONTROLS.map((control) => (
         <label
           key={control.key}
-          className="flex flex-col gap-1 text-sm text-neutral-300"
+          className="flex flex-col gap-1 text-base text-neutral-300"
         >
           {control.label}: {extrusion[control.key]}
           <input
@@ -37,7 +37,7 @@ export function ExtrusionControls({ extrusion, onChange, onSpiralPreset }) {
         <button
           type="button"
           onClick={() => setField('sideways', false)}
-          className={`flex-1 rounded px-3 py-1.5 text-sm transition-colors ${
+          className={`flex-1 rounded px-3 py-1.5 text-base transition-colors ${
             !extrusion.sideways
               ? 'bg-purple-500 text-white'
               : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
@@ -48,7 +48,7 @@ export function ExtrusionControls({ extrusion, onChange, onSpiralPreset }) {
         <button
           type="button"
           onClick={() => setField('sideways', true)}
-          className={`flex-1 rounded px-3 py-1.5 text-sm transition-colors ${
+          className={`flex-1 rounded px-3 py-1.5 text-base transition-colors ${
             extrusion.sideways
               ? 'bg-purple-500 text-white'
               : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
@@ -57,15 +57,17 @@ export function ExtrusionControls({ extrusion, onChange, onSpiralPreset }) {
           Sideways
         </button>
       </div>
-      <p className="text-sm text-neutral-400">
+      <p className="text-base leading-relaxed text-neutral-400">
         Twist spirals the whole bundle around its center as it's pulled
-        (the zanfirico technique). It only shows up on shapes placed
+        (the zanfirico technique) — a helix along the rod's length, only
+        visible from the side. It only shows up on shapes placed
         off-center — a single shape sitting dead-center in the pattern has
         nothing off-axis to spiral, so twisting it looks like nothing
-        happened. "Try a spiral cane" sets up a real example: a base color
-        with one thin accent thread off to the side. Taper narrows the rod
-        toward the far end. Sideways flips the pulled rod 90° to run
-        across the view instead of away from it.
+        happened. This is different from the Spiral shape in the pattern
+        toolbar, which builds a jellyroll-style spiral into the
+        cross-section itself. Taper narrows the rod toward the far end.
+        Sideways flips the pulled rod 90° to run across the view instead
+        of away from it.
       </p>
     </div>
   )

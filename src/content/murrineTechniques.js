@@ -1,4 +1,4 @@
-import { SHAPE_TYPES } from '../engine/murrini/shapes'
+import { computeShapeReach } from '../engine/murrini/shapes'
 
 // Reference notes on the real glassblowing techniques each digital shape
 // stands in for. Most shape ids map straight to one technique key; polygon
@@ -57,6 +57,39 @@ export const MURRINI_TECHNIQUES = {
       'Attach a punty to each end and draw the layered bundle out from both sides at once.',
     ],
   },
+  spiral: {
+    title: 'Jellyroll (Rolled Spiral)',
+    summary:
+      "A genuinely different technique from twist/zanfirico (which spirals along a rod's length, visible from the side) — this spiral is built into the cross-section itself, visible when you slice straight across. A striped strip of alternating colors is wound into a coil from the center outward, like a jellyroll, so every slice shows the same nested spiral. Real jellyroll canes are typically cased in another color afterward, same as any other cane core.",
+    steps: [
+      'Lay out a thin strip of glass with alternating color bands (stringers, or a striped sheet).',
+      "Starting from one end, wind the strip into a tight coil, building it out from the center — the app's two interleaved spirals (offset by half a turn) stand in for the alternating stripe.",
+      'Heat the coiled strip until it fuses into a single solid disc with a spiral cross-section.',
+      'Pick the fused coil up on a punty, case it in another color if wanted, and pull it into a rod — the spiral holds all the way down the length.',
+    ],
+  },
+  jellyroll: {
+    title: 'Jellyroll, Cased',
+    summary:
+      'A jellyroll coil built first (see Jellyroll (Rolled Spiral) for that step), then cased in another color afterward — real jellyroll canes are typically encased the same way any other cane core would be, which protects the coiled pattern through the rest of the working process.',
+    steps: [
+      "Lay out a thin strip of glass with alternating color bands and wind it into a tight coil from the center outward — the app's two interleaved spirals stand in for the alternating stripe.",
+      'Heat the coiled strip until it fuses into a single solid disc with a spiral cross-section.',
+      'Gather the casing color over the fused coil, coating it evenly.',
+      'Reheat and pull the cased gather into a rod — the casing stays as an outer layer the whole length, with the spiral visible in the core.',
+    ],
+  },
+  pinwheel: {
+    title: 'Pinwheel Cane',
+    summary:
+      'Alternating colored wedges — like slices of a pie — bundled side by side around a center point, then twisted as the whole bundle is drawn out. The straight wedge seams curve into a swirling pinwheel pattern as the twist works its way through the pull; more twist (or a longer pull) curves the blades further.',
+    steps: [
+      'Pull each wedge-shaped color as its own simple cane, cut to matching lengths.',
+      'Pack the wedges together around a center point, alternating colors, so the cross-section looks like a pie sliced into equal wedges.',
+      "Fuse the bundle with a reheat, then twist it as it's drawn out from both ends — the twist is what curves the straight wedge seams into the pinwheel's characteristic swirl.",
+      'Slice the cooled rod crosswise — every slice shows the same curved pinwheel pattern.',
+    ],
+  },
   line: {
     title: 'Stringer',
     summary:
@@ -67,10 +100,21 @@ export const MURRINI_TECHNIQUES = {
       'Use it by trailing it onto hot glass, or bundle it with other canes before pulling further.',
     ],
   },
+  embeddedThread: {
+    title: 'Embedded Thread',
+    summary:
+      "A thin thread trailed into a gather at one spot, then covered back over — an accent color sitting inside the glass at one point, not sheeting all the way around it the way a full casing does. On its own it's just an inclusion; twist the bundle while pulling (the Rod Extrusion twist) and that off-center thread spirals into a visible helix — the zanfirico/filigrana technique.",
+    steps: [
+      'Gather the base color first.',
+      'Trail a thin thread of the accent color onto one spot on the gather and marver it in so it fuses with the surface.',
+      'Reheat and gather a thin layer of the base color back over it, re-covering the thread.',
+      'Pull into a rod — twisting as you pull spirals the embedded thread into a helix (zanfirico); pulling straight keeps it as one visible seam along the length instead.',
+    ],
+  },
   bundle: {
     title: 'Bundling Canes',
     summary:
-      "When multiple shapes sit apart from each other — not nested inside one another — each one represents an already-pulled cane (simple, cased, faceted, or chevron) gathered alongside the others and fused into one new composite rod. This is how real complex murrini cross-sections — flower canes, mosaic canes — are actually built: separate canes packed side by side and redrawn as one, not a single pull. (A smaller shape placed inside a larger one is a different technique — see Casing.)",
+      "When multiple shapes sit apart from each other — not nested inside one another — each one represents an already-pulled cane (simple, cased, faceted, or chevron) gathered alongside the others and fused into one new composite rod. This is how real complex murrini cross-sections — flower canes, mosaic canes — are actually built: separate canes packed side by side and redrawn as one, not a single pull. (A smaller shape nested inside a larger one is a different technique — see Casing or Embedded Thread.)",
     steps: [
       'Pull each individual cane first, as its own technique — simple, cased, faceted, or chevron.',
       'Cut the finished canes to matching lengths and pack them together in a bundle, often around a central cane or side by side.',
@@ -84,38 +128,41 @@ export const MURRINI_TECHNIQUES = {
 // about a hexagon; more facets than that is realistically mold territory.
 const MAX_HAND_MARVERED_SIDES = 6
 
-// How far a shape's outline reaches from its own local (0,0) — used to
-// tell "nested inside another shape" from "sitting apart from it" without
-// hardcoding each shape type's own radius/width/height param names.
 function computeElementReach(element) {
-  const definition = SHAPE_TYPES[element.shape]
-  if (!definition) return 0
-  const { shape: points } = definition.createShape(element.params).extractPoints(16)
-  let maxDist = 0
-  for (const point of points) {
-    const dist = Math.sqrt(point.x * point.x + point.y * point.y)
-    if (dist > maxDist) maxDist = dist
-  }
-  return maxDist
+  return computeShapeReach(element.shape, element.params)
 }
 
-// True when every shape is centered on (roughly) the same point — a
-// smaller color nested inside a larger one, i.e. casing — as opposed to
-// shapes placed apart from each other, i.e. separate canes bundled
-// together. Tolerance scales with the largest shape's own size so it
-// still reads as "centered" at any zoom/scale, not just a fixed pixel
-// radius.
-function areElementsConcentric(elements) {
-  const avgX = elements.reduce((sum, el) => sum + el.x, 0) / elements.length
-  const avgY = elements.reduce((sum, el) => sum + el.y, 0) / elements.length
-  const maxReach = Math.max(...elements.map(computeElementReach))
-  const tolerance = Math.max(4, maxReach * 0.2)
+// True when b's bounding circle fits entirely inside a's — the correct
+// general test for "nested inside," which is broader than "centered on
+// the same point." A cased color doesn't have to be dead-center: an
+// off-center thread embedded in a gather (the setup a zanfirico twist
+// needs) is still one color nested inside another, not two separate
+// canes bundled side by side. Concentric placement is just the special
+// case of this where the offset happens to be zero. Tolerance scales
+// with the bigger shape's own size so it still reads as "nested" at any
+// zoom/scale, not just a fixed pixel radius.
+function isNested(a, reachA, b, reachB) {
+  const bigger = Math.max(reachA, reachB)
+  const smaller = Math.min(reachA, reachB)
+  const tolerance = Math.max(4, bigger * 0.15)
+  const dx = a.x - b.x
+  const dy = a.y - b.y
+  const dist = Math.sqrt(dx * dx + dy * dy)
+  return dist + smaller <= bigger + tolerance
+}
 
-  return elements.every((el) => {
-    const dx = el.x - avgX
-    const dy = el.y - avgY
-    return Math.sqrt(dx * dx + dy * dy) <= tolerance
-  })
+// True when every shape in the set nests inside the single largest one —
+// the whole group reads as one cased/layered cane, not separate canes
+// bundled together.
+function allElementsNested(elements) {
+  const reach = elements.map(computeElementReach)
+  let outerIndex = 0
+  for (let i = 1; i < elements.length; i++) {
+    if (reach[i] > reach[outerIndex]) outerIndex = i
+  }
+  return elements.every(
+    (el, i) => i === outerIndex || isNested(elements[outerIndex], reach[outerIndex], el, reach[i]),
+  )
 }
 
 // What a single shape, on its own, actually becomes — the base case both
@@ -125,7 +172,44 @@ function resolveSingleShapeTechniqueKey(shape, params = {}) {
   if (shape === 'polygon') {
     return (params.sides ?? 4) <= MAX_HAND_MARVERED_SIDES ? 'marver' : 'opticMold'
   }
+  // A lone leftover pinwheel blade (e.g. after undoing away its siblings)
+  // still reads as the pinwheel technique, not a shape of its own.
+  if (shape === 'pinwheelBlade') return 'pinwheel'
   return shape
+}
+
+// True when every element in a concentric group was placed together by
+// the same compound tool (jellyroll, pinwheel) — read from the tag each
+// element carries, not guessed from shape/color, so a coincidentally
+// concentric mix of hand-placed shapes still reads as plain casing.
+function resolveCompoundTechniqueKey(group) {
+  const compoundType = group[0]?.compoundType
+  if (compoundType && group.every((el) => el.compoundType === compoundType)) {
+    return compoundType
+  }
+  return null
+}
+
+// For a group that's already confirmed nested (allElementsNested), tells
+// a full casing apart from an off-center embedded thread: casing coats
+// the whole core, so the inner shape sits dead-center on the outer one;
+// anything meaningfully off that center is a localized inclusion instead
+// — the setup a zanfirico twist needs, not a coating.
+function classifyNestedGroup(elements) {
+  const reach = elements.map(computeElementReach)
+  let outerIndex = 0
+  for (let i = 1; i < elements.length; i++) {
+    if (reach[i] > reach[outerIndex]) outerIndex = i
+  }
+  const outer = elements[outerIndex]
+  const concentricTolerance = Math.max(4, reach[outerIndex] * 0.15)
+  const allConcentric = elements.every((el, i) => {
+    if (i === outerIndex) return true
+    const dx = el.x - outer.x
+    const dy = el.y - outer.y
+    return Math.sqrt(dx * dx + dy * dy) <= concentricTolerance
+  })
+  return allConcentric ? 'ring' : 'embeddedThread'
 }
 
 // Reflects what's actually been built so far, not just whichever tool is
@@ -138,7 +222,8 @@ function resolveSingleShapeTechniqueKey(shape, params = {}) {
 // tool (which previews what would be made if it were placed) still apply.
 export function resolveTechniqueKey(elements, fallbackShape, fallbackParams = {}) {
   if (elements.length > 1) {
-    return areElementsConcentric(elements) ? 'ring' : 'bundle'
+    if (!allElementsNested(elements)) return 'bundle'
+    return resolveCompoundTechniqueKey(elements) ?? classifyNestedGroup(elements)
   }
 
   const shape = elements.length === 1 ? elements[0].shape : fallbackShape
@@ -147,10 +232,11 @@ export function resolveTechniqueKey(elements, fallbackShape, fallbackParams = {}
 }
 
 // Groups elements into the individual canes they'd actually be pulled as:
-// shapes centered on (roughly) the same point merge into one cluster (one
-// cased/layered cane), everything else stays its own cluster (a separate
-// cane, to be bundled with the rest later). Union-find over pairwise
-// "concentric" checks, same tolerance rule as areElementsConcentric.
+// shapes that nest inside each other (one color inside another, however
+// it's offset) merge into one cluster (one cased/layered cane), everything
+// else stays its own cluster (a separate cane, to be bundled with the rest
+// later). Union-find over pairwise nesting checks, same rule as
+// allElementsNested.
 function clusterElements(elements) {
   const reach = elements.map(computeElementReach)
   const parent = elements.map((_, i) => i)
@@ -166,10 +252,7 @@ function clusterElements(elements) {
 
   for (let i = 0; i < elements.length; i++) {
     for (let j = i + 1; j < elements.length; j++) {
-      const tolerance = Math.max(4, Math.max(reach[i], reach[j]) * 0.2)
-      const dx = elements[i].x - elements[j].x
-      const dy = elements[i].y - elements[j].y
-      if (Math.sqrt(dx * dx + dy * dy) <= tolerance) union(i, j)
+      if (isNested(elements[i], reach[i], elements[j], reach[j])) union(i, j)
     }
   }
 
@@ -195,7 +278,9 @@ export function computeBuildPlan(elements) {
   const clusters = clusterElements(elements)
   const steps = clusters.map((cluster) => ({
     techniqueKey:
-      cluster.length > 1 ? 'ring' : resolveSingleShapeTechniqueKey(cluster[0].shape, cluster[0].params),
+      cluster.length > 1
+        ? (resolveCompoundTechniqueKey(cluster) ?? classifyNestedGroup(cluster))
+        : resolveSingleShapeTechniqueKey(cluster[0].shape, cluster[0].params),
     caneCount: cluster.length,
   }))
 

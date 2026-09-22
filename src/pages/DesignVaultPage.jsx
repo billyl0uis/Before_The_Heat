@@ -26,15 +26,15 @@ function buildDesignPayload(design) {
 function NotConfiguredNotice() {
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-3 rounded-lg border border-neutral-800 bg-neutral-900 p-6">
-      <h2 className="text-sm font-medium text-neutral-100">
+      <h2 className="text-base font-medium text-neutral-100">
         Firebase isn't configured yet
       </h2>
-      <p className="text-sm text-neutral-400">
+      <p className="text-base leading-relaxed text-neutral-400">
         The Design Vault needs a real Firebase project (Firestore + Auth)
         to save and load designs. This app never crashes without one — it
         just skips initialization and shows this message instead.
       </p>
-      <ol className="flex list-decimal flex-col gap-1 pl-5 text-sm text-neutral-400">
+      <ol className="flex list-decimal flex-col gap-1 pl-5 text-base text-neutral-400">
         <li>
           Create a project at{' '}
           <a
@@ -97,14 +97,14 @@ function SavedDesignRow({ saved, onLoadDesign, onOverwrite, onRename, onDelete }
               setIsRenaming(false)
             }
           }}
-          className="flex-1 rounded border border-neutral-700 bg-neutral-950 px-2 py-1 text-sm text-neutral-100"
+          className="flex-1 rounded border border-neutral-700 bg-neutral-950 px-2 py-1 text-base text-neutral-100"
         />
       ) : (
         <button
           type="button"
           onClick={() => setIsRenaming(true)}
           title="Click to rename"
-          className="flex-1 truncate text-left text-sm text-neutral-200 hover:text-white"
+          className="flex-1 truncate text-left text-base text-neutral-200 hover:text-white"
         >
           {saved.name}
         </button>
@@ -114,7 +114,7 @@ function SavedDesignRow({ saved, onLoadDesign, onOverwrite, onRename, onDelete }
         <button
           type="button"
           onClick={() => onLoadDesign(saved)}
-          className="rounded bg-neutral-800 px-3 py-1 text-xs text-neutral-300 hover:bg-neutral-700"
+          className="rounded bg-neutral-800 px-3 py-1 text-sm text-neutral-300 hover:bg-neutral-700"
         >
           Load
         </button>
@@ -122,14 +122,14 @@ function SavedDesignRow({ saved, onLoadDesign, onOverwrite, onRename, onDelete }
           type="button"
           onClick={() => onOverwrite(saved.id)}
           title="Replace this saved design with what's currently in the editor"
-          className="rounded bg-neutral-800 px-3 py-1 text-xs text-neutral-300 hover:bg-neutral-700"
+          className="rounded bg-neutral-800 px-3 py-1 text-sm text-neutral-300 hover:bg-neutral-700"
         >
           Overwrite
         </button>
         <button
           type="button"
           onClick={() => onDelete(saved.id)}
-          className="rounded bg-neutral-800 px-3 py-1 text-xs text-red-300 hover:bg-red-950/50"
+          className="rounded bg-neutral-800 px-3 py-1 text-sm text-red-300 hover:bg-red-950/50"
         >
           Delete
         </button>
@@ -164,10 +164,10 @@ export function DesignVaultPage({ design, onLoadDesign }) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 p-8">
+    <div className="flex flex-col items-center gap-6 p-4 sm:p-8">
       <div className="max-w-xl text-center">
         <h1 className="text-2xl font-medium text-neutral-100">Design Vault</h1>
-        <p className="mt-1 text-sm text-neutral-400">
+        <p className="mt-1 text-base leading-relaxed text-neutral-400">
           Save the pattern you're working on and load it again later.
         </p>
       </div>
@@ -186,26 +186,26 @@ export function DesignVaultPage({ design, onLoadDesign }) {
               onChange={(event) => setDesignName(event.target.value)}
               placeholder="Name this design"
               disabled={!user}
-              className="flex-1 rounded border border-neutral-700 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-100 placeholder:text-neutral-600"
+              className="flex-1 rounded border border-neutral-700 bg-neutral-950 px-3 py-1.5 text-base text-neutral-100 placeholder:text-neutral-600"
             />
             <button
               type="submit"
               disabled={!user || !designName.trim() || status === 'saving'}
-              className="rounded bg-purple-500 px-4 py-1.5 text-sm text-white transition-colors hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded bg-purple-500 px-4 py-1.5 text-base text-white transition-colors hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {status === 'saving' ? 'Saving…' : 'Save current design'}
             </button>
           </form>
 
           {error && (
-            <p className="rounded border border-red-900/50 bg-red-950/30 p-2 text-sm text-red-300">
+            <p className="rounded border border-red-900/50 bg-red-950/30 p-2 text-base text-red-300">
               {error}
             </p>
           )}
 
           <div className="flex flex-col gap-2">
             {savedDesigns.length === 0 ? (
-              <p className="text-sm text-neutral-400">No saved designs yet.</p>
+              <p className="text-base leading-relaxed text-neutral-400">No saved designs yet.</p>
             ) : (
               savedDesigns.map((saved) => (
                 <SavedDesignRow

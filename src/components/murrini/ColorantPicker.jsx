@@ -11,8 +11,8 @@ export function ColorantPicker({
   const selected = GLASS_COLOR_INDEX.find((colorant) => colorant.id === colorantId)
 
   return (
-    <div className="flex w-64 flex-col gap-3 rounded-lg border border-neutral-800 bg-neutral-900 p-4">
-      <h2 className="text-sm font-medium text-neutral-100">Glass Color</h2>
+    <div className="flex w-64 flex-col gap-4 rounded-lg border border-neutral-800 bg-neutral-900 p-5">
+      <h2 className="text-base font-medium text-neutral-100">Glass Color</h2>
 
       <div className="grid grid-cols-6 gap-2">
         {GLASS_COLOR_INDEX.map((colorant) => (
@@ -35,7 +35,7 @@ export function ColorantPicker({
         ))}
       </div>
 
-      <label className="flex items-center gap-2 text-sm text-neutral-300">
+      <label className="flex items-center gap-2 text-base text-neutral-300">
         <input
           type="checkbox"
           checked={useCustom}
@@ -53,7 +53,7 @@ export function ColorantPicker({
         />
       ) : (
         selected && (
-          <div className="flex flex-col gap-1 border-t border-neutral-800 pt-2 text-sm">
+          <div className="flex flex-col gap-1 border-t border-neutral-800 pt-2 text-base">
             <p className="font-medium text-neutral-200">{selected.name}</p>
             <p className="text-neutral-400">{selected.colorant}</p>
             {selected.strikes && (

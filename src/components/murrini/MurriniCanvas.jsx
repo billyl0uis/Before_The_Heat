@@ -10,7 +10,23 @@ function disposeGroupChildren(group) {
   }
 }
 
-export function MurriniCanvas({ canvas, elements, onPlace, preview }) {
+export function MurriniCanvas({
+  canvas,
+  elements,
+  onPlace,
+  preview,
+  displayWidth,
+  displayHeight,
+}) {
+  // The logical coordinate system (world units used for placement math,
+  // pattern repeat, saved designs) is always canvas.width/height — fixed,
+  // never changes with screen size. displayWidth/displayHeight is just
+  // how many actual CSS pixels that gets rendered into, which can shrink
+  // on a narrow phone screen. They're decoupled on purpose: shrinking the
+  // display size must never change where a click at a given world
+  // position ends up.
+  const renderWidth = displayWidth ?? canvas.width
+  const renderHeight = displayHeight ?? canvas.height
   const mountRef = useRef(null)
   const sceneRef = useRef(null)
   const groupRef = useRef(null)
@@ -18,6 +34,12 @@ export function MurriniCanvas({ canvas, elements, onPlace, preview }) {
   const cameraRef = useRef(null)
   const previewMeshRef = useRef(null)
   const onPlaceRef = useRef(onPlace)
+  // Read by the pointermove handler below, which is set up once (its
+  // effect doesn't depend on `preview`) — a compound tool (jellyroll,
+  // pinwheel) isn't a single SHAPE_TYPES entry, so there's no one ghost
+  // shape to show; keeping this in sync lets pointermove know to keep the
+  // preview hidden instead of showing whatever shape was last selected.
+  const previewShapeKeyRef = useRef(preview.shape)
   const [webglFailed, setWebglFailed] = useState(false)
 
   // onPlace is a new closure every render (it captures the current tool
@@ -27,6 +49,10 @@ export function MurriniCanvas({ canvas, elements, onPlace, preview }) {
   useEffect(() => {
     onPlaceRef.current = onPlace
   }, [onPlace])
+
+  useEffect(() => {
+    previewShapeKeyRef.current = preview.shape
+  }, [preview.shape])
 
   useEffect(() => {
     const mount = mountRef.current
@@ -55,7 +81,7 @@ export function MurriniCanvas({ canvas, elements, onPlace, preview }) {
       setWebglFailed(true)
       return
     }
-    renderer.setSize(width, height)
+    renderer.setSize(renderWidth, renderHeight)
     renderer.setPixelRatio(window.devicePixelRatio)
     mount.appendChild(renderer.domElement)
 
@@ -89,8 +115,14 @@ export function MurriniCanvas({ canvas, elements, onPlace, preview }) {
 
     const pointerToWorld = (event) => {
       const rect = renderer.domElement.getBoundingClientRect()
-      const x = event.clientX - rect.left - width / 2
-      const y = height / 2 - (event.clientY - rect.top)
+      // rect.width/height is the rendered CSS size, which can be smaller
+      // than the logical width/height on a narrow screen — scale into
+      // world units so a click always lands where it visually looks like
+      // it landed, regardless of display size.
+      const scaleX = width / rect.width
+      const scaleY = height / rect.height
+      const x = (event.clientX - rect.left) * scaleX - width / 2
+      const y = height / 2 - (event.clientY - rect.top) * scaleY
       return { x, y }
     }
 
@@ -122,7 +154,7 @@ export function MurriniCanvas({ canvas, elements, onPlace, preview }) {
       renderer.dispose()
       mount.removeChild(renderer.domElement)
     }
-  }, [canvas])
+  }, [canvas, renderWidth, renderHeight])
 
   useEffect(() => {
     const group = groupRef.current
@@ -166,7 +198,7 @@ export function MurriniCanvas({ canvas, elements, onPlace, preview }) {
   }, [preview.shape, preview.params, preview.color, webglFailed])
 
   if (webglFailed) {
-    return <WebGLUnavailable width={canvas.width} height={canvas.height} />
+    return <WebGLUnavailable width={renderWidth} height={renderHeight} />
   }
 
   return (

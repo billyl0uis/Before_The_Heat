@@ -13,7 +13,7 @@ const WAVE_CONTROLS = [
 
 function ControlSlider({ control, value, onChange }) {
   return (
-    <label className="flex flex-col gap-1 text-sm text-neutral-300">
+    <label className="flex flex-col gap-1 text-base text-neutral-300">
       {control.label}: {value}
       <input
         type="range"
@@ -36,12 +36,12 @@ export function VesselControls({
   onExitFreeform,
 }) {
   return (
-    <div className="flex w-64 flex-col gap-4 rounded-lg border border-neutral-800 bg-neutral-900 p-4">
+    <div className="flex w-64 flex-col gap-4 rounded-lg border border-neutral-800 bg-neutral-900 p-5">
       <div className="flex gap-2">
         <button
           type="button"
           onClick={onExitFreeform}
-          className={`flex-1 rounded px-3 py-1.5 text-sm transition-colors ${
+          className={`flex-1 rounded px-3 py-1.5 text-base transition-colors ${
             !freeform
               ? 'bg-purple-500 text-white'
               : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
@@ -52,7 +52,7 @@ export function VesselControls({
         <button
           type="button"
           onClick={onEnterFreeform}
-          className={`flex-1 rounded px-3 py-1.5 text-sm transition-colors ${
+          className={`flex-1 rounded px-3 py-1.5 text-base transition-colors ${
             freeform
               ? 'bg-purple-500 text-white'
               : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
@@ -62,7 +62,7 @@ export function VesselControls({
         </button>
       </div>
 
-      <h2 className="text-sm font-medium text-neutral-100">Vessel Profile</h2>
+      <h2 className="text-base font-medium text-neutral-100">Vessel Profile</h2>
       <fieldset disabled={freeform} className="flex flex-col gap-4 disabled:opacity-40">
         {PROFILE_CONTROLS.map((control) => (
           <ControlSlider
@@ -73,7 +73,7 @@ export function VesselControls({
           />
         ))}
 
-        <h2 className="mt-2 text-sm font-medium text-neutral-100">Surface Ripple</h2>
+        <h2 className="mt-2 text-base font-medium text-neutral-100">Surface Ripple</h2>
         {WAVE_CONTROLS.map((control) => (
           <ControlSlider
             key={control.key}
@@ -85,7 +85,7 @@ export function VesselControls({
       </fieldset>
 
       {freeform && (
-        <p className="text-sm text-neutral-400">
+        <p className="text-base leading-relaxed text-neutral-400">
           Drag the points on the silhouette to reshape the wall by hand.
           Switch back to Parametric to use these sliders again.
         </p>
@@ -94,7 +94,7 @@ export function VesselControls({
       <button
         type="button"
         onClick={onReset}
-        className="rounded bg-neutral-800 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-700"
+        className="rounded bg-neutral-800 px-3 py-1.5 text-base text-neutral-300 hover:bg-neutral-700"
       >
         Reset shape
       </button>
