@@ -4,19 +4,12 @@ const CONTROLS = [
   { key: 'taper', label: 'Taper (%)', min: 0, max: 90, step: 5 },
 ]
 
-export function ExtrusionControls({ extrusion, onChange, onSpiralPreset }) {
+export function ExtrusionControls({ extrusion, onChange }) {
   const setField = (key, value) => onChange({ ...extrusion, [key]: value })
 
   return (
     <div className="flex w-64 flex-col gap-4 rounded-lg border border-neutral-800 bg-neutral-900 p-5">
       <h2 className="text-base font-medium text-neutral-100">Rod Extrusion</h2>
-      <button
-        type="button"
-        onClick={onSpiralPreset}
-        className="rounded bg-neutral-800 px-3 py-1.5 text-base text-neutral-300 hover:bg-neutral-700"
-      >
-        Try a twisted thread (zanfirico)
-      </button>
       {CONTROLS.map((control) => (
         <label
           key={control.key}
@@ -58,16 +51,17 @@ export function ExtrusionControls({ extrusion, onChange, onSpiralPreset }) {
         </button>
       </div>
       <p className="text-base leading-relaxed text-neutral-400">
-        Twist spirals the whole bundle around its center as it's pulled
-        (the zanfirico technique) — a helix along the rod's length, only
-        visible from the side. It only shows up on shapes placed
-        off-center — a single shape sitting dead-center in the pattern has
-        nothing off-axis to spiral, so twisting it looks like nothing
-        happened. This is different from the Spiral shape in the pattern
-        toolbar, which builds a jellyroll-style spiral into the
-        cross-section itself. Taper narrows the rod toward the far end.
-        Sideways flips the pulled rod 90° to run across the view instead
-        of away from it.
+        Twist spirals the whole bundle around its center as it's pulled —
+        a helix along the rod's length, only visible from the side. It
+        only shows up on shapes placed off-center — a single shape
+        sitting dead-center in the pattern has nothing off-axis to
+        spiral, so twisting it looks like nothing happened. Try the
+        Zanfirico tool in the pattern toolbar for a ready-made off-center
+        setup (it's the real technique this twist reproduces). This is
+        different from the Spiral shape, which builds a jellyroll-style
+        spiral into the cross-section itself instead. Taper narrows the
+        rod toward the far end. Sideways flips the pulled rod 90° to run
+        across the view instead of away from it.
       </p>
     </div>
   )

@@ -103,12 +103,23 @@ export const MURRINI_TECHNIQUES = {
   embeddedThread: {
     title: 'Embedded Thread',
     summary:
-      "A thin thread trailed into a gather at one spot, then covered back over — an accent color sitting inside the glass at one point, not sheeting all the way around it the way a full casing does. On its own it's just an inclusion; twist the bundle while pulling (the Rod Extrusion twist) and that off-center thread spirals into a visible helix — the zanfirico/filigrana technique.",
+      "A thin thread trailed into a gather at one spot, then covered back over — an accent color sitting inside the glass at one point, not sheeting all the way around it the way a full casing does, and not a full ring of threads the way the Zanfirico tool builds. On its own it's just an inclusion; twist the bundle while pulling (the Rod Extrusion twist) and that off-center thread spirals into a visible helix.",
     steps: [
       'Gather the base color first.',
       'Trail a thin thread of the accent color onto one spot on the gather and marver it in so it fuses with the surface.',
       'Reheat and gather a thin layer of the base color back over it, re-covering the thread.',
-      'Pull into a rod — twisting as you pull spirals the embedded thread into a helix (zanfirico); pulling straight keeps it as one visible seam along the length instead.',
+      'Pull into a rod — twisting as you pull spirals the embedded thread into a helix; pulling straight keeps it as one visible seam along the length instead.',
+    ],
+  },
+  zanfirico: {
+    title: 'Zanfirico (Twisted Latticino)',
+    summary:
+      "Real zanfirico/filigrana a retorti canes use several thin threads laid evenly around a core cylinder's circumference — not just one — then a layer of clear glass is gathered over the whole threaded core to lock the threads in place before anything is twisted. Only then is the cased bundle twisted as it's pulled, turning the straight parallel threads into the classic corkscrew lattice.",
+    steps: [
+      'Gather the core color onto a punty (often clear, but any color works).',
+      "Lay several thin threads of the accent color evenly spaced around the core's circumference and marver them in so they fuse to the surface.",
+      'Gather a layer of clear glass over the whole threaded core, locking the threads in place under a smooth outer surface.',
+      "Reheat and pull the cased bundle into a rod while twisting it — the twist is what turns the straight parallel threads into a corkscrew lattice; pulling without twisting keeps them running straight instead.",
     ],
   },
   bundle: {

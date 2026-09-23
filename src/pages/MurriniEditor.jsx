@@ -10,7 +10,6 @@ import { TechniqueReference } from '../components/murrini/TechniqueReference'
 import { GLASS_COLOR_INDEX } from '../content/glassColorIndex'
 import { checkColorCompatibility } from '../engine/murrini/colorCompatibility'
 import { buildCompoundElements, COMPOUND_SHAPE_TYPES } from '../engine/murrini/compoundShapes'
-import { DEFAULT_EXTRUSION } from '../engine/murrini/extrude'
 import { computeShapeReach, SHAPE_TYPES } from '../engine/murrini/shapes'
 import { useResponsiveCanvasSize } from '../hooks/useResponsiveCanvasSize'
 
@@ -68,6 +67,9 @@ export function MurriniEditor({ design }) {
   const [colorantId, setColorantId] = useState(GLASS_COLOR_INDEX[0].id)
   const [useCustomColor, setUseCustomColor] = useState(false)
   const [customColor, setCustomColor] = useState('#c084fc')
+  // The second color a compound tool (Jellyroll, Pinwheel, Zanfirico)
+  // uses — null means "pick one automatically" (see resolveColorTrio).
+  const [accentColorantId, setAccentColorantId] = useState(null)
 
   // Swap in that shape's own default params whenever the tool changes, so
   // sliders never show a param the current shape type doesn't have.
@@ -129,13 +131,15 @@ export function MurriniEditor({ design }) {
     [selectMode, selectedShape, params, previewColor],
   )
 
-  // What a compound tool (Jellyroll, Pinwheel) actually places: your
-  // currently selected color as the primary, plus an automatically
-  // chosen contrasting accent and casing color — real glass colorants,
-  // picked to never collide with whatever you've already chosen. Because
-  // this reads the current selection instead of hardcoding fixed colors,
-  // the same tool produces a different result each time you change color
-  // before clicking, instead of always the same fixed demo.
+  // What a compound tool (Jellyroll, Pinwheel, Zanfirico) actually
+  // places: your currently selected color as the primary, plus an accent
+  // and a casing color — real glass colorants, picked to never collide
+  // with whatever you've already chosen. Because this reads the current
+  // selection instead of hardcoding fixed colors, the same tool produces
+  // a different result each time you change color before clicking,
+  // instead of always the same fixed demo. The accent defaults to an
+  // automatic contrast but can be overridden (accentColorantId) via the
+  // second color picker shown alongside a compound tool.
   const resolveColorTrio = () => {
     const primary = useCustomColor
       ? { swatch: customColor, id: null }
@@ -143,16 +147,18 @@ export function MurriniEditor({ design }) {
           const colorant = GLASS_COLOR_INDEX.find((entry) => entry.id === colorantId)
           return { swatch: colorant.swatch, id: colorant.id }
         })()
-    const accentId = primary.id === 'opal-white' ? 'black-glass' : 'opal-white'
-    const accent = GLASS_COLOR_INDEX.find((entry) => entry.id === accentId)
+    const autoAccentId = primary.id === 'opal-white' ? 'black-glass' : 'opal-white'
+    const accentEntry =
+      GLASS_COLOR_INDEX.find((entry) => entry.id === accentColorantId) ??
+      GLASS_COLOR_INDEX.find((entry) => entry.id === autoAccentId)
     const casingId =
       ['cadmium-selenium-red', 'black-glass', 'cobalt-blue'].find(
-        (id) => id !== primary.id && id !== accentId,
+        (id) => id !== primary.id && id !== accentEntry.id,
       ) ?? 'cobalt-blue'
     const casing = GLASS_COLOR_INDEX.find((entry) => entry.id === casingId)
     return {
       primary,
-      accent: { swatch: accent.swatch, id: accent.id },
+      accent: { swatch: accentEntry.swatch, id: accentEntry.id },
       casing: { swatch: casing.swatch, id: casing.id },
     }
   }
@@ -183,6 +189,16 @@ export function MurriniEditor({ design }) {
   const handlePlace = (x, y) => {
     if (COMPOUND_SHAPE_TYPES[selectedShape]) {
       addElements(buildCompoundElements(selectedShape, x, y, params, resolveColorTrio()))
+      // Zanfirico is invisible as anything but a plain casing until it's
+      // actually twisted — jump to a sensible twist and the Rod Preview
+      // so placing one immediately shows what it's for, instead of
+      // leaving a first-time user staring at flat nested circles. Only
+      // on the first placement (twist still at its default of 0), so it
+      // never overwrites a twist you've already dialed in.
+      if (selectedShape === 'zanfirico' && extrusion.twistDegrees === 0) {
+        setExtrusion({ ...extrusion, twistDegrees: 360, length: Math.max(extrusion.length, 200) })
+        setViewMode('rod')
+      }
       return
     }
     if (useCustomColor) {
@@ -195,44 +211,6 @@ export function MurriniEditor({ design }) {
       params,
       colorantId: colorant.id,
     })
-  }
-
-  // A zanfirico/filigrana cane is a real, specific setup: one or more
-  // thin threads embedded in a casing, off-center, then the whole bundle
-  // twisted as it's pulled — the twist rotates that off-center thread
-  // into a visible helix along the rod's length. Twisting a shape sitting
-  // dead center (like a single plain circle) is invisible, since there's
-  // nothing off-axis to spiral — that's the gap this preset closes: it
-  // sets up geometry the twist can actually show.
-  //
-  // The thread has to sit genuinely embedded inside the casing (not just
-  // touching its outside surface) to match how it's really made — a
-  // trailed thread sinks into and fuses with the hot gather it's laid
-  // onto, it doesn't balance on the surface at a single point of contact.
-  // For that embedded thread to still be visible in an opaque render, the
-  // casing needs actual transparency, not just a "transparent" label —
-  // cobalt blue is a real transparent-family colorant for exactly this
-  // reason (see content/glassColorIndex.js), so a lowered opacity here
-  // reflects that rather than being an arbitrary rendering trick.
-  const handleSpiralPreset = () => {
-    clearElements()
-    const base = GLASS_COLOR_INDEX.find((entry) => entry.id === 'cobalt-blue')
-    const accent = GLASS_COLOR_INDEX.find((entry) => entry.id === 'opal-white')
-    const baseRadius = 20
-    const accentRadius = 4
-    addElement('circle', 0, 0, {
-      color: base.swatch,
-      colorantId: base.id,
-      opacity: 0.55,
-      params: { radius: baseRadius },
-    })
-    addElement('circle', baseRadius - accentRadius * 2, 0, {
-      color: accent.swatch,
-      colorantId: accent.id,
-      params: { radius: accentRadius },
-    })
-    setExtrusion({ ...DEFAULT_EXTRUSION, length: 220, twistDegrees: 360 })
-    setViewMode('rod')
   }
 
   return (
@@ -319,13 +297,11 @@ export function MurriniEditor({ design }) {
             onBeginEdit={beginElementEdit}
             onCommitEdit={commitElementEdit}
             onDeleteSelected={handleDeleteSelected}
+            accentColorantId={accentColorantId}
+            onSelectAccentColorant={setAccentColorantId}
           />
           <PatternControls pattern={pattern} onChange={setPattern} />
-          <ExtrusionControls
-            extrusion={extrusion}
-            onChange={setExtrusion}
-            onSpiralPreset={handleSpiralPreset}
-          />
+          <ExtrusionControls extrusion={extrusion} onChange={setExtrusion} />
         </div>
         <div className="flex flex-col gap-6">
           <ColorantPicker
