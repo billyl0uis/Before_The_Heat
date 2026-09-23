@@ -1,3 +1,4 @@
+import { GLASS_COLOR_INDEX } from '../../content/glassColorIndex'
 import { COMPOUND_SHAPE_ORDER, COMPOUND_SHAPE_TYPES } from '../../engine/murrini/compoundShapes'
 import { SHAPE_ORDER, SHAPE_TYPES } from '../../engine/murrini/shapes'
 
@@ -25,6 +26,8 @@ export function ShapeToolbar({
   onBeginEdit,
   onCommitEdit,
   onDeleteSelected,
+  accentColorantId,
+  onSelectAccentColorant,
 }) {
   const definition = shapeDefinition(selectedShape)
   const isCompound = Boolean(COMPOUND_SHAPE_TYPES[selectedShape])
@@ -133,11 +136,43 @@ export function ShapeToolbar({
           ))}
 
           {isCompound && (
-            <p className="text-base leading-relaxed text-neutral-400">
-              Uses your selected color below as the main color, plus an
-              automatic contrasting accent. Pick a different color, then
-              click the canvas again to place another one.
-            </p>
+            <>
+              <p className="text-base leading-relaxed text-neutral-400">
+                Uses your selected color below as the main color. Pick a
+                second color here for the accent, or leave it on Auto —
+                change either color, then click the canvas again to place
+                another one with a different look.
+              </p>
+              <div className="flex flex-col gap-2">
+                <p className="text-base text-neutral-300">Second color</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onSelectAccentColorant(null)}
+                    className={`rounded px-2 py-1 text-sm transition-colors ${
+                      accentColorantId === null
+                        ? 'bg-purple-500 text-white'
+                        : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+                    }`}
+                  >
+                    Auto
+                  </button>
+                  {GLASS_COLOR_INDEX.map((colorant) => (
+                    <button
+                      key={colorant.id}
+                      type="button"
+                      title={colorant.name}
+                      aria-label={colorant.name}
+                      onClick={() => onSelectAccentColorant(colorant.id)}
+                      className={`h-6 w-6 rounded-full border-2 transition-transform hover:scale-110 ${
+                        accentColorantId === colorant.id ? 'border-white' : 'border-neutral-700'
+                      }`}
+                      style={{ backgroundColor: colorant.swatch }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </>
           )}
         </>
       )}

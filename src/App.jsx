@@ -22,6 +22,9 @@ const VesselEditor = lazy(() =>
 const ColorIndexPage = lazy(() =>
   import('./pages/ColorIndexPage').then((m) => ({ default: m.ColorIndexPage })),
 )
+const TechniqueGuidePage = lazy(() =>
+  import('./pages/TechniqueGuidePage').then((m) => ({ default: m.TechniqueGuidePage })),
+)
 const DesignVaultPage = lazy(() =>
   import('./pages/DesignVaultPage').then((m) => ({ default: m.DesignVaultPage })),
 )
@@ -37,6 +40,7 @@ const TABS = [
   { key: 'vessel', label: 'Vessel Morphograph' },
   { key: 'sculpt', label: 'Free Sculpt' },
   { key: 'colors', label: 'Color Index' },
+  { key: 'techniques', label: 'Technique Guide' },
   { key: 'vault', label: 'Design Vault' },
   { key: 'inspiration', label: 'Inspiration' },
 ]
@@ -91,6 +95,7 @@ function App() {
           )}
           {activeTab === 'sculpt' && <FreeSculptPage />}
           {activeTab === 'colors' && <ColorIndexPage />}
+          {activeTab === 'techniques' && <TechniqueGuidePage />}
           {activeTab === 'inspiration' && <InspirationPage />}
           {activeTab === 'vault' && (
             <DesignVaultPage

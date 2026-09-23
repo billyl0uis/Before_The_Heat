@@ -22,9 +22,17 @@ export const COMPOUND_SHAPE_TYPES = {
       { key: 'blades', label: 'Blades', min: 4, max: 10, step: 2 },
     ],
   },
+  zanfirico: {
+    label: 'Zanfirico',
+    defaultParams: { coreRadius: 16, threadCount: 3 },
+    controls: [
+      { key: 'coreRadius', label: 'Core radius', min: 8, max: 30, step: 1 },
+      { key: 'threadCount', label: 'Threads', min: 2, max: 6, step: 1 },
+    ],
+  },
 }
 
-export const COMPOUND_SHAPE_ORDER = ['jellyroll', 'pinwheel']
+export const COMPOUND_SHAPE_ORDER = ['jellyroll', 'pinwheel', 'zanfirico']
 
 // The jellyroll: a casing color gathered over a coiled strip (the real
 // build order — coil first, case afterward — see the 'jellyroll'
@@ -105,9 +113,66 @@ function buildPinwheelSpecs(x, y, { size, blades }, colors) {
   return specs
 }
 
+// A real zanfirico/filigrana cane: several thin parallel threads laid
+// evenly around a core cylinder's circumference, then the whole thing is
+// gathered over with a layer of clear glass to lock the threads in place
+// — only THEN is it twisted while pulled. Not a single off-center thread
+// (that undersells it — real canes read as a full lattice/cage, not one
+// stripe) and not skipping the outer casing (without it, there's nothing
+// holding the threads in place once twisted, and nothing for them to be
+// visible "inside" of). `colors.casing` renders translucent so the
+// threads stay visible through it once placed.
+function buildZanfiricoSpecs(x, y, { coreRadius, threadCount }, colors) {
+  const compoundId = crypto.randomUUID()
+  const threadRadius = Math.max(1.5, coreRadius * 0.16)
+  const casingRadius = coreRadius + threadRadius * 2.2
+
+  const specs = [
+    {
+      shape: 'circle',
+      x,
+      y,
+      params: { radius: coreRadius },
+      color: colors.primary.swatch,
+      colorantId: colors.primary.id,
+      compoundId,
+      compoundType: 'zanfirico',
+    },
+  ]
+
+  for (let i = 0; i < threadCount; i++) {
+    const angle = (i / threadCount) * Math.PI * 2
+    specs.push({
+      shape: 'circle',
+      x: x + Math.cos(angle) * coreRadius,
+      y: y + Math.sin(angle) * coreRadius,
+      params: { radius: threadRadius },
+      color: colors.accent.swatch,
+      colorantId: colors.accent.id,
+      compoundId,
+      compoundType: 'zanfirico',
+    })
+  }
+
+  specs.push({
+    shape: 'circle',
+    x,
+    y,
+    params: { radius: casingRadius },
+    color: colors.casing.swatch,
+    colorantId: colors.casing.id,
+    opacity: 0.4,
+    compoundId,
+    compoundType: 'zanfirico',
+  })
+
+  return specs
+}
+
 // colors: { primary, accent, casing }, each { swatch, id }.
 export function buildCompoundElements(type, x, y, params, colors) {
   if (type === 'jellyroll') return buildJellyrollSpecs(x, y, params, colors)
   if (type === 'pinwheel') return buildPinwheelSpecs(x, y, params, colors)
+  if (type === 'zanfirico') return buildZanfiricoSpecs(x, y, params, colors)
   return []
 }

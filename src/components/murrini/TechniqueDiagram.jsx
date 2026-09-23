@@ -121,6 +121,25 @@ const DIAGRAMS = {
       <circle cx="112" cy="80" r="9" fill={CASING} />
     </>
   ),
+  // A ring of parallel threads around a core, cased in clear — real
+  // zanfirico canes read as a full lattice/cage of threads, not one
+  // stripe. Curved slightly to hint at the twist that's applied afterward.
+  zanfirico: (params) => {
+    const threadCount = params.threadCount ?? 3
+    const coreRadius = 30
+    return (
+      <>
+        <circle cx="80" cy="80" r="46" fill={CASING} opacity="0.45" />
+        <circle cx="80" cy="80" r={coreRadius} fill={BASE} />
+        {Array.from({ length: threadCount }, (_, i) => {
+          const angle = (i / threadCount) * Math.PI * 2 + 0.3
+          const cx = 80 + Math.cos(angle) * coreRadius
+          const cy = 80 + Math.sin(angle) * coreRadius
+          return <circle key={i} cx={cx} cy={cy} r="6" fill={ACCENT} />
+        })}
+      </>
+    )
+  },
   // The jellyroll coil (same two interleaved strokes as 'spiral' above)
   // with the casing layer it's typically pulled under afterward.
   jellyroll: () => (
