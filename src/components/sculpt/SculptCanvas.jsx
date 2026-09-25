@@ -38,6 +38,7 @@ export const SculptCanvas = forwardRef(function SculptCanvas(
   const isSculptingRef = useRef(false)
   const strokeStartRef = useRef(null)
   const lastStampRef = useRef(null)
+  const strokeNormalsRef = useRef(null)
   const pastRef = useRef([])
   const futureRef = useRef([])
   const brushRef = useRef({ radius: brushRadius, strength: brushStrength, mode: brushMode })
@@ -159,7 +160,20 @@ export const SculptCanvas = forwardRef(function SculptCanvas(
 
     const applyBrush = (worldHit) => {
       const position = mesh.geometry.attributes.position
-      const normal = mesh.geometry.attributes.normal
+      // Push direction comes from strokeNormalsRef — a snapshot taken
+      // once at the start of this stroke — not the live, continuously
+      // recomputed normal attribute. Pushing along the vertex's own
+      // surface normal (rather than the vector from the mesh's center)
+      // was the right fix for spikes across SEPARATE strokes, but
+      // recomputing that normal after every dab WITHIN one continuous
+      // stroke backfires: once a bump grows enough that its local normal
+      // tilts sideways (toward becoming a ridge wall rather than an
+      // outward bulge), later dabs in the same stroke push along that
+      // increasingly-tilted direction instead of continuing outward —
+      // compounding into a sharp folded crease instead of a smooth ridge.
+      // Freezing the direction per stroke means every dab in one drag
+      // pushes the same way, so the result stays a smooth bulge.
+      const strokeNormals = strokeNormalsRef.current
       const { radius, strength, mode } = brushRef.current
       const sign = mode === 'pull' ? -1 : 1
       const localHit = mesh.worldToLocal(worldHit.clone())
@@ -177,21 +191,17 @@ export const SculptCanvas = forwardRef(function SculptCanvas(
         const falloff = 1 - dist / radius
         const smooth = falloff * falloff * (3 - 2 * falloff)
         const amount = sign * strength * smooth
-        // Push along the vertex's own surface normal, not the vector from
-        // the mesh's center — those two only agree on an untouched
-        // sphere. Once a stroke has pushed part of the surface out of
-        // round, "from center" and "along the surface" increasingly
-        // diverge, and pushing further along the wrong one is what was
-        // actually producing spikes rather than smooth bumps as sculpting
-        // continued.
         position.setXYZ(
           i,
-          vx + normal.getX(i) * amount,
-          vy + normal.getY(i) * amount,
-          vz + normal.getZ(i) * amount,
+          vx + strokeNormals[i * 3] * amount,
+          vy + strokeNormals[i * 3 + 1] * amount,
+          vz + strokeNormals[i * 3 + 2] * amount,
         )
       }
       position.needsUpdate = true
+      // Still recomputed every dab so lighting/shading tracks the
+      // deforming surface in real time — only the push DIRECTION is
+      // frozen, not the shading normals.
       mesh.geometry.computeVertexNormals()
       mesh.geometry.computeBoundingSphere()
     }
@@ -206,7 +216,15 @@ export const SculptCanvas = forwardRef(function SculptCanvas(
     // (the same approach every paint/sculpt tool uses) fixes it — a stamp
     // only lands once the cursor has moved a fraction of the brush radius
     // since the last one, regardless of how many events fired in between.
-    const MIN_STAMP_SPACING_FACTOR = 0.35
+    //
+    // That spacing has to stay small, though: too wide a gap between dabs
+    // and a genuine drag stops reading as one continuous stroke and
+    // instead looks like a row of separate round bumps laid end to end
+    // (visibly scalloped in a side-lit profile) — heavily overlapping
+    // dabs is what makes a swept stroke look like one smooth ridge
+    // instead of a string of beads, the same reason every paint/sculpt
+    // tool defaults its brush spacing well under half the brush size.
+    const MIN_STAMP_SPACING_FACTOR = 0.1
     const shouldStamp = (worldHit) => {
       const last = lastStampRef.current
       if (!last) return true
@@ -229,6 +247,7 @@ export const SculptCanvas = forwardRef(function SculptCanvas(
       isSculptingRef.current = true
       controls.enabled = false
       strokeStartRef.current = mesh.geometry.attributes.position.array.slice()
+      strokeNormalsRef.current = mesh.geometry.attributes.normal.array.slice()
       applyBrush(hitPoint)
       lastStampRef.current = hitPoint.clone()
     }
@@ -248,6 +267,7 @@ export const SculptCanvas = forwardRef(function SculptCanvas(
       futureRef.current = []
       strokeStartRef.current = null
       lastStampRef.current = null
+      strokeNormalsRef.current = null
       reportHistory()
     }
 
