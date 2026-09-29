@@ -122,6 +122,39 @@ export const MURRINI_TECHNIQUES = {
       "Reheat and pull the cased bundle into a rod while twisting it — the twist is what turns the straight parallel threads into a corkscrew lattice; pulling without twisting keeps them running straight instead.",
     ],
   },
+  multiCasing: {
+    title: 'Double/Triple Casing',
+    summary:
+      "Real cane construction doesn't stop at one casing — a second (or third) contrasting color can be gathered over a core that's already been cased once, before anything is pulled. Glass-cane design software like VirtualGlass models casings as an ordered list for exactly this reason: each layer is its own color and thickness, stacked in build order. Slicing the finished cane shows every shell nested around the core, one inside the next.",
+    steps: [
+      'Gather the base/core color first.',
+      'Dip that gather into the first casing color, coating it evenly, and reheat.',
+      'Dip the once-cased gather into a second casing color (and a third, if wanted), reheating between each dip so it stays workable.',
+      'Pull the fully layered gather into a rod — every casing stays as its own concentric shell the whole length.',
+    ],
+  },
+  tripod: {
+    title: 'Tripod Bundle',
+    summary:
+      "Three already-pulled canes packed edge-to-edge in a tight triangle, then fused and drawn out as one new rod — the same bundling process as any other composite cane, just with this specific three-cane count and arrangement. It's common enough to be a named, cataloged preset in glass-cane design software (VirtualGlass lists it as one of its built-in cane templates).",
+    steps: [
+      'Pull three canes of matching diameter, in whatever colors the pattern needs.',
+      'Pack the three canes together so each touches the other two, forming a tight triangle in cross-section.',
+      'Fuse the bundle with a reheat, then draw it out from both ends into one smaller-diameter composite rod.',
+      'Slice the cooled rod crosswise — every slice shows the same three-way arrangement.',
+    ],
+  },
+  cross: {
+    title: 'Cross Bundle',
+    summary:
+      'A center cane surrounded by four more canes packed at north, south, east, and west, so the fused bundle reads as a plus-shaped cross in cross-section. Cross and star motifs are a recognized family of historical Venetian murrini patterns, and this specific five-cane layout is also cataloged as a named cane template in glass-cane design software (VirtualGlass).',
+    steps: [
+      'Pull a center cane and four outer canes of matching diameter.',
+      'Pack the four outer canes against the center one at the four compass points, so the group forms a plus/cross shape.',
+      'Fuse the bundle with a reheat, then draw it out from both ends into one smaller-diameter composite rod.',
+      'Slice the cooled rod crosswise — every slice shows the same cross-shaped arrangement.',
+    ],
+  },
   bundle: {
     title: 'Bundling Canes',
     summary:
@@ -220,7 +253,14 @@ function classifyNestedGroup(elements) {
     const dy = el.y - outer.y
     return Math.sqrt(dx * dx + dy * dy) <= concentricTolerance
   })
-  return allConcentric ? 'ring' : 'embeddedThread'
+  if (!allConcentric) return 'embeddedThread'
+  // Real cane construction can gather a second (or third) casing over an
+  // already-cased core before pulling -- VirtualGlass's own Cane model
+  // stores casings as an ordered list for exactly this reason, rather than
+  // capping it at one layer. Three or more concentric shells (core plus
+  // two or more casings) reads as that layered technique instead of a
+  // single casing.
+  return elements.length >= 3 ? 'multiCasing' : 'ring'
 }
 
 // Reflects what's actually been built so far, not just whichever tool is
@@ -233,8 +273,18 @@ function classifyNestedGroup(elements) {
 // tool (which previews what would be made if it were placed) still apply.
 export function resolveTechniqueKey(elements, fallbackShape, fallbackParams = {}) {
   if (elements.length > 1) {
+    // A shared compoundId/compoundType (Jellyroll, Pinwheel, Zanfirico,
+    // Tripod, Cross...) is ground truth about how the group was actually
+    // built and has to win over the geometry heuristics below. Most
+    // compound tools happen to place their elements concentrically (so
+    // they'd also read as "nested"), but Tripod/Cross pack canes
+    // side-by-side, touching rather than one-inside-another -- geometry
+    // alone would misread that as a generic bundle instead of the tool
+    // that actually placed it.
+    const compoundKey = resolveCompoundTechniqueKey(elements)
+    if (compoundKey) return compoundKey
     if (!allElementsNested(elements)) return 'bundle'
-    return resolveCompoundTechniqueKey(elements) ?? classifyNestedGroup(elements)
+    return classifyNestedGroup(elements)
   }
 
   const shape = elements.length === 1 ? elements[0].shape : fallbackShape
@@ -264,6 +314,13 @@ function clusterElements(elements) {
   for (let i = 0; i < elements.length; i++) {
     for (let j = i + 1; j < elements.length; j++) {
       if (isNested(elements[i], reach[i], elements[j], reach[j])) union(i, j)
+      // Same reasoning as resolveTechniqueKey: elements a compound tool
+      // tagged with the same compoundId are one cane, however it laid
+      // them out geometrically (a Tripod's three canes touch side by
+      // side, not one nested in another).
+      if (elements[i].compoundId && elements[i].compoundId === elements[j].compoundId) {
+        union(i, j)
+      }
     }
   }
 

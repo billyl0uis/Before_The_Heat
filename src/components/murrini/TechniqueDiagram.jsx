@@ -179,6 +179,40 @@ const DIAGRAMS = {
       </>
     )
   },
+  // Three or more concentric shells around the core -- a casing gathered
+  // over an already-cased core, VirtualGlass's own casings-as-a-list model.
+  multiCasing: () => (
+    <>
+      <circle cx="80" cy="80" r="56" fill={ACCENT} />
+      <circle cx="80" cy="80" r="38" fill={CASING} />
+      <circle cx="80" cy="80" r="20" fill={BASE} />
+    </>
+  ),
+  // Three canes packed edge-to-edge in a tight triangle -- same math as
+  // buildTripodSpecs in engine/murrini/compoundShapes.js.
+  tripod: () => {
+    const orbitRadius = 44 / Math.cos(Math.PI / 6)
+    return (
+      <>
+        {Array.from({ length: 3 }, (_, i) => {
+          const angle = (i / 3) * Math.PI * 2 - Math.PI / 2
+          const cx = 80 + Math.cos(angle) * orbitRadius
+          const cy = 80 + Math.sin(angle) * orbitRadius
+          return <circle key={i} cx={cx} cy={cy} r="44" fill={i % 2 === 0 ? BASE : ACCENT} />
+        })}
+      </>
+    )
+  },
+  // A center cane plus four outer canes at the compass points -- same
+  // layout as buildCrossSpecs in engine/murrini/compoundShapes.js.
+  cross: () => (
+    <>
+      {[[80, 46], [114, 80], [80, 114], [46, 80]].map(([cx, cy], i) => (
+        <circle key={i} cx={cx} cy={cy} r="22" fill={ACCENT} />
+      ))}
+      <circle cx="80" cy="80" r="28" fill={BASE} />
+    </>
+  ),
   // A handful of already-pulled canes packed together before the whole
   // bundle is fused and redrawn as one composite rod.
   bundle: () => (

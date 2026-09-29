@@ -10,6 +10,7 @@ import { MURRINI_TECHNIQUES } from '../content/murrineTechniques'
 const TECHNIQUE_ORDER = [
   { key: 'circle', params: {} },
   { key: 'ring', params: {} },
+  { key: 'multiCasing', params: {} },
   { key: 'embeddedThread', params: {} },
   { key: 'zanfirico', params: { threadCount: 3 } },
   { key: 'marver', params: { sides: 4 } },
@@ -19,6 +20,8 @@ const TECHNIQUE_ORDER = [
   { key: 'jellyroll', params: {} },
   { key: 'pinwheel', params: { blades: 6 } },
   { key: 'line', params: {} },
+  { key: 'tripod', params: {} },
+  { key: 'cross', params: {} },
   { key: 'bundle', params: {} },
 ]
 

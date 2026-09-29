@@ -30,9 +30,22 @@ export const COMPOUND_SHAPE_TYPES = {
       { key: 'threadCount', label: 'Threads', min: 2, max: 6, step: 1 },
     ],
   },
+  tripod: {
+    label: 'Tripod',
+    defaultParams: { caneRadius: 16 },
+    controls: [{ key: 'caneRadius', label: 'Cane radius', min: 8, max: 30, step: 1 }],
+  },
+  cross: {
+    label: 'Cross',
+    defaultParams: { centerRadius: 16, armRadius: 12 },
+    controls: [
+      { key: 'centerRadius', label: 'Center radius', min: 8, max: 26, step: 1 },
+      { key: 'armRadius', label: 'Arm radius', min: 6, max: 22, step: 1 },
+    ],
+  },
 }
 
-export const COMPOUND_SHAPE_ORDER = ['jellyroll', 'pinwheel', 'zanfirico']
+export const COMPOUND_SHAPE_ORDER = ['jellyroll', 'pinwheel', 'zanfirico', 'tripod', 'cross']
 
 // The jellyroll: a casing color gathered over a coiled strip (the real
 // build order — coil first, case afterward — see the 'jellyroll'
@@ -169,10 +182,71 @@ function buildZanfiricoSpecs(x, y, { coreRadius, threadCount }, colors) {
   return specs
 }
 
+// Three already-pulled canes packed edge-to-edge in a tight triangle (the
+// "Tripod" bundle template) -- centers placed so each circle is tangent to
+// the other two: for circles of radius r mutually touching, the centers
+// sit on a circle of radius r/cos(30deg) around the shared centroid.
+function buildTripodSpecs(x, y, { caneRadius }, colors) {
+  const compoundId = crypto.randomUUID()
+  const orbitRadius = caneRadius / Math.cos(Math.PI / 6)
+  const specs = []
+  for (let i = 0; i < 3; i++) {
+    const angle = (i / 3) * Math.PI * 2 - Math.PI / 2
+    const colorEntry = i % 2 === 0 ? colors.primary : colors.accent
+    specs.push({
+      shape: 'circle',
+      x: x + Math.cos(angle) * orbitRadius,
+      y: y + Math.sin(angle) * orbitRadius,
+      params: { radius: caneRadius },
+      color: colorEntry.swatch,
+      colorantId: colorEntry.id,
+      compoundId,
+      compoundType: 'tripod',
+    })
+  }
+  return specs
+}
+
+// A center cane plus four outer canes packed at the compass points (the
+// "Cross" bundle template) -- each outer circle placed tangent to the
+// center one, so the fused group reads as a plus/cross in cross-section.
+function buildCrossSpecs(x, y, { centerRadius, armRadius }, colors) {
+  const compoundId = crypto.randomUUID()
+  const orbitRadius = centerRadius + armRadius
+  const specs = [
+    {
+      shape: 'circle',
+      x,
+      y,
+      params: { radius: centerRadius },
+      color: colors.primary.swatch,
+      colorantId: colors.primary.id,
+      compoundId,
+      compoundType: 'cross',
+    },
+  ]
+  for (let i = 0; i < 4; i++) {
+    const angle = (i / 4) * Math.PI * 2
+    specs.push({
+      shape: 'circle',
+      x: x + Math.cos(angle) * orbitRadius,
+      y: y + Math.sin(angle) * orbitRadius,
+      params: { radius: armRadius },
+      color: colors.accent.swatch,
+      colorantId: colors.accent.id,
+      compoundId,
+      compoundType: 'cross',
+    })
+  }
+  return specs
+}
+
 // colors: { primary, accent, casing }, each { swatch, id }.
 export function buildCompoundElements(type, x, y, params, colors) {
   if (type === 'jellyroll') return buildJellyrollSpecs(x, y, params, colors)
   if (type === 'pinwheel') return buildPinwheelSpecs(x, y, params, colors)
   if (type === 'zanfirico') return buildZanfiricoSpecs(x, y, params, colors)
+  if (type === 'tripod') return buildTripodSpecs(x, y, params, colors)
+  if (type === 'cross') return buildCrossSpecs(x, y, params, colors)
   return []
 }
