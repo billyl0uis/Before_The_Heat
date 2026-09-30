@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { repaintVesselTexture } from '../../engine/vessel/paint'
 import { createCustomVesselGeometry, createVesselGeometry } from '../../engine/vessel/profile'
+import { paintReticelloTexture } from '../../engine/vessel/reticello'
 import { WebGLUnavailable } from '../WebGLUnavailable'
 
 const GLASS_COLOR = '#d97706'
@@ -15,6 +16,8 @@ export function VesselCanvas({
   manualMode,
   placements,
   onPlacePattern,
+  reticelloMode,
+  reticelloParams,
   width = 360,
   height = 420,
 }) {
@@ -173,16 +176,53 @@ export function VesselCanvas({
     const texture = textureRef.current
     if (!mesh || !canvas || !texture) return
 
+    const ctx = canvas.getContext('2d')
+
+    if (reticelloMode) {
+      paintReticelloTexture(ctx, TEXTURE_SIZE, reticelloParams)
+      texture.needsUpdate = true
+
+      // The texture's diamond cells are square in canvas-pixel space, but
+      // LatheGeometry's default UV maps U (circumference) and V (height)
+      // each 0-1 across that same square canvas regardless of the
+      // vessel's actual proportions -- on any vessel where circumference
+      // != height (almost always), that would stretch the cells (and the
+      // "trapped air" dots) into ellipses instead of the circles a real
+      // fused bubble actually leaves. Repeating the texture around the
+      // circumference by the real aspect ratio keeps cells square in
+      // world space instead.
+      const avgRadius = freeform
+        ? controlRadii.reduce((sum, r) => sum + r, 0) / controlRadii.length
+        : (params.baseRadius + params.topRadius) / 2
+      const circumference = 2 * Math.PI * avgRadius
+      texture.wrapT = THREE.RepeatWrapping
+      texture.repeat.set(Math.max(1, circumference / params.height), 1)
+
+      mesh.material = texturedMaterialRef.current
+      return
+    }
+
+    texture.wrapT = THREE.ClampToEdgeWrapping
+    texture.repeat.set(1, 1)
+
     if (!manualMode) {
       mesh.material = plainMaterialRef.current
       return
     }
 
-    const ctx = canvas.getContext('2d')
     repaintVesselTexture(ctx, TEXTURE_SIZE, GLASS_COLOR, placements)
     texture.needsUpdate = true
     mesh.material = texturedMaterialRef.current
-  }, [manualMode, placements, webglFailed])
+  }, [
+    manualMode,
+    placements,
+    reticelloMode,
+    reticelloParams,
+    params,
+    freeform,
+    controlRadii,
+    webglFailed,
+  ])
 
   if (webglFailed) {
     return <WebGLUnavailable width={width} height={height} />

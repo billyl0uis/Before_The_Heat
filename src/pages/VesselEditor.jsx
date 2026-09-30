@@ -1,12 +1,29 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ProfileCurveEditor } from '../components/vessel/ProfileCurveEditor'
 import { VesselCanvas } from '../components/vessel/VesselCanvas'
 import { VesselControls } from '../components/vessel/VesselControls'
+import { GLASS_COLOR_INDEX } from '../content/glassColorIndex'
 import { renderPatternTile } from '../engine/murrini/rasterize'
 import { useResponsiveCanvasSize } from '../hooks/useResponsiveCanvasSize'
 
 const STAMP_SIZE = 96
 const DEFAULT_STAMP_FRACTION = 0.16
+const RETICELLO_TEXTURE_SIZE = 512
+const DEFAULT_RETICELLO_DENSITY = 8
+const DEFAULT_RETICELLO_COLOR_A = 'opal-white'
+const DEFAULT_RETICELLO_COLOR_B = 'cobalt-blue'
+// The field between the crossed rib canes: each rib is a thin colored
+// thread pulled in a mostly-clear casing (the same "clear glass gathered
+// over" step the Zanfirico tool's casing color stands in for), not the
+// pattern editor's own dark UI canvas background. Needs to be a genuinely
+// different LUMINANCE from opal white (#f5f5f4, this tool's own default
+// thread color) -- a near-white base was nearly indistinguishable from a
+// white thread and washed the whole pattern out.
+const RETICELLO_BASE_COLOR = '#aab4bd'
+
+function colorSwatch(id) {
+  return GLASS_COLOR_INDEX.find((entry) => entry.id === id)?.swatch ?? '#ffffff'
+}
 
 export function VesselEditor({ design, vessel, vesselPattern }) {
   const {
@@ -23,11 +40,30 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
     vesselPattern
   const [manualMode, setManualMode] = useState(false)
   const [stampFraction, setStampFraction] = useState(DEFAULT_STAMP_FRACTION)
+  // Reticello is a whole-surface technique in real glasswork (see
+  // engine/vessel/reticello.js) — genuinely different from the hand-placed
+  // murrini stamps above, so it's its own mode rather than another stamp
+  // option, and mutually exclusive with manual placement (the vessel
+  // texture can show one or the other, not both at once).
+  const [reticelloMode, setReticelloMode] = useState(false)
+  const [reticelloDensity, setReticelloDensity] = useState(DEFAULT_RETICELLO_DENSITY)
+  const [reticelloColorAId, setReticelloColorAId] = useState(DEFAULT_RETICELLO_COLOR_A)
+  const [reticelloColorBId, setReticelloColorBId] = useState(DEFAULT_RETICELLO_COLOR_B)
   const hasPattern = design.elements.length > 0
   const { containerRef: canvasContainerRef, size: canvasSize } = useResponsiveCanvasSize(
     360,
     420 / 360,
   )
+
+  const handleSetManualMode = (checked) => {
+    setManualMode(checked)
+    if (checked) setReticelloMode(false)
+  }
+
+  const handleSetReticelloMode = (checked) => {
+    setReticelloMode(checked)
+    if (checked) setManualMode(false)
+  }
 
   const handlePlacePattern = (u, v) => {
     const stampCanvas = renderPatternTile(
@@ -39,6 +75,21 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
     )
     addPlacement(u, v, stampCanvas, stampFraction)
   }
+
+  // cellSize has to evenly divide the texture so the diagonal grid tiles
+  // seamlessly across the vessel's UV wrap seam -- deriving it from an
+  // integer density (cells across) guarantees that, rather than letting a
+  // slider pick an arbitrary pixel size.
+  const reticelloParams = useMemo(
+    () => ({
+      baseColor: RETICELLO_BASE_COLOR,
+      threadColorA: colorSwatch(reticelloColorAId),
+      threadColorB: colorSwatch(reticelloColorBId),
+      cellSize: RETICELLO_TEXTURE_SIZE / reticelloDensity,
+      threadWidth: Math.max(2, RETICELLO_TEXTURE_SIZE / reticelloDensity / 8),
+    }),
+    [reticelloColorAId, reticelloColorBId, reticelloDensity],
+  )
 
   return (
     <div className="flex flex-col items-center gap-6 p-4 sm:p-8">
@@ -61,6 +112,8 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
               manualMode={manualMode}
               placements={placements}
               onPlacePattern={handlePlacePattern}
+              reticelloMode={reticelloMode}
+              reticelloParams={reticelloParams}
               width={canvasSize.width}
               height={canvasSize.height}
             />
@@ -70,7 +123,7 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
               type="checkbox"
               checked={manualMode}
               disabled={!hasPattern}
-              onChange={(event) => setManualMode(event.target.checked)}
+              onChange={(event) => handleSetManualMode(event.target.checked)}
             />
             Place murrini by hand (click the vessel to press a slice on)
           </label>
@@ -123,6 +176,71 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
               It's a flat texture, not a real simulation of how the cane
               would stretch when actually blown into this shape.
             </p>
+          )}
+
+          <label className="flex items-center gap-2 text-base text-neutral-300">
+            <input
+              type="checkbox"
+              checked={reticelloMode}
+              onChange={(event) => handleSetReticelloMode(event.target.checked)}
+            />
+            Reticello wrap (crossed diagonal cane technique)
+          </label>
+          {reticelloMode && (
+            <>
+              <p className="max-w-[360px] text-base leading-relaxed text-neutral-400">
+                Real reticello covers the whole piece, not spots pressed on
+                by hand: two canes of parallel threads, twisted in opposite
+                directions, are each blown into a bubble, then one nested
+                inside the other and inflated until they fuse. The threads
+                touch and fuse where the two grids cross; the diamond gap
+                between crossings is where air gets trapped as the bubbles
+                seal together.
+              </p>
+              <label className="flex flex-col gap-1 text-base text-neutral-300">
+                Thread density: {reticelloDensity}
+                <input
+                  type="range"
+                  min={4}
+                  max={16}
+                  step={1}
+                  value={reticelloDensity}
+                  onChange={(event) => setReticelloDensity(Number(event.target.value))}
+                />
+              </label>
+              <div className="flex flex-col gap-2">
+                <p className="text-base text-neutral-300">Rib cane colors</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  {GLASS_COLOR_INDEX.map((colorant) => (
+                    <button
+                      key={colorant.id}
+                      type="button"
+                      title={colorant.name}
+                      aria-label={`${colorant.name} — click to set rib A, shift-click for rib B`}
+                      onClick={(event) =>
+                        event.shiftKey
+                          ? setReticelloColorBId(colorant.id)
+                          : setReticelloColorAId(colorant.id)
+                      }
+                      className="h-6 w-6 rounded-full border-2 transition-transform hover:scale-110"
+                      style={{
+                        backgroundColor: colorant.swatch,
+                        borderColor:
+                          colorant.id === reticelloColorAId
+                            ? '#ffffff'
+                            : colorant.id === reticelloColorBId
+                              ? '#a855f7'
+                              : 'transparent',
+                      }}
+                    />
+                  ))}
+                </div>
+                <p className="text-sm text-neutral-500">
+                  Click a swatch for rib A (white outline), shift-click for
+                  rib B (purple outline).
+                </p>
+              </div>
+            </>
           )}
         </div>
         {freeform && (

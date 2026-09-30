@@ -22,6 +22,9 @@ const TECHNIQUE_ORDER = [
   { key: 'line', params: {} },
   { key: 'tripod', params: {} },
   { key: 'cross', params: {} },
+  { key: 'row', params: {} },
+  { key: 'grid', params: {} },
+  { key: 'frame', params: {} },
   { key: 'bundle', params: {} },
 ]
 

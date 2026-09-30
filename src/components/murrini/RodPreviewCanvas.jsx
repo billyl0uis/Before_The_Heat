@@ -12,6 +12,51 @@ function disposeGroupChildren(group) {
   }
 }
 
+// Shared by both the setup effect and the elements effect below, so a
+// freshly (re)created group always gets the current elements extruded into
+// it immediately -- not just whenever the `elements`/`extrusion` props
+// themselves change. Without this, a resize-triggered scene rebuild (see
+// width/height below) recreates an empty group that never gets
+// repopulated, since the elements effect's own deps wouldn't consider
+// that a reason to re-run -- the rod would render blank until something
+// actually changed the pattern or extrusion settings again.
+function populateGroup(group, elements, extrusion) {
+  disposeGroupChildren(group)
+  group.clear()
+
+  for (const element of elements) {
+    const definition = SHAPE_TYPES[element.shape]
+    if (!definition) continue
+
+    const shape = definition.createShape(element.params)
+    const geometry = createExtrudedElementGeometry(shape, extrusion, {
+      x: element.x,
+      y: element.y,
+    })
+    const material = new THREE.MeshStandardMaterial({
+      color: element.color,
+      metalness: 0.05,
+      roughness: 0.2,
+      transparent: element.opacity < 1,
+      opacity: element.opacity,
+      side: THREE.DoubleSide,
+      // A casing's inner edge (or an embedded thread's edge) often sits at
+      // almost exactly the same radius as the shape it's nested against,
+      // so their extruded surfaces are coincident or nearly so along the
+      // whole twisted length -- the GPU has no stable way to decide which
+      // wins the depth test there, which flickers as "meshes fighting."
+      // Nudging each element's depth by its placement order (later ==
+      // higher layer == physically gathered on top) gives every tie a
+      // consistent winner instead, matching real build order.
+      polygonOffset: true,
+      polygonOffsetFactor: 1,
+      polygonOffsetUnits: -(element.layer ?? 0),
+    })
+    const mesh = new THREE.Mesh(geometry, material)
+    group.add(mesh)
+  }
+}
+
 export function RodPreviewCanvas({ elements, extrusion, width = 360, height = 420 }) {
   const mountRef = useRef(null)
   const sceneRef = useRef(null)
@@ -20,6 +65,18 @@ export function RodPreviewCanvas({ elements, extrusion, width = 360, height = 42
   const cameraRef = useRef(null)
   const controlsRef = useRef(null)
   const [webglFailed, setWebglFailed] = useState(false)
+  // Read by the setup effect below so it can immediately repopulate a
+  // freshly (re)created group with the current pattern, without making
+  // elements/extrusion dependencies of that effect (which would tear down
+  // and rebuild the whole WebGL context/OrbitControls on every shape
+  // placed or slider tick, instead of just on an actual size change).
+  const elementsRef = useRef(elements)
+  const extrusionRef = useRef(extrusion)
+
+  useEffect(() => {
+    elementsRef.current = elements
+    extrusionRef.current = extrusion
+  }, [elements, extrusion])
 
   useEffect(() => {
     const mount = mountRef.current
@@ -51,6 +108,7 @@ export function RodPreviewCanvas({ elements, extrusion, width = 360, height = 42
 
     const group = new THREE.Group()
     scene.add(group)
+    populateGroup(group, elementsRef.current, extrusionRef.current)
 
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.enableDamping = true
@@ -87,29 +145,7 @@ export function RodPreviewCanvas({ elements, extrusion, width = 360, height = 42
     const controls = controlsRef.current
     if (!group || !controls || webglFailed) return
 
-    disposeGroupChildren(group)
-    group.clear()
-
-    for (const element of elements) {
-      const definition = SHAPE_TYPES[element.shape]
-      if (!definition) continue
-
-      const shape = definition.createShape(element.params)
-      const geometry = createExtrudedElementGeometry(shape, extrusion, {
-        x: element.x,
-        y: element.y,
-      })
-      const material = new THREE.MeshStandardMaterial({
-        color: element.color,
-        metalness: 0.05,
-        roughness: 0.2,
-        transparent: element.opacity < 1,
-        opacity: element.opacity,
-        side: THREE.DoubleSide,
-      })
-      const mesh = new THREE.Mesh(geometry, material)
-      group.add(mesh)
-    }
+    populateGroup(group, elements, extrusion)
 
     // Rotate the whole pulled rod 90° instead of re-deriving its geometry
     // — "sideways" is an orientation flip, not a different pull.

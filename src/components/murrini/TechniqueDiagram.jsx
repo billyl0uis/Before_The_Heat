@@ -43,6 +43,24 @@ function pinwheelBladePoints(cx, cy, innerRadius, outerRadius, angleWidthDeg, cu
   return [...leading, ...trailing.reverse()].join(' ')
 }
 
+// A center cane plus a ring of `wings` same-size canes around it -- same
+// math as buildRingedBundleSpecs in engine/murrini/compoundShapes.js
+// (VirtualGlass's Tripod/Cross template: one switch case, wings=3 or 4).
+function ringedBundlePoints(wings) {
+  const caneRadius = 24
+  return (
+    <>
+      <circle cx="80" cy="80" r={caneRadius} fill={BASE} />
+      {Array.from({ length: wings }, (_, i) => {
+        const angle = (i / wings) * Math.PI * 2
+        const cx = 80 + Math.cos(angle) * caneRadius * 2
+        const cy = 80 + Math.sin(angle) * caneRadius * 2
+        return <circle key={i} cx={cx} cy={cy} r={caneRadius} fill={ACCENT} />
+      })}
+    </>
+  )
+}
+
 function starPoints(cx, cy, outerRadius, innerRadius, points) {
   const coords = []
   const step = 180 / points
@@ -188,31 +206,89 @@ const DIAGRAMS = {
       <circle cx="80" cy="80" r="20" fill={BASE} />
     </>
   ),
-  // Three canes packed edge-to-edge in a tight triangle -- same math as
-  // buildTripodSpecs in engine/murrini/compoundShapes.js.
-  tripod: () => {
-    const orbitRadius = 44 / Math.cos(Math.PI / 6)
+  tripod: () => ringedBundlePoints(3),
+  cross: () => ringedBundlePoints(4),
+  // Canes packed edge-to-edge in a straight line -- same math as
+  // buildRowSpecs in engine/murrini/compoundShapes.js.
+  row: () => {
+    const count = 4
+    const extent = 60
+    const caneRadius = extent / count
     return (
       <>
-        {Array.from({ length: 3 }, (_, i) => {
-          const angle = (i / 3) * Math.PI * 2 - Math.PI / 2
-          const cx = 80 + Math.cos(angle) * orbitRadius
-          const cy = 80 + Math.sin(angle) * orbitRadius
-          return <circle key={i} cx={cx} cy={cy} r="44" fill={i % 2 === 0 ? BASE : ACCENT} />
-        })}
+        {Array.from({ length: count }, (_, i) => (
+          <circle
+            key={i}
+            cx={80 + (-extent + caneRadius + i * 2 * caneRadius)}
+            cy={80}
+            r={caneRadius}
+            fill={i % 2 === 0 ? BASE : ACCENT}
+          />
+        ))}
       </>
     )
   },
-  // A center cane plus four outer canes at the compass points -- same
-  // layout as buildCrossSpecs in engine/murrini/compoundShapes.js.
-  cross: () => (
-    <>
-      {[[80, 46], [114, 80], [80, 114], [46, 80]].map(([cx, cy], i) => (
-        <circle key={i} cx={cx} cy={cy} r="22" fill={ACCENT} />
-      ))}
-      <circle cx="80" cy="80" r="28" fill={BASE} />
-    </>
-  ),
+  // A square grid of canes -- same math as buildGridSpecs in
+  // engine/murrini/compoundShapes.js.
+  grid: () => {
+    const sideCount = 3
+    const extent = 55
+    const caneRadius = extent / sideCount
+    const cells = []
+    for (let i = 0; i < sideCount; i++) {
+      for (let j = 0; j < sideCount; j++) {
+        cells.push(
+          <circle
+            key={`${i}-${j}`}
+            cx={80 + (-extent + caneRadius + 2 * caneRadius * i)}
+            cy={80 + (-extent + caneRadius + 2 * caneRadius * j)}
+            r={caneRadius}
+            fill={(i + j) % 2 === 0 ? BASE : ACCENT}
+          />,
+        )
+      }
+    }
+    return <>{cells}</>
+  },
+  // A square center cane framed by small round canes along its perimeter
+  // -- same math as buildFrameSpecs in engine/murrini/compoundShapes.js.
+  frame: () => {
+    const sideCount = 3
+    const extent = 55
+    const caneRadius = extent / (sideCount + 1)
+    const centerHalfExtent = caneRadius * (sideCount - 1)
+    const frameHalfExtent = caneRadius * sideCount
+    const offsets = Array.from(
+      { length: sideCount },
+      (_, i) => -frameHalfExtent + caneRadius + i * 2 * caneRadius,
+    )
+    const frameCanes = []
+    for (const t of offsets) {
+      const positions = [
+        [t, -frameHalfExtent],
+        [frameHalfExtent, t],
+        [-t, frameHalfExtent],
+        [-frameHalfExtent, -t],
+      ]
+      for (const [dx, dy] of positions) {
+        frameCanes.push(
+          <circle key={`${dx}-${dy}`} cx={80 + dx} cy={80 + dy} r={caneRadius} fill={ACCENT} />,
+        )
+      }
+    }
+    return (
+      <>
+        <rect
+          x={80 - centerHalfExtent}
+          y={80 - centerHalfExtent}
+          width={centerHalfExtent * 2}
+          height={centerHalfExtent * 2}
+          fill={BASE}
+        />
+        {frameCanes}
+      </>
+    )
+  },
   // A handful of already-pulled canes packed together before the whole
   // bundle is fused and redrawn as one composite rod.
   bundle: () => (
