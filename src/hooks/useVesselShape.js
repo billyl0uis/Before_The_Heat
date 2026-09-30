@@ -12,6 +12,16 @@ export function useVesselShape() {
     setParams((prev) => ({ ...prev, [key]: value }))
   }, [])
 
+  // Applies several params at once (a named form preset) as one state
+  // update, and drops back to Parametric mode so the new values actually
+  // take effect immediately (a preset set while in Free-form would
+  // otherwise silently do nothing, since free-form ignores params in
+  // favor of controlRadii until you exit it).
+  const applyPreset = useCallback((patch) => {
+    setParams((prev) => ({ ...prev, ...patch }))
+    setFreeform(false)
+  }, [])
+
   const setControlRadius = useCallback((index, value) => {
     setControlRadii((prev) => {
       const next = [...prev]
@@ -40,6 +50,7 @@ export function useVesselShape() {
   return {
     params,
     setParam,
+    applyPreset,
     reset,
     freeform,
     enterFreeform,

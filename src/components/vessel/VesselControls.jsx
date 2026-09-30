@@ -1,3 +1,5 @@
+import { VESSEL_FORM_PRESETS } from '../../engine/vessel/profile'
+
 const PROFILE_CONTROLS = [
   { key: 'height', label: 'Height', min: 80, max: 320, step: 5 },
   { key: 'baseRadius', label: 'Base radius', min: 5, max: 100, step: 1 },
@@ -42,6 +44,7 @@ function ControlSlider({ control, value, onChange }) {
 export function VesselControls({
   params,
   onParamChange,
+  onApplyPreset,
   onReset,
   freeform,
   onEnterFreeform,
@@ -49,6 +52,27 @@ export function VesselControls({
 }) {
   return (
     <div className="flex w-64 flex-col gap-4 rounded-lg border border-neutral-800 bg-neutral-900 p-5">
+      <div className="flex flex-col gap-2">
+        <p className="text-base text-neutral-300">Vessel Form</p>
+        <div className="flex flex-wrap gap-2">
+          {Object.entries(VESSEL_FORM_PRESETS).map(([key, preset]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => onApplyPreset(preset.params)}
+              className="rounded bg-neutral-800 px-3 py-1.5 text-base text-neutral-300 hover:bg-neutral-700"
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+        <p className="text-sm text-neutral-500">
+          Standard vessel archetypes, also cataloged by name in glass-cane
+          design software (VirtualGlass) — a starting point for the sliders
+          below, not a locked shape.
+        </p>
+      </div>
+
       <div className="flex gap-2">
         <button
           type="button"

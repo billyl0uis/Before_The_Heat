@@ -29,6 +29,7 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
   const {
     params,
     setParam,
+    applyPreset,
     reset,
     freeform,
     enterFreeform,
@@ -249,6 +250,7 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
         <VesselControls
           params={params}
           onParamChange={setParam}
+          onApplyPreset={applyPreset}
           onReset={reset}
           freeform={freeform}
           onEnterFreeform={enterFreeform}

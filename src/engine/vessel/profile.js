@@ -19,6 +19,87 @@ export const DEFAULT_VESSEL_PARAMS = {
   ribTwist: 0,
 }
 
+// Named starting shapes for the sliders above. VirtualGlass's own blown-
+// piece model (PieceTemplate::Type, piecetemplate.h) independently
+// catalogs these same five named vessel forms -- Tumbler, Bowl, Vase, Pot,
+// Plate -- as its standard presets, confirming they're the real, standard
+// archetypes worth offering here too. It also stores each one as an exact
+// hand-drawn Bezier control curve (piece.cpp), but that curve's coordinate
+// system and scale aren't documented anywhere reachable, so rather than
+// guess at numbers I can't verify, these presets are built from this app's
+// own well-understood sliders instead -- real vessel-form knowledge, not a
+// claimed reproduction of VirtualGlass's exact geometry. (VirtualGlass
+// also has a sixth template, Fishtrap -- a distinctly unusual form left
+// out here rather than guessed at.)
+export const VESSEL_FORM_PRESETS = {
+  tumbler: {
+    label: 'Tumbler',
+    params: {
+      height: 130,
+      baseRadius: 48,
+      topRadius: 50,
+      bulge: 0,
+      sphereBlend: 0,
+      waveAmplitude: 0,
+      ribAmplitude: 0,
+    },
+  },
+  bowl: {
+    label: 'Bowl',
+    params: {
+      height: 70,
+      baseRadius: 14,
+      topRadius: 95,
+      bulge: -5,
+      sphereBlend: 0.4,
+      waveAmplitude: 0,
+      ribAmplitude: 0,
+    },
+  },
+  vase: {
+    label: 'Vase',
+    params: {
+      height: 220,
+      baseRadius: 30,
+      topRadius: 35,
+      bulge: 40,
+      sphereBlend: 0,
+      waveAmplitude: 0,
+      ribAmplitude: 0,
+    },
+  },
+  pot: {
+    label: 'Pot',
+    params: {
+      height: 150,
+      baseRadius: 45,
+      topRadius: 28,
+      bulge: 35,
+      sphereBlend: 0,
+      waveAmplitude: 0,
+      ribAmplitude: 0,
+    },
+  },
+  plate: {
+    label: 'Plate',
+    params: {
+      // A LatheGeometry only revolves the profile curve itself -- it
+      // doesn't cap either end with a flat disc -- so baseRadius has to
+      // actually reach near the central axis, not just "small," or the
+      // result is a hollow open ring instead of a solid plate (caught by
+      // actually rendering this preset, not just picking numbers that
+      // sounded plate-shaped).
+      height: 25,
+      baseRadius: 4,
+      topRadius: 95,
+      bulge: 0,
+      sphereBlend: 0.1,
+      waveAmplitude: 0,
+      ribAmplitude: 0,
+    },
+  },
+}
+
 const MIN_RADIUS = 2
 const PROFILE_SAMPLES = 64
 
