@@ -114,7 +114,7 @@ export const MURRINI_TECHNIQUES = {
   zanfirico: {
     title: 'Zanfirico (Twisted Latticino)',
     summary:
-      "Real zanfirico/filigrana a retorti canes use several thin threads laid evenly around a core cylinder's circumference — not just one — then a layer of clear glass is gathered over the whole threaded core to lock the threads in place before anything is twisted. Only then is the cased bundle twisted as it's pulled, turning the straight parallel threads into the classic corkscrew lattice.",
+      "Real zanfirico/filigrana a retorti canes use several thin threads laid evenly around a core cylinder's circumference — not just one, and packed edge-to-edge touching their neighbors, not loosely scattered — then a layer of clear glass is gathered over the whole threaded core to lock the threads in place before anything is twisted. Only then is the cased bundle twisted as it's pulled, turning the straight parallel threads into the classic corkscrew lattice.",
     steps: [
       'Gather the core color onto a punty (often clear, but any color works).',
       "Lay several thin threads of the accent color evenly spaced around the core's circumference and marver them in so they fuse to the surface.",
@@ -136,23 +136,45 @@ export const MURRINI_TECHNIQUES = {
   tripod: {
     title: 'Tripod Bundle',
     summary:
-      "Three already-pulled canes packed edge-to-edge in a tight triangle, then fused and drawn out as one new rod — the same bundling process as any other composite cane, just with this specific three-cane count and arrangement. It's common enough to be a named, cataloged preset in glass-cane design software (VirtualGlass lists it as one of its built-in cane templates).",
+      "A center cane surrounded by a ring of three more canes, all the same diameter, packed so every cane touches its neighbors — not just three canes alone with no center. Glass-cane design software (VirtualGlass) models Tripod and Cross as the same underlying template (a center plus one or more rings of canes), differing only in how many canes wrap each ring — three here. A second ring can be added further out for a denser bundle.",
     steps: [
-      'Pull three canes of matching diameter, in whatever colors the pattern needs.',
-      'Pack the three canes together so each touches the other two, forming a tight triangle in cross-section.',
+      'Pull a center cane and three (or more, in a second ring) outer canes, all matching diameter.',
+      'Pack the outer canes around the center one so each touches its neighbors, forming a tight ring.',
       'Fuse the bundle with a reheat, then draw it out from both ends into one smaller-diameter composite rod.',
-      'Slice the cooled rod crosswise — every slice shows the same three-way arrangement.',
+      'Slice the cooled rod crosswise — every slice shows the same ringed arrangement.',
     ],
   },
   cross: {
     title: 'Cross Bundle',
     summary:
-      'A center cane surrounded by four more canes packed at north, south, east, and west, so the fused bundle reads as a plus-shaped cross in cross-section. Cross and star motifs are a recognized family of historical Venetian murrini patterns, and this specific five-cane layout is also cataloged as a named cane template in glass-cane design software (VirtualGlass).',
+      'A center cane surrounded by a ring of four more canes at north, south, east, and west, so the fused bundle reads as a plus-shaped cross in cross-section. Cross and star motifs are a recognized family of historical Venetian murrini patterns, and glass-cane design software (VirtualGlass) models this as the same template as Tripod — a center plus one or more rings — just with four canes per ring instead of three.',
     steps: [
-      'Pull a center cane and four outer canes of matching diameter.',
-      'Pack the four outer canes against the center one at the four compass points, so the group forms a plus/cross shape.',
+      'Pull a center cane and four (or more, in a second ring) outer canes, all matching diameter.',
+      'Pack the outer canes against the center one at the four compass points, so the group forms a plus/cross shape.',
       'Fuse the bundle with a reheat, then draw it out from both ends into one smaller-diameter composite rod.',
       'Slice the cooled rod crosswise — every slice shows the same cross-shaped arrangement.',
+    ],
+  },
+  row: {
+    title: 'Row Bundle',
+    summary:
+      "Several already-pulled canes packed edge-to-edge in a straight line rather than a radial cluster, then fused and drawn out as one new rod. A genuinely different real arrangement from Tripod/Cross's rings, not just a cosmetic variant — glass-cane design software (VirtualGlass) catalogs it as its own named template (\"Horizontal Line\").",
+    steps: [
+      'Pull each cane in the row to matching diameter.',
+      'Line the canes up edge-to-edge in a single row, alternating colors as wanted.',
+      'Fuse the row with a reheat, then draw it out from both ends into one smaller-diameter composite rod.',
+      'Slice the cooled rod crosswise — every slice shows the same linear stripe arrangement.',
+    ],
+  },
+  grid: {
+    title: 'Square Grid Bundle',
+    summary:
+      'A square grid of already-pulled canes — every row and column the same count — fused and drawn out as one new composite rod, reading as a checkerboard in cross-section. Glass-cane design software (VirtualGlass) catalogs this as its own named template ("Square of Circles"), distinct from a radial bundle like Tripod/Cross or a single line like the Row Bundle.',
+    steps: [
+      'Pull every cane in the grid to matching diameter.',
+      'Arrange the canes in a square grid, alternating colors in a checkerboard pattern.',
+      'Fuse the grid with a reheat, then draw it out from both ends into one smaller-diameter composite rod.',
+      'Slice the cooled rod crosswise — every slice shows the same grid arrangement.',
     ],
   },
   bundle: {
