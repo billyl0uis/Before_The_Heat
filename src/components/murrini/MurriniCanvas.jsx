@@ -10,6 +10,36 @@ function disposeGroupChildren(group) {
   }
 }
 
+// Shared by both the setup effect and the elements effect below, so a
+// freshly (re)created group always gets the current elements drawn into
+// it immediately -- not just whenever the `elements` prop itself changes.
+// Without this, a resize-triggered scene rebuild (see renderWidth/
+// renderHeight below) recreates an empty group that never gets
+// repopulated, since the elements effect's own deps wouldn't consider
+// that a reason to re-run -- the whole placed pattern would silently
+// vanish until something actually changed `elements` again.
+function populateGroup(group, elements) {
+  disposeGroupChildren(group)
+  group.clear()
+
+  for (const element of elements) {
+    const definition = SHAPE_TYPES[element.shape]
+    if (!definition) continue
+
+    const shape = definition.createShape(element.params)
+    const geometry = new THREE.ShapeGeometry(shape)
+    const material = new THREE.MeshBasicMaterial({
+      color: element.color,
+      transparent: element.opacity < 1,
+      opacity: element.opacity,
+    })
+    const mesh = new THREE.Mesh(geometry, material)
+    mesh.position.set(element.x, element.y, 0)
+    mesh.rotation.z = (element.rotation * Math.PI) / 180
+    group.add(mesh)
+  }
+}
+
 export function MurriniCanvas({
   canvas,
   elements,
@@ -34,6 +64,12 @@ export function MurriniCanvas({
   const cameraRef = useRef(null)
   const previewMeshRef = useRef(null)
   const onPlaceRef = useRef(onPlace)
+  // Read by the setup effect below so it can immediately repopulate a
+  // freshly (re)created group with whatever's currently placed, without
+  // making `elements` a dependency of that effect (which would tear down
+  // and rebuild the whole WebGL context on every shape placed, instead of
+  // just on an actual canvas/size change).
+  const elementsRef = useRef(elements)
   // Read by the pointermove handler below, which is set up once (its
   // effect doesn't depend on `preview`) — a compound tool (jellyroll,
   // pinwheel) isn't a single SHAPE_TYPES entry, so there's no one ghost
@@ -49,6 +85,10 @@ export function MurriniCanvas({
   useEffect(() => {
     onPlaceRef.current = onPlace
   }, [onPlace])
+
+  useEffect(() => {
+    elementsRef.current = elements
+  }, [elements])
 
   useEffect(() => {
     previewShapeKeyRef.current = preview.shape
@@ -87,6 +127,7 @@ export function MurriniCanvas({
 
     const group = new THREE.Group()
     scene.add(group)
+    populateGroup(group, elementsRef.current)
 
     // Ghost of whatever shape/color is about to be placed, following the
     // cursor so you can see exactly where and what will land before you
@@ -160,26 +201,7 @@ export function MurriniCanvas({
     const group = groupRef.current
     if (!group || webglFailed) return
 
-    disposeGroupChildren(group)
-    group.clear()
-
-    for (const element of elements) {
-      const definition = SHAPE_TYPES[element.shape]
-      if (!definition) continue
-
-      const shape = definition.createShape(element.params)
-      const geometry = new THREE.ShapeGeometry(shape)
-      const material = new THREE.MeshBasicMaterial({
-        color: element.color,
-        transparent: element.opacity < 1,
-        opacity: element.opacity,
-      })
-      const mesh = new THREE.Mesh(geometry, material)
-      mesh.position.set(element.x, element.y, 0)
-      mesh.rotation.z = (element.rotation * Math.PI) / 180
-      group.add(mesh)
-    }
-
+    populateGroup(group, elements)
     rendererRef.current.render(sceneRef.current, cameraRef.current)
   }, [elements, webglFailed])
 
