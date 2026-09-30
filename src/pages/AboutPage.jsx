@@ -48,7 +48,7 @@ export function AboutPage() {
     <div className="flex flex-col items-center gap-6 p-4 sm:p-8">
       <div className="max-w-2xl text-center">
         <h1 className="text-2xl font-medium text-neutral-100">About This Project</h1>
-        <p className="mt-1 text-base leading-relaxed text-neutral-400">
+        <p className="mt-1 text-left text-base leading-relaxed text-neutral-400">
           The cane and murrini techniques this app simulates are real, not
           invented. They're inspired by the work of glass artists Wes
           Hunting and his son Wesley Hunting, and corrected/extended

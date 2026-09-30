@@ -98,7 +98,7 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
         <h1 className="text-2xl font-medium text-neutral-100">
           Vessel Morphograph
         </h1>
-        <p className="text-base leading-relaxed text-neutral-400">
+        <p className="text-left text-base leading-relaxed text-neutral-400">
           Sculpt a vessel silhouette from math — taper, bulge, a spherical
           blend, and a surface ripple. Drag to orbit, scroll to zoom.
         </p>
