@@ -250,6 +250,45 @@ const DIAGRAMS = {
     }
     return <>{cells}</>
   },
+  // A square center cane framed by small round canes along its perimeter
+  // -- same math as buildFrameSpecs in engine/murrini/compoundShapes.js.
+  frame: () => {
+    const sideCount = 3
+    const extent = 55
+    const caneRadius = extent / (sideCount + 1)
+    const centerHalfExtent = caneRadius * (sideCount - 1)
+    const frameHalfExtent = caneRadius * sideCount
+    const offsets = Array.from(
+      { length: sideCount },
+      (_, i) => -frameHalfExtent + caneRadius + i * 2 * caneRadius,
+    )
+    const frameCanes = []
+    for (const t of offsets) {
+      const positions = [
+        [t, -frameHalfExtent],
+        [frameHalfExtent, t],
+        [-t, frameHalfExtent],
+        [-frameHalfExtent, -t],
+      ]
+      for (const [dx, dy] of positions) {
+        frameCanes.push(
+          <circle key={`${dx}-${dy}`} cx={80 + dx} cy={80 + dy} r={caneRadius} fill={ACCENT} />,
+        )
+      }
+    }
+    return (
+      <>
+        <rect
+          x={80 - centerHalfExtent}
+          y={80 - centerHalfExtent}
+          width={centerHalfExtent * 2}
+          height={centerHalfExtent * 2}
+          fill={BASE}
+        />
+        {frameCanes}
+      </>
+    )
+  },
   // A handful of already-pulled canes packed together before the whole
   // bundle is fused and redrawn as one composite rod.
   bundle: () => (

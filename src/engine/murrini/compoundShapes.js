@@ -62,6 +62,14 @@ export const COMPOUND_SHAPE_TYPES = {
       { key: 'sideCount', label: 'Canes per side', min: 2, max: 4, step: 1 },
     ],
   },
+  frame: {
+    label: 'Frame',
+    defaultParams: { extent: 40, sideCount: 3 },
+    controls: [
+      { key: 'extent', label: 'Frame size', min: 20, max: 70, step: 2 },
+      { key: 'sideCount', label: 'Canes per side', min: 2, max: 4, step: 1 },
+    ],
+  },
 }
 
 export const COMPOUND_SHAPE_ORDER = [
@@ -72,6 +80,7 @@ export const COMPOUND_SHAPE_ORDER = [
   'cross',
   'row',
   'grid',
+  'frame',
 ]
 
 // The jellyroll: a casing color gathered over a coiled strip (the real
@@ -323,6 +332,67 @@ function buildGridSpecs(x, y, { extent, sideCount }, colors) {
   return specs
 }
 
+// A square center cane framed by a ring of small round canes evenly spaced
+// along its perimeter (VirtualGlass's "Surrounding Square" cane template)
+// -- a genuinely different real arrangement from Tripod/Cross (a radial
+// ring around a point) or Grid (a uniform checkerboard): here the center
+// is a SQUARE cane, and the frame canes are sized/spaced to sit tangent to
+// its perimeter. `caneRadius = extent/(sideCount+1)` and
+// `centerHalfExtent = caneRadius*(sideCount-1)` reproduce VirtualGlass's
+// own proportions (its `radius/(sideCount+1)` and
+// `2*littleRadius*(sideCount-1)` diameter), just placing the frame canes
+// at evenly-spaced fractional positions along each side instead of
+// replicating its corner-doubling iteration order, which existed there
+// only to keep subcane indices stable across live parameter edits -- not
+// something this tool needs, since each click places a fresh, complete
+// frame.
+function buildFrameSpecs(x, y, { extent, sideCount }, colors) {
+  const compoundId = crypto.randomUUID()
+  const caneRadius = extent / (sideCount + 1)
+  const centerHalfExtent = caneRadius * (sideCount - 1)
+  const frameHalfExtent = caneRadius * sideCount
+
+  const specs = [
+    {
+      shape: 'square',
+      x,
+      y,
+      params: { width: centerHalfExtent * 2, height: centerHalfExtent * 2 },
+      color: colors.primary.swatch,
+      colorantId: colors.primary.id,
+      compoundId,
+      compoundType: 'frame',
+    },
+  ]
+
+  const offsets = Array.from(
+    { length: sideCount },
+    (_, i) => -frameHalfExtent + caneRadius + i * 2 * caneRadius,
+  )
+  for (const t of offsets) {
+    const positions = [
+      [t, -frameHalfExtent],
+      [frameHalfExtent, t],
+      [-t, frameHalfExtent],
+      [-frameHalfExtent, -t],
+    ]
+    for (const [dx, dy] of positions) {
+      specs.push({
+        shape: 'circle',
+        x: x + dx,
+        y: y + dy,
+        params: { radius: caneRadius },
+        color: colors.accent.swatch,
+        colorantId: colors.accent.id,
+        compoundId,
+        compoundType: 'frame',
+      })
+    }
+  }
+
+  return specs
+}
+
 // colors: { primary, accent, casing }, each { swatch, id }.
 export function buildCompoundElements(type, x, y, params, colors) {
   if (type === 'jellyroll') return buildJellyrollSpecs(x, y, params, colors)
@@ -332,5 +402,6 @@ export function buildCompoundElements(type, x, y, params, colors) {
   if (type === 'cross') return buildRingedBundleSpecs(x, y, params, colors, 4, 'cross')
   if (type === 'row') return buildRowSpecs(x, y, params, colors)
   if (type === 'grid') return buildGridSpecs(x, y, params, colors)
+  if (type === 'frame') return buildFrameSpecs(x, y, params, colors)
   return []
 }

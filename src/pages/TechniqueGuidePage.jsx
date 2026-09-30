@@ -24,6 +24,7 @@ const TECHNIQUE_ORDER = [
   { key: 'cross', params: {} },
   { key: 'row', params: {} },
   { key: 'grid', params: {} },
+  { key: 'frame', params: {} },
   { key: 'bundle', params: {} },
 ]
 

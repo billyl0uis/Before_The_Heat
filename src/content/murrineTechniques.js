@@ -177,6 +177,17 @@ export const MURRINI_TECHNIQUES = {
       'Slice the cooled rod crosswise — every slice shows the same grid arrangement.',
     ],
   },
+  frame: {
+    title: 'Surrounding Square Bundle',
+    summary:
+      'A square center cane framed by a ring of small round canes evenly spaced along its perimeter, fused and drawn out as one new composite rod. Genuinely different from a radial ring like Tripod/Cross (framing a POINT) or a uniform checkerboard like the Cane Grid (all one shape) — here a square cane is framed by round ones. Glass-cane design software (VirtualGlass) catalogs this as its own named template ("Surrounding Square").',
+    steps: [
+      'Marver the center cane into a square cross-section (see Marvering) and pull the small round frame canes to matching diameter.',
+      "Pack the round canes evenly along all four sides of the square cane's perimeter, each touching its neighbors.",
+      'Fuse the bundle with a reheat, then draw it out from both ends into one smaller-diameter composite rod.',
+      'Slice the cooled rod crosswise — every slice shows the same framed-square arrangement.',
+    ],
+  },
   bundle: {
     title: 'Bundling Canes',
     summary:
