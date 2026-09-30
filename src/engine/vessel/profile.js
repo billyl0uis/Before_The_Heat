@@ -8,51 +8,198 @@ export const DEFAULT_VESSEL_PARAMS = {
   sphereBlend: 0,
   waveAmplitude: 0,
   waveFrequency: 8,
+  // Optic ribs: real glass-cane design software (VirtualGlass) gives its
+  // blown-piece model ("Piece", piece.h) its own twist_ field, distinct
+  // from the Cane class's -- the whole-vessel analog of twisting a rod
+  // while pulling it, and the real technique behind spiral/"barley twist"
+  // ribbed vessels. ribAmplitude 0 means no ribs (identical to every
+  // vessel this app made before this feature existed).
+  ribAmplitude: 0,
+  ribCount: 8,
+  ribTwist: 0,
+}
+
+// Named starting shapes for the sliders above. VirtualGlass's own blown-
+// piece model (PieceTemplate::Type, piecetemplate.h) independently
+// catalogs these same five named vessel forms -- Tumbler, Bowl, Vase, Pot,
+// Plate -- as its standard presets, confirming they're the real, standard
+// archetypes worth offering here too. It also stores each one as an exact
+// hand-drawn Bezier control curve (piece.cpp), but that curve's coordinate
+// system and scale aren't documented anywhere reachable, so rather than
+// guess at numbers I can't verify, these presets are built from this app's
+// own well-understood sliders instead -- real vessel-form knowledge, not a
+// claimed reproduction of VirtualGlass's exact geometry. (VirtualGlass
+// also has a sixth template, Fishtrap -- a distinctly unusual form left
+// out here rather than guessed at.)
+export const VESSEL_FORM_PRESETS = {
+  tumbler: {
+    label: 'Tumbler',
+    params: {
+      height: 130,
+      baseRadius: 48,
+      topRadius: 50,
+      bulge: 0,
+      sphereBlend: 0,
+      waveAmplitude: 0,
+      ribAmplitude: 0,
+    },
+  },
+  bowl: {
+    label: 'Bowl',
+    params: {
+      height: 70,
+      baseRadius: 14,
+      topRadius: 95,
+      bulge: -5,
+      sphereBlend: 0.4,
+      waveAmplitude: 0,
+      ribAmplitude: 0,
+    },
+  },
+  vase: {
+    label: 'Vase',
+    params: {
+      height: 220,
+      baseRadius: 30,
+      topRadius: 35,
+      bulge: 40,
+      sphereBlend: 0,
+      waveAmplitude: 0,
+      ribAmplitude: 0,
+    },
+  },
+  pot: {
+    label: 'Pot',
+    params: {
+      height: 150,
+      baseRadius: 45,
+      topRadius: 28,
+      bulge: 35,
+      sphereBlend: 0,
+      waveAmplitude: 0,
+      ribAmplitude: 0,
+    },
+  },
+  plate: {
+    label: 'Plate',
+    params: {
+      // A LatheGeometry only revolves the profile curve itself -- it
+      // doesn't cap either end with a flat disc -- so baseRadius has to
+      // actually reach near the central axis, not just "small," or the
+      // result is a hollow open ring instead of a solid plate (caught by
+      // actually rendering this preset, not just picking numbers that
+      // sounded plate-shaped).
+      height: 25,
+      baseRadius: 4,
+      topRadius: 95,
+      bulge: 0,
+      sphereBlend: 0.1,
+      waveAmplitude: 0,
+      ribAmplitude: 0,
+    },
+  },
 }
 
 const MIN_RADIUS = 2
 const PROFILE_SAMPLES = 64
 
-// The vessel wall is one radius-as-a-function-of-height curve, built from
-// a few blended mathematical primitives — this is the "morphograph":
+// The height-only part of the vessel wall -- a few blended mathematical
+// primitives, this is the "morphograph":
 //  - taper: a straight line from baseRadius to topRadius (a cone/cylinder)
 //  - parabola: sin(pi*t) is zero at both ends and peaks at the middle, so
 //    it reads as a smooth belly (bulge > 0) or waist (bulge < 0)
 //  - sphereArc: sqrt(1 - (2t-1)^2) traces an actual semicircle, so
 //    sphereBlend adds a true round, globe-like silhouette rather than an
 //    approximation
-//  - ripple: a sine wave along the height, for a ribbed/wavy surface
-export function computeProfilePoints(params) {
-  const {
-    height,
-    baseRadius,
-    topRadius,
-    bulge,
-    sphereBlend,
-    waveAmplitude,
-    waveFrequency,
-  } = params
+//  - ripple: a sine wave along the height, for a corrugated/banded
+//    profile -- horizontal rings, since a LatheGeometry revolves this
+//    curve uniformly around the axis. Genuinely different from the
+//    angle-dependent optic ribs below, which a lathe can't produce at
+//    all (every point at a given height has the same radius, by
+//    definition of a lathe/revolve).
+export function computeProfileRadius(params, t) {
+  const { baseRadius, topRadius, bulge, sphereBlend, waveAmplitude, waveFrequency } = params
+  const taper = baseRadius + (topRadius - baseRadius) * t
+  const parabola = bulge * Math.sin(Math.PI * t)
+  const sphereArc =
+    sphereBlend *
+    Math.max(baseRadius, topRadius) *
+    Math.sqrt(Math.max(0, 1 - (2 * t - 1) ** 2))
+  const ripple = waveAmplitude * Math.sin(waveFrequency * t * Math.PI * 2)
+  return Math.max(MIN_RADIUS, taper + parabola + sphereArc + ripple)
+}
 
+export function computeProfilePoints(params) {
   const points = []
   for (let i = 0; i <= PROFILE_SAMPLES; i++) {
     const t = i / PROFILE_SAMPLES
-    const taper = baseRadius + (topRadius - baseRadius) * t
-    const parabola = bulge * Math.sin(Math.PI * t)
-    const sphereArc =
-      sphereBlend *
-      Math.max(baseRadius, topRadius) *
-      Math.sqrt(Math.max(0, 1 - (2 * t - 1) ** 2))
-    const ripple = waveAmplitude * Math.sin(waveFrequency * t * Math.PI * 2)
-
-    const radius = Math.max(MIN_RADIUS, taper + parabola + sphereArc + ripple)
-    points.push(new THREE.Vector2(radius, t * height))
+    points.push(new THREE.Vector2(computeProfileRadius(params, t), t * params.height))
   }
   return points
 }
 
+// A true optic-rib/twist surface needs radius as a function of BOTH
+// height and angle, which LatheGeometry structurally cannot express (it
+// revolves one 2D profile identically all the way around) -- so this
+// builds the surface directly as a height x angle grid instead of
+// revolving a curve. `radiusAtT` is whichever profile is active
+// (parametric formula or the free-form spline), kept generic so ribbing
+// works identically in both modes. `ribTwist` spirals the rib phase
+// progressively with height -- 0 gives straight vertical ribs (a real
+// "optic mold" vessel), nonzero gives the classic spiral/twist look.
+function createRibbedVesselGeometry(
+  radiusAtT,
+  height,
+  { ribAmplitude, ribCount, ribTwist },
+  radialSegments = 48,
+  heightSegments = 64,
+) {
+  const positions = []
+  const uvs = []
+  const indices = []
+  const twistRadPerT = (ribTwist * Math.PI) / 180
+
+  for (let i = 0; i <= heightSegments; i++) {
+    const t = i / heightSegments
+    const y = t * height
+    const twist = twistRadPerT * t
+    for (let j = 0; j <= radialSegments; j++) {
+      const theta = (j / radialSegments) * Math.PI * 2
+      const rib = ribAmplitude * Math.cos(ribCount * theta - twist)
+      const radius = Math.max(MIN_RADIUS, radiusAtT(t) + rib)
+      positions.push(Math.cos(theta) * radius, y, Math.sin(theta) * radius)
+      uvs.push(j / radialSegments, t)
+    }
+  }
+
+  const stride = radialSegments + 1
+  for (let i = 0; i < heightSegments; i++) {
+    for (let j = 0; j < radialSegments; j++) {
+      const a = i * stride + j
+      const b = a + stride
+      indices.push(a, b, a + 1, b, b + 1, a + 1)
+    }
+  }
+
+  const geometry = new THREE.BufferGeometry()
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
+  geometry.setIndex(indices)
+  geometry.computeVertexNormals()
+  return geometry
+}
+
 export function createVesselGeometry(params, radialSegments = 48) {
-  const profilePoints = computeProfilePoints(params)
-  return new THREE.LatheGeometry(profilePoints, radialSegments)
+  if (!params.ribAmplitude) {
+    const profilePoints = computeProfilePoints(params)
+    return new THREE.LatheGeometry(profilePoints, radialSegments)
+  }
+  return createRibbedVesselGeometry(
+    (t) => computeProfileRadius(params, t),
+    params.height,
+    params,
+    radialSegments,
+  )
 }
 
 // How many draggable control points the free-form profile editor exposes.
@@ -150,9 +297,18 @@ export function computeCustomProfilePoints(controlRadii, height) {
   )
 }
 
-export function createCustomVesselGeometry(controlRadii, height, radialSegments = 48) {
-  const profilePoints = computeCustomProfilePoints(controlRadii, height)
-  return new THREE.LatheGeometry(profilePoints, radialSegments)
+export function createCustomVesselGeometry(controlRadii, height, radialSegments = 48, ribParams) {
+  if (!ribParams?.ribAmplitude) {
+    const profilePoints = computeCustomProfilePoints(controlRadii, height)
+    return new THREE.LatheGeometry(profilePoints, radialSegments)
+  }
+  const tangents = computeMonotonicTangents(controlRadii)
+  return createRibbedVesselGeometry(
+    (t) => Math.max(MIN_RADIUS, hermiteAt(controlRadii, tangents, t * (controlRadii.length - 1))),
+    height,
+    ribParams,
+    radialSegments,
+  )
 }
 
 // Snapshots whatever the current formula-based profile looks like into

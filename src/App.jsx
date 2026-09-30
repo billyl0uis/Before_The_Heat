@@ -28,8 +28,8 @@ const TechniqueGuidePage = lazy(() =>
 const DesignVaultPage = lazy(() =>
   import('./pages/DesignVaultPage').then((m) => ({ default: m.DesignVaultPage })),
 )
-const InspirationPage = lazy(() =>
-  import('./pages/InspirationPage').then((m) => ({ default: m.InspirationPage })),
+const AboutPage = lazy(() =>
+  import('./pages/AboutPage').then((m) => ({ default: m.AboutPage })),
 )
 const FreeSculptPage = lazy(() =>
   import('./pages/FreeSculptPage').then((m) => ({ default: m.FreeSculptPage })),
@@ -42,7 +42,7 @@ const TABS = [
   { key: 'colors', label: 'Color Index' },
   { key: 'techniques', label: 'Technique Guide' },
   { key: 'vault', label: 'Design Vault' },
-  { key: 'inspiration', label: 'Inspiration' },
+  { key: 'about', label: 'About' },
 ]
 
 function TabLoadingFallback() {
@@ -96,7 +96,7 @@ function App() {
           {activeTab === 'sculpt' && <FreeSculptPage />}
           {activeTab === 'colors' && <ColorIndexPage />}
           {activeTab === 'techniques' && <TechniqueGuidePage />}
-          {activeTab === 'inspiration' && <InspirationPage />}
+          {activeTab === 'about' && <AboutPage />}
           {activeTab === 'vault' && (
             <DesignVaultPage
               design={design}

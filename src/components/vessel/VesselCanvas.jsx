@@ -165,7 +165,7 @@ export function VesselCanvas({
 
     mesh.geometry.dispose()
     mesh.geometry = freeform
-      ? createCustomVesselGeometry(controlRadii, params.height)
+      ? createCustomVesselGeometry(controlRadii, params.height, 48, params)
       : createVesselGeometry(params)
     controls.target.set(0, params.height / 2, 0)
   }, [params, freeform, controlRadii, webglFailed])
