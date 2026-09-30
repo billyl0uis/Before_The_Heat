@@ -11,6 +11,18 @@ const WAVE_CONTROLS = [
   { key: 'waveFrequency', label: 'Ripple count', min: 0, max: 24, step: 1 },
 ]
 
+// Optic ribs: radius varies by angle as well as height, which a lathe
+// can't produce (see engine/vessel/profile.js) -- ribTwist=0 is straight
+// vertical ribs (a real "optic mold" vessel), nonzero spirals them, the
+// classic "barley twist" look. VirtualGlass's own blown-piece model
+// (Piece, piece.h) has a twist_ field for exactly this, distinct from its
+// Cane class's twist -- confirmed real, not invented for this app.
+const RIB_CONTROLS = [
+  { key: 'ribAmplitude', label: 'Rib depth', min: 0, max: 12, step: 0.5 },
+  { key: 'ribCount', label: 'Rib count', min: 3, max: 24, step: 1 },
+  { key: 'ribTwist', label: 'Twist (degrees)', min: -720, max: 720, step: 15 },
+]
+
 function ControlSlider({ control, value, onChange }) {
   return (
     <label className="flex flex-col gap-1 text-base text-neutral-300">
@@ -83,6 +95,23 @@ export function VesselControls({
           />
         ))}
       </fieldset>
+
+      <h2 className="mt-2 text-base font-medium text-neutral-100">Optic Ribs</h2>
+      <div className="flex flex-col gap-4">
+        {RIB_CONTROLS.map((control) => (
+          <ControlSlider
+            key={control.key}
+            control={control}
+            value={params[control.key]}
+            onChange={onParamChange}
+          />
+        ))}
+      </div>
+      <p className="text-sm leading-relaxed text-neutral-500">
+        Works in both Parametric and Free-form — a real vessel-wall
+        technique (angle-dependent radius), not a texture trick, so it
+        applies on top of whatever silhouette is active.
+      </p>
 
       {freeform && (
         <p className="text-base leading-relaxed text-neutral-400">
