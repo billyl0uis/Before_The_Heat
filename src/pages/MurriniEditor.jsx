@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Icon } from '../components/icons'
+import { ModeSwitch } from '../components/ModeSwitch'
 import { CasingPanel } from '../components/murrini/CasingPanel'
 import { ColorChart } from '../components/murrini/ColorChart'
 import { CompatibilityCheck } from '../components/murrini/CompatibilityCheck'
@@ -12,10 +13,11 @@ import { TOOL_KEYS } from '../components/murrini/toolKeys'
 import { ToolRail } from '../components/murrini/ToolRail'
 import { GLASS_COLOR_INDEX } from '../content/glassColorIndex'
 import { buildCompoundElements, COMPOUND_SHAPE_TYPES } from '../engine/murrini/compoundShapes'
-import { casingRings, pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
+import { pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
 import { computeShapeReach, SHAPE_TYPES } from '../engine/murrini/shapes'
 import { buildShopPlan, shopPlanWarnings, usedColorants } from '../engine/murrini/shopPlan'
 import { useResponsiveCanvasSize } from '../hooks/useResponsiveCanvasSize'
+import { useSliceGeometry } from '../hooks/useSliceGeometry'
 
 const DOCK = [
   { key: 'tools', label: 'Tools', icon: 'tools' },
@@ -33,7 +35,7 @@ const RodPreviewCanvas = lazy(() =>
   })),
 )
 
-export function MurriniEditor({ design, onOpenPlan }) {
+export function MurriniEditor({ design, onOpenPlan, onMode }) {
   const {
     canvas,
     elements,
@@ -139,12 +141,7 @@ export function MurriniEditor({ design, onOpenPlan }) {
   // The rod as the canvas draws it: casing rings in world units and the
   // room left inside them for canes. Memoised so the WebGL scene only
   // rebuilds its rings when the rod or casing actually change.
-  const slice = useMemo(() => {
-    const { rings, contentRadius } = casingRings(rod, casing)
-    const groundColor =
-      getComputedStyle(document.documentElement).getPropertyValue('--ground').trim() || '#150b07'
-    return { rings, contentRadius, groundColor }
-  }, [rod, casing])
+  const slice = useSliceGeometry(rod, casing)
 
   // What handlePlace would actually place right now — used to render the
   // hover preview so it always matches the real click outcome exactly.
@@ -337,6 +334,7 @@ export function MurriniEditor({ design, onOpenPlan }) {
               </button>
             ))}
           </div>
+          {onMode && <ModeSwitch mode="advanced" onChange={onMode} className="sm:hidden" />}
           <p className="text-right text-xs text-mute max-sm:hidden">
             True scale · 1 tick = 1 mm · <kbd className="font-mono">⌘Z</kbd> undo
           </p>

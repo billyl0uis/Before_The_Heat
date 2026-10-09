@@ -19,6 +19,20 @@ if (typeof window !== 'undefined') {
 
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
+// The field plays once per browser session, on the first move between
+// sections. After that, switching tabs is instant: a repeated delay is
+// friction, and the moment is only special the first time.
+const PLAYED_KEY = 'before-the-heat:field-played'
+function playedThisSession() {
+  try {
+    if (window.sessionStorage.getItem(PLAYED_KEY)) return true
+    window.sessionStorage.setItem(PLAYED_KEY, '1')
+    return false
+  } catch {
+    return false
+  }
+}
+
 // The signature moment between sections: a freshly rolled cane field that
 // follows the pointer for under a second, then gets out of the way.
 export function LoadingField({ trigger, section, design }) {
@@ -31,7 +45,7 @@ export function LoadingField({ trigger, section, design }) {
   }, [design])
 
   useEffect(() => {
-    if (trigger === 0 || reducedMotion()) return undefined
+    if (trigger === 0 || reducedMotion() || playedThisSession()) return undefined
     const canvas = canvasRef.current
     setMessage((previous) => {
       let next = previous

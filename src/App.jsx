@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { Mark } from './components/icons'
 import { LoadingField } from './components/LoadingField'
+import { ModeSwitch } from './components/ModeSwitch'
 import { computeRepeatedElements } from './engine/murrini/pattern'
 import { useMurriniDesign } from './hooks/useMurriniDesign'
 import { useVesselPattern } from './hooks/useVesselPattern'
@@ -22,6 +23,9 @@ const VesselEditor = lazy(() =>
   import('./pages/VesselEditor').then((m) => ({ default: m.VesselEditor })),
 )
 const PlanPage = lazy(() => import('./pages/PlanPage').then((m) => ({ default: m.PlanPage })))
+const SimpleBuilder = lazy(() =>
+  import('./pages/SimpleBuilder').then((m) => ({ default: m.SimpleBuilder })),
+)
 const LearnPage = lazy(() =>
   import('./pages/LearnPage').then((m) => ({ default: m.LearnPage })),
 )
@@ -44,8 +48,38 @@ function TabLoadingFallback() {
   return <div className="flex justify-center p-16 text-base text-mute">Loading…</div>
 }
 
+const MODE_KEY = 'before-the-heat:mode'
+
+function readMode() {
+  try {
+    return window.localStorage.getItem(MODE_KEY) === 'advanced' ? 'advanced' : 'simple'
+  } catch {
+    return 'simple'
+  }
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState('murrini')
+  // Simple is the guided recipe flow; Advanced is the full editor. Both
+  // edit the same design, so switching never loses anything.
+  const [mode, setModeState] = useState(readMode)
+  const setMode = (next) => {
+    setModeState(next)
+    try {
+      window.localStorage.setItem(MODE_KEY, next)
+    } catch {
+      // The choice just won't be remembered.
+    }
+    if (activeTab !== 'murrini') goTo('murrini')
+  }
+  const openPlan = (view) => {
+    try {
+      window.localStorage.setItem('before-the-heat:plan-view', view)
+    } catch {
+      // PlanPage falls back to the print sheet.
+    }
+    goTo('plan')
+  }
   // Bumped on every tab change so the loading field rolls a fresh hand.
   const [transition, setTransition] = useState(0)
 
@@ -121,7 +155,8 @@ function App() {
             </button>
           ))}
         </nav>
-        <p className="ml-auto hidden shrink-0 items-center gap-2 text-sm text-mute md:flex" role="status">
+        <ModeSwitch mode={mode} onChange={setMode} className="ml-auto max-sm:hidden" />
+        <p className="hidden shrink-0 items-center gap-2 text-sm text-mute lg:flex" role="status">
           <span
             className={`h-2 w-2 rounded-full ${murriniHook.savedLocally ? 'bg-accent-2' : 'bg-faint'}`}
           />
@@ -131,9 +166,12 @@ function App() {
       <LoadingField trigger={transition} section={activeTab} design={design} />
       <ErrorBoundary key={activeTab}>
         <Suspense fallback={<TabLoadingFallback />}>
-          {activeTab === 'murrini' && (
-            <MurriniEditor design={design} onOpenPlan={() => goTo('plan')} />
-          )}
+          {activeTab === 'murrini' &&
+            (mode === 'simple' ? (
+              <SimpleBuilder design={design} onOpenPlan={openPlan} onMode={setMode} />
+            ) : (
+              <MurriniEditor design={design} onOpenPlan={() => goTo('plan')} onMode={setMode} />
+            ))}
           {activeTab === 'vessel' && (
             <VesselEditor design={design} vessel={vessel} vesselPattern={vesselPattern} />
           )}
