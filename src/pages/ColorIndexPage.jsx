@@ -15,7 +15,7 @@ export function ColorIndexPage() {
     <div className="flex flex-col items-center gap-6 p-4 sm:p-8">
       <div className="max-w-2xl text-center">
         <h1 className="text-2xl font-medium text-neutral-100">Color Index</h1>
-        <p className="mt-1 text-base leading-relaxed text-neutral-400">
+        <p className="mt-1 text-left text-base leading-relaxed text-neutral-400">
           Real glass colorant chemistry — what each color is actually made of,
           and the physical properties that come with it. This is a reference
           catalog, not a live analysis of whatever hex value the pattern

@@ -219,7 +219,7 @@ export function MurriniEditor({ design }) {
         <h1 className="text-2xl font-medium text-neutral-100">
           Murrini Pattern Engine
         </h1>
-        <p className="text-base leading-relaxed text-neutral-400">
+        <p className="text-left text-base leading-relaxed text-neutral-400">
           Pick a shape and a real glass color, then click the canvas to place
           it. Turn on a repeat to see it as a full cane cross-section.
         </p>
