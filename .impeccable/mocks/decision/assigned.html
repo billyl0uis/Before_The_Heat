@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Rod &amp; Colour Chart</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;600;700&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--paper:#f6f5f1;--ink:#14161a;--mute:#5d6068;--rule:#d9d6cc;--cobalt:#1d3f8f;--warn:#b3261e;--ok:#1f6b3a}
+body{width:1440px;height:900px;overflow:hidden;background:var(--paper);color:var(--ink);font:15px/1.4 Archivo,sans-serif;font-variant-numeric:tabular-nums}
+.band{height:64px;background:var(--cobalt);color:#fff;display:flex;align-items:center;padding:0 28px;gap:40px}
+.mark{font:700 22px/1 'Archivo Narrow';letter-spacing:.02em;text-transform:uppercase}
+.mark small{display:block;font:500 11px/1.3 Archivo;letter-spacing:.08em;opacity:.75}
+nav{display:flex;gap:4px;height:100%}
+nav a{display:flex;align-items:center;padding:0 18px;font:600 16px 'Archivo Narrow';letter-spacing:.04em;text-transform:uppercase;color:#cdd6ec}
+nav a.on{background:var(--paper);color:var(--ink)}
+.band .entry{margin-left:auto;font:500 13px Archivo;color:#cdd6ec}
+.band .entry b{color:#fff;font-weight:600}
+main{display:grid;grid-template-columns:232px 1fr 392px;height:calc(900px - 64px - 76px)}
+aside{border-right:1px solid var(--rule);padding:22px 20px;overflow:hidden}
+h3{font:700 13px 'Archivo Narrow';letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin:0 0 10px}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:22px}
+.tool{border:1px solid var(--rule);background:#fff;height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px}
+.tool i{width:20px;height:20px;border:2px solid var(--ink);border-radius:50%}
+.tool.on{border:2px solid var(--ink)}
+.stage{position:relative;display:flex;align-items:center;justify-content:center}
+.stage .meta{position:absolute;top:22px;left:28px;right:28px;display:flex;justify-content:space-between;font-size:13px;color:var(--mute)}
+.stage .meta b{color:var(--ink);font:600 15px Archivo}
+.dims{position:absolute;bottom:24px;left:28px;display:flex;gap:28px}
+.dim{border-top:2px solid var(--ink);padding-top:6px;min-width:120px}
+.dim span{display:block;font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em}
+.dim b{font:700 30px/1.1 'Archivo Narrow'}
+.right{border-left:1px solid var(--rule);padding:22px 24px;overflow:hidden}
+.case{border-top:1px solid var(--ink);margin-bottom:22px}
+.row{display:grid;grid-template-columns:22px 34px 1fr 64px;align-items:center;gap:10px;height:44px;border-bottom:1px solid var(--rule);font-size:14px}
+.row .n{color:var(--mute)}
+.chip{width:34px;height:26px;border:1px solid rgba(0,0,0,.25)}
+.row .code{text-align:right;color:var(--mute);font-size:12px}
+.chart{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.sw{border:1px solid var(--rule);background:#fff}
+.sw .c{height:38px;border-bottom:1px solid rgba(0,0,0,.15)}
+.sw p{padding:5px 6px 6px;font-size:11px;line-height:1.25}
+.sw p b{display:block;font:600 12px Archivo}
+.sw.on{outline:2px solid var(--ink);outline-offset:1px}
+.strip{height:76px;border-top:2px solid var(--ink);display:flex;align-items:center;padding:0 28px;gap:36px;background:#fff}
+.strip .k{font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em}
+.strip .v{font:600 17px Archivo}
+.ok{color:var(--ok)}
+.btn{margin-left:auto;background:var(--ink);color:#fff;padding:13px 22px;font:600 15px Archivo}
+</style></head><body>
+<header class="band">
+  <div class="mark">Before The Heat<small>Cane &amp; murrine planner</small></div>
+  <nav><a class="on">Murrini</a><a>Vessel</a><a>Plan</a><a>Learn</a><a>Saved</a></nav>
+  <div class="entry">Entry <b>No. 014</b> · Six-petal radial · example</div>
+</header>
+<main>
+  <aside>
+    <h3>Single cane</h3>
+    <div class="tools">
+      <div class="tool on"><i></i>Circle</div><div class="tool"><i style="border-radius:0"></i>Square</div>
+      <div class="tool"><i style="border-radius:50% 0"></i>Petal</div><div class="tool"><i style="border-width:5px"></i>Ring</div>
+      <div class="tool"><i style="border-radius:2px;transform:rotate(45deg)"></i>Star mold</div><div class="tool"><i style="border-style:dashed"></i>Chevron</div>
+    </div>
+    <h3>Bundles</h3>
+    <div class="tools">
+      <div class="tool"><i></i>Zanfirico</div><div class="tool"><i></i>Tripod</div>
+      <div class="tool"><i></i>Cane grid</div><div class="tool"><i></i>Frame</div>
+    </div>
+    <h3>Repeat</h3>
+    <div class="row" style="grid-template-columns:1fr auto;border-top:1px solid var(--ink)"><span>Radial</span><b>× 6</b></div>
+  </aside>
+  <section class="stage">
+    <div class="meta"><span>Cross-section · <b>true scale</b></span><span>Click to place · ⌘Z undo</span></div>
+    <svg width="520" height="520" viewBox="-130 -130 260 260">
+      <g stroke="#14161a" stroke-width=".5" fill="none">
+        <circle r="124" stroke-dasharray="1 3.2"/>
+      </g>
+      <g font-size="6" fill="#5d6068" font-family="Archivo" text-anchor="middle">
+        <text y="-127">0</text><text x="127" y="2">8</text><text y="132">16</text><text x="-127" y="2">24 mm</text>
+      </g>
+      <circle r="116" fill="#1f45a8"/>
+      <circle r="108" fill="#f3f1ea"/>
+      <circle r="100" fill="#dfe6e2" opacity=".9"/>
+      <g fill="#f3f1ea" stroke="#1f45a8" stroke-width="3">
+        <ellipse cx="0" cy="-55" rx="24" ry="38"/><ellipse cx="0" cy="-55" rx="24" ry="38" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-55" rx="24" ry="38" transform="rotate(120)"/><ellipse cx="0" cy="-55" rx="24" ry="38" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-55" rx="24" ry="38" transform="rotate(240)"/><ellipse cx="0" cy="-55" rx="24" ry="38" transform="rotate(300)"/>
+      </g>
+      <circle r="22" fill="#b0183a"/><circle r="9" fill="#f3f1ea"/>
+    </svg>
+    <div class="dims">
+      <div class="dim"><span>Gather Ø</span><b>32 mm</b></div>
+      <div class="dim"><span>Pulled Ø</span><b>8 mm</b></div>
+      <div class="dim"><span>Reduction</span><b>4 : 1</b></div>
+    </div>
+  </section>
+  <section class="right">
+    <h3>Casing, inside → out</h3>
+    <div class="case">
+      <div class="row"><span class="n">1</span><span class="chip" style="background:#dfe6e2"></span><span>Clear</span><span class="code">base</span></div>
+      <div class="row"><span class="n">2</span><span class="chip" style="background:#f3f1ea"></span><span>Opal White</span><span class="code">opaque</span></div>
+      <div class="row"><span class="n">3</span><span class="chip" style="background:#1f45a8"></span><span>Cobalt Blue</span><span class="code">CoO</span></div>
+    </div>
+    <h3>Colour chart</h3>
+    <div class="chart">
+      <div class="sw on"><div class="c" style="background:#1f45a8"></div><p><b>Cobalt Blue</b>CoO · transp.</p></div>
+      <div class="sw"><div class="c" style="background:#f3f1ea"></div><p><b>Opal White</b>opaque</p></div>
+      <div class="sw"><div class="c" style="background:#b0183a"></div><p><b>Gold Ruby</b>Au · strikes</p></div>
+      <div class="sw"><div class="c" style="background:#1c9a8f"></div><p><b>Cu Turquoise</b>CuO · transp.</p></div>
+      <div class="sw"><div class="c" style="background:#2e7d32"></div><p><b>Chromium Grn</b>Cr₂O₃</p></div>
+      <div class="sw"><div class="c" style="background:#6a3d8f"></div><p><b>Manganese</b>MnO₂</p></div>
+      <div class="sw"><div class="c" style="background:#f2c230"></div><p><b>Cadmium Ylw</b>CdS · toxic</p></div>
+      <div class="sw"><div class="c" style="background:#b8742a"></div><p><b>Amber</b>Fe / S</p></div>
+    </div>
+  </section>
+</main>
+<footer class="strip">
+  <div><div class="k">Build order</div><div class="v">4 steps</div></div>
+  <div><div class="k">Pull</div><div class="v">32 → 8 mm · 4 : 1</div></div>
+  <div><div class="k">Compatibility</div><div class="v ok">✓ 4 colours checked · run a test strip</div></div>
+  <a class="btn">Open shop plan →</a>
+</footer>
+</body></html>

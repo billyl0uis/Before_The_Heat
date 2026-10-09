@@ -8,12 +8,12 @@ export function ExtrusionControls({ extrusion, onChange }) {
   const setField = (key, value) => onChange({ ...extrusion, [key]: value })
 
   return (
-    <div className="flex w-64 flex-col gap-4 rounded-lg border border-neutral-800 bg-neutral-900 p-5">
-      <h2 className="text-base font-medium text-neutral-100">Rod Extrusion</h2>
+    <div className="flex flex-col gap-3 border-b border-line pb-5">
+      <h2 className="text-sm font-bold tracking-[0.06em] text-mute uppercase">Rod Extrusion</h2>
       {CONTROLS.map((control) => (
         <label
           key={control.key}
-          className="flex flex-col gap-1 text-base text-neutral-300"
+          className="flex flex-col gap-1 text-sm text-neutral-300"
         >
           {control.label}: {extrusion[control.key]}
           <input
@@ -30,9 +30,9 @@ export function ExtrusionControls({ extrusion, onChange }) {
         <button
           type="button"
           onClick={() => setField('sideways', false)}
-          className={`flex-1 rounded px-3 py-1.5 text-base transition-colors ${
+          className={`flex-1 rounded-md px-3 py-1.5 text-sm transition-colors ${
             !extrusion.sideways
-              ? 'bg-purple-500 text-white'
+              ? 'bg-accent text-accent-ink'
               : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
           }`}
         >
@@ -41,16 +41,16 @@ export function ExtrusionControls({ extrusion, onChange }) {
         <button
           type="button"
           onClick={() => setField('sideways', true)}
-          className={`flex-1 rounded px-3 py-1.5 text-base transition-colors ${
+          className={`flex-1 rounded-md px-3 py-1.5 text-sm transition-colors ${
             extrusion.sideways
-              ? 'bg-purple-500 text-white'
+              ? 'bg-accent text-accent-ink'
               : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
           }`}
         >
           Sideways
         </button>
       </div>
-      <p className="text-base leading-relaxed text-neutral-400">
+      <p className="text-sm leading-relaxed text-neutral-400">
         Twist spirals the whole bundle around its center as it's pulled —
         a helix along the rod's length, only visible from the side. It
         only shows up on shapes placed off-center — a single shape

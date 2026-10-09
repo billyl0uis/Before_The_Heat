@@ -1,17 +1,28 @@
-import { lazy, Suspense, useMemo, useState } from 'react'
-import { BuildPlan } from '../components/murrini/BuildPlan'
-import { ColorantPicker } from '../components/murrini/ColorantPicker'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import { Icon } from '../components/icons'
+import { CasingPanel } from '../components/murrini/CasingPanel'
+import { ColorChart } from '../components/murrini/ColorChart'
 import { CompatibilityCheck } from '../components/murrini/CompatibilityCheck'
 import { ExtrusionControls } from '../components/murrini/ExtrusionControls'
-import { MurriniCanvas } from '../components/murrini/MurriniCanvas'
 import { PatternControls } from '../components/murrini/PatternControls'
-import { ShapeToolbar } from '../components/murrini/ShapeToolbar'
+import { RodPanel } from '../components/murrini/RodPanel'
+import { RodSlice } from '../components/murrini/RodSlice'
 import { TechniqueReference } from '../components/murrini/TechniqueReference'
+import { TOOL_KEYS } from '../components/murrini/toolKeys'
+import { ToolRail } from '../components/murrini/ToolRail'
 import { GLASS_COLOR_INDEX } from '../content/glassColorIndex'
-import { checkColorCompatibility } from '../engine/murrini/colorCompatibility'
 import { buildCompoundElements, COMPOUND_SHAPE_TYPES } from '../engine/murrini/compoundShapes'
+import { casingRings, pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
 import { computeShapeReach, SHAPE_TYPES } from '../engine/murrini/shapes'
+import { buildShopPlan, shopPlanWarnings, usedColorants } from '../engine/murrini/shopPlan'
 import { useResponsiveCanvasSize } from '../hooks/useResponsiveCanvasSize'
+
+const DOCK = [
+  { key: 'tools', label: 'Tools', icon: 'tools' },
+  { key: 'colour', label: 'Colour', icon: 'colour' },
+  { key: 'casing', label: 'Rod', icon: 'casing' },
+  { key: 'plan', label: 'Plan', icon: 'plan' },
+]
 
 // Lazy so OrbitControls (and its ~370KB chunk, shared with the Vessel tab)
 // only loads if Rod Preview is actually opened — most visits stay on the
@@ -22,7 +33,7 @@ const RodPreviewCanvas = lazy(() =>
   })),
 )
 
-export function MurriniEditor({ design }) {
+export function MurriniEditor({ design, onOpenPlan }) {
   const {
     canvas,
     elements,
@@ -42,6 +53,13 @@ export function MurriniEditor({ design }) {
     redo,
     canUndo,
     canRedo,
+    rod,
+    setRod,
+    casing,
+    addCasingLayer,
+    removeCasingLayer,
+    moveCasingLayer,
+    updateCasingLayer,
   } = design
   const [viewMode, setViewMode] = useState('flat')
   const [selectedShape, setSelectedShape] = useState('circle')
@@ -58,10 +76,9 @@ export function MurriniEditor({ design }) {
 
   // Both canvases cap at their normal desktop size but shrink to fit a
   // narrow screen instead of forcing horizontal scrolling.
-  const { containerRef: flatContainerRef, size: flatSize } = useResponsiveCanvasSize(
-    canvas.width,
-    canvas.height / canvas.width,
-  )
+  const { containerRef: flatContainerRef, size: flatSize } = useResponsiveCanvasSize(520, 1)
+  const [dock, setDock] = useState('tools')
+  const [notice, setNotice] = useState(null)
   const { containerRef: rodContainerRef, size: rodSize } = useResponsiveCanvasSize(360, 420 / 360)
 
   const [colorantId, setColorantId] = useState(GLASS_COLOR_INDEX[0].id)
@@ -110,9 +127,24 @@ export function MurriniEditor({ design }) {
   }
 
   const compatibilityWarnings = useMemo(
-    () => checkColorCompatibility(elements),
-    [elements],
+    () => shopPlanWarnings({ elements, casing }),
+    [elements, casing],
   )
+  const planSteps = useMemo(
+    () => buildShopPlan({ elements, pattern, rod, casing }),
+    [elements, pattern, rod, casing],
+  )
+  const colorantCount = useMemo(() => usedColorants({ elements, casing }).length, [elements, casing])
+
+  // The rod as the canvas draws it: casing rings in world units and the
+  // room left inside them for canes. Memoised so the WebGL scene only
+  // rebuilds its rings when the rod or casing actually change.
+  const slice = useMemo(() => {
+    const { rings, contentRadius } = casingRings(rod, casing)
+    const groundColor =
+      getComputedStyle(document.documentElement).getPropertyValue('--ground').trim() || '#150b07'
+    return { rings, contentRadius, groundColor }
+  }, [rod, casing])
 
   // What handlePlace would actually place right now — used to render the
   // hover preview so it always matches the real click outcome exactly.
@@ -179,6 +211,11 @@ export function MurriniEditor({ design }) {
   }
 
   const handleCanvasClick = (x, y) => {
+    if (!selectMode && Math.hypot(x, y) > slice.contentRadius) {
+      setNotice('Place canes inside the rod. The outer rings are casing.')
+      return
+    }
+    setNotice(null)
     if (selectMode) {
       setSelectedElementId(hitTestElement(x, y)?.id ?? null)
       return
@@ -213,97 +250,158 @@ export function MurriniEditor({ design }) {
     })
   }
 
+  // Keyboard: undo/redo, delete the selected shape, Esc leaves Select,
+  // and number keys pick the first nine tools in rail order.
+  useEffect(() => {
+    const onKey = (event) => {
+      const tag = event.target.tagName
+      const typing =
+        tag === 'TEXTAREA' || (tag === 'INPUT' && event.target.type !== 'range' && event.target.type !== 'checkbox')
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'z') {
+        event.preventDefault()
+        if (event.shiftKey) redo()
+        else undo()
+        return
+      }
+      if (typing || event.metaKey || event.ctrlKey || event.altKey) return
+      if ((event.key === 'Delete' || event.key === 'Backspace') && selectedElementId) {
+        event.preventDefault()
+        removeElement(selectedElementId)
+        setSelectedElementId(null)
+      } else if (event.key === 'Escape' && selectMode) {
+        setSelectMode(false)
+        setSelectedElementId(null)
+      } else if (/^[1-9]$/.test(event.key)) {
+        const key = TOOL_KEYS[Number(event.key) - 1]
+        if (key) handleSelectShape(key)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  })
+
+  const onDock = (key) => (dock === key ? '' : 'max-lg:hidden')
+
   return (
-    <div className="flex flex-col items-center gap-6 p-4 sm:p-8">
-      <div className="text-center">
-        <h1 className="text-2xl font-medium text-neutral-100">
-          Murrini Pattern Engine
-        </h1>
-        <p className="text-left text-base leading-relaxed text-neutral-400">
-          Pick a shape and color, then click the canvas to place it.
-        </p>
-      </div>
-      <div className="flex w-full min-w-0 flex-col items-start gap-6 lg:flex-row">
-        <div className="flex w-full min-w-0 flex-col gap-3 lg:w-auto">
-          <div className="flex gap-2">
+    <div className="grid grid-cols-[minmax(0,1fr)] lg:h-[calc(100svh-3.5rem)] lg:grid-cols-[232px_minmax(0,1fr)_344px] lg:grid-rows-[minmax(0,1fr)_auto]">
+      <aside
+        className={`flex flex-col gap-5 overflow-y-auto border-line bg-panel p-4 lg:border-r ${onDock('tools')}`}
+        aria-label="Tools"
+      >
+        <ToolRail
+          selectedShape={selectedShape}
+          onSelectShape={handleSelectShape}
+          params={params}
+          onParamChange={handleParamChange}
+          onClear={handleClear}
+          onUndo={undo}
+          onRedo={redo}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          selectMode={selectMode}
+          onToggleSelectMode={handleToggleSelectMode}
+          canSelect={canSelect}
+          selectedElement={selectedElement}
+          onEditParamChange={handleEditParamChange}
+          onBeginEdit={beginElementEdit}
+          onCommitEdit={commitElementEdit}
+          onDeleteSelected={handleDeleteSelected}
+          accentColorantId={accentColorantId}
+          onSelectAccentColorant={setAccentColorantId}
+        />
+        <PatternControls pattern={pattern} onChange={setPattern} />
+        <ExtrusionControls extrusion={extrusion} onChange={setExtrusion} />
+        <TechniqueReference elements={elements} shape={selectedShape} params={params} />
+      </aside>
+
+      <section
+        aria-label="Cross-section"
+        className="max-lg:order-first max-lg:sticky max-lg:top-14 max-lg:z-10 flex min-h-0 flex-col items-center justify-center gap-2 border-b border-line bg-ground px-4 py-2 lg:gap-4 lg:row-start-1 lg:col-start-2 lg:border-b-0 lg:py-6"
+      >
+        <div className="flex w-full max-w-[520px] items-center justify-between gap-3">
+          <div className="inline-flex rounded-lg bg-raise p-0.5" role="group" aria-label="View">
             {[
-              { key: 'flat', label: 'Flat pattern' },
-              { key: 'rod', label: 'Rod preview (3D)' },
+              { key: 'flat', label: 'Slice' },
+              { key: 'rod', label: 'Rod 3D' },
             ].map((mode) => (
               <button
                 key={mode.key}
                 type="button"
+                aria-pressed={viewMode === mode.key}
                 onClick={() => setViewMode(mode.key)}
-                className={`rounded px-3 py-1.5 text-base transition-colors ${
-                  mode.key === viewMode
-                    ? 'bg-purple-500 text-white'
-                    : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+                className={`rounded-md px-3 py-1 text-sm font-semibold ${
+                  viewMode === mode.key ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
                 }`}
               >
                 {mode.label}
               </button>
             ))}
           </div>
-          {viewMode === 'flat' ? (
-            <div ref={flatContainerRef} className="w-full min-w-0" style={{ maxWidth: canvas.width }}>
-              <MurriniCanvas
-                canvas={canvas}
+          <p className="text-right text-xs text-mute max-sm:hidden">
+            True scale · 1 tick = 1 mm · <kbd className="font-mono">⌘Z</kbd> undo
+          </p>
+        </div>
+
+        {viewMode === 'flat' ? (
+          <div ref={flatContainerRef} className="flex w-full max-w-[min(520px,calc(100svh-17rem))] justify-center max-lg:max-w-[min(300px,30svh)]">
+            <RodSlice
+              canvas={canvas}
+              elements={repeatedElements}
+              slice={slice}
+              rod={rod}
+              onPlace={handleCanvasClick}
+              preview={preview}
+              size={flatSize.width}
+            />
+          </div>
+        ) : (
+          <div ref={rodContainerRef} className="w-full min-w-0" style={{ maxWidth: 360 }}>
+            <Suspense
+              fallback={
+                <div
+                  className="flex items-center justify-center rounded-lg border border-line text-sm text-mute"
+                  style={{ width: rodSize.width, height: rodSize.height }}
+                >
+                  Loading 3D preview…
+                </div>
+              }
+            >
+              <RodPreviewCanvas
                 elements={repeatedElements}
-                onPlace={handleCanvasClick}
-                preview={preview}
-                displayWidth={flatSize.width}
-                displayHeight={flatSize.height}
+                extrusion={extrusion}
+                width={rodSize.width}
+                height={rodSize.height}
               />
-            </div>
-          ) : (
-            <div ref={rodContainerRef} className="w-full min-w-0" style={{ maxWidth: 360 }}>
-              <Suspense
-                fallback={
-                  <div
-                    className="flex items-center justify-center rounded-lg border border-neutral-800 text-base text-neutral-400"
-                    style={{ width: rodSize.width, height: rodSize.height }}
-                  >
-                    Loading 3D preview…
-                  </div>
-                }
-              >
-                <RodPreviewCanvas
-                  elements={repeatedElements}
-                  extrusion={extrusion}
-                  width={rodSize.width}
-                  height={rodSize.height}
-                />
-              </Suspense>
-            </div>
-          )}
+            </Suspense>
+          </div>
+        )}
+        <p role="status" aria-live="polite" className="text-sm text-amber-300 empty:hidden lg:min-h-5 lg:empty:block">
+          {notice}
+        </p>
+      </section>
+
+      <aside
+        className={`flex flex-col gap-5 overflow-y-auto border-line bg-panel p-4 lg:col-start-3 lg:row-start-1 lg:border-l ${
+          dock === 'colour' || dock === 'casing' ? '' : 'max-lg:hidden'
+        }`}
+        aria-label="Rod and colour"
+      >
+        <div className={onDock('casing')}>
+          <RodPanel rod={rod} onChange={setRod} />
         </div>
-        <div className="flex flex-col gap-6">
-          <ShapeToolbar
-            selectedShape={selectedShape}
-            onSelectShape={handleSelectShape}
-            params={params}
-            onParamChange={handleParamChange}
-            onClear={handleClear}
-            onUndo={undo}
-            onRedo={redo}
-            canUndo={canUndo}
-            canRedo={canRedo}
-            selectMode={selectMode}
-            onToggleSelectMode={handleToggleSelectMode}
-            canSelect={canSelect}
-            selectedElement={selectedElement}
-            onEditParamChange={handleEditParamChange}
-            onBeginEdit={beginElementEdit}
-            onCommitEdit={commitElementEdit}
-            onDeleteSelected={handleDeleteSelected}
-            accentColorantId={accentColorantId}
-            onSelectAccentColorant={setAccentColorantId}
+        <div className={onDock('casing')}>
+          <CasingPanel
+            casing={casing}
+            rod={rod}
+            selectedColorantId={useCustomColor ? null : colorantId}
+            onAdd={addCasingLayer}
+            onRemove={removeCasingLayer}
+            onMove={moveCasingLayer}
+            onUpdate={updateCasingLayer}
           />
-          <PatternControls pattern={pattern} onChange={setPattern} />
-          <ExtrusionControls extrusion={extrusion} onChange={setExtrusion} />
         </div>
-        <div className="flex flex-col gap-6">
-          <ColorantPicker
+        <div className={onDock('colour')}>
+          <ColorChart
             colorantId={colorantId}
             onSelectColorant={setColorantId}
             useCustom={useCustomColor}
@@ -311,11 +409,66 @@ export function MurriniEditor({ design }) {
             customColor={customColor}
             onCustomColorChange={setCustomColor}
           />
-          <CompatibilityCheck warnings={compatibilityWarnings} />
-          <TechniqueReference elements={elements} shape={selectedShape} params={params} />
-          <BuildPlan elements={elements} />
         </div>
-      </div>
+        <div className={onDock('colour')}>
+          <CompatibilityCheck warnings={compatibilityWarnings} colorantCount={colorantCount} />
+        </div>
+      </aside>
+
+      <footer
+        className={`flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-line bg-panel px-5 py-3 lg:col-span-3 lg:row-start-2 ${onDock('plan')}`}
+      >
+        <Stat label="Build" value={planSteps.length ? `${planSteps.length} steps` : 'Place a cane to start'} />
+        <Stat
+          label="Yield"
+          value={`≈ ${(pulledLengthMm(rod) / 1000).toFixed(1)} m of Ø ${pulledDiameterMm(rod).toFixed(1)} mm`}
+        />
+        <Stat
+          label="Colours"
+          value={
+            compatibilityWarnings.some((w) => w.severity !== 'info')
+              ? `${compatibilityWarnings.filter((w) => w.severity !== 'info').length} to check`
+              : `${colorantCount} listed, run a test strip`
+          }
+        />
+        <button
+          type="button"
+          onClick={onOpenPlan}
+          disabled={!planSteps.length}
+          className="flex items-center gap-2 rounded-lg bg-accent px-5 py-3 font-bold text-accent-ink transition-transform hover:-translate-y-px disabled:opacity-50 max-lg:w-full max-lg:justify-center lg:ml-auto"
+        >
+          Open shop plan <Icon name="arrowRight" size={18} />
+        </button>
+      </footer>
+
+      <nav
+        aria-label="Editor panels"
+        className="sticky bottom-0 z-20 grid grid-cols-4 gap-1 border-t border-line bg-panel px-1.5 pt-1.5 pb-3 lg:hidden"
+      >
+        {DOCK.map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            aria-pressed={dock === item.key}
+            onClick={() => setDock(item.key)}
+            className={`flex min-h-13 flex-col items-center justify-center gap-0.5 rounded-lg text-xs font-semibold ${
+              dock === item.key ? 'bg-raise text-ink' : 'text-mute'
+            }`}
+          >
+            <Icon name={item.icon} size={22} />
+            {item.label}
+          </button>
+        ))}
+      </nav>
+    </div>
+  )
+}
+
+function Stat({ label, value }) {
+  return (
+    <div>
+      <p className="text-xs tracking-[0.08em] text-mute uppercase">{label}</p>
+      <p className="font-semibold">{value}</p>
     </div>
   )
 }

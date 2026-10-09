@@ -58,7 +58,7 @@ export function useDesignVault() {
         await addDoc(collection(db, 'designs'), {
           ownerId: user.uid,
           type: 'murrini',
-          schemaVersion: 2,
+          schemaVersion: 3,
           name,
           visibility: 'private',
           createdAt: serverTimestamp(),
@@ -67,6 +67,8 @@ export function useDesignVault() {
           elements: designData.elements,
           pattern: designData.pattern,
           extrusion: designData.extrusion,
+          rod: designData.rod,
+          casing: designData.casing,
           thumbnailUrl: designData.thumbnailUrl ?? null,
         })
         setStatus('idle')
@@ -102,6 +104,9 @@ export function useDesignVault() {
         elements: designData.elements,
         pattern: designData.pattern,
         extrusion: designData.extrusion,
+        rod: designData.rod,
+        casing: designData.casing,
+        schemaVersion: 3,
         thumbnailUrl: designData.thumbnailUrl ?? null,
       })
       setStatus('idle')

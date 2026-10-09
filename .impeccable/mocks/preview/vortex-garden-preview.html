@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Before The Heat · Vortex Garden preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ---------- section palettes, lifted from VORTEX GARDEN ---------- */
+:root{
+  --font:'Hanken Grotesk',system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+[data-section="murrini"]{ /* Ember, orange-led */
+  --ground:#150b07;--panel:#1f120c;--raise:#2b1911;--line:#40271b;
+  --ink:#fbf1e8;--mute:#cdb5a5;--accent:#f2762e;--accent-ink:#1a0a02;--accent-2:#5ec1e8;--warn:#ffb4a0;
+}
+[data-section="plan"]{ /* Primary */
+  --ground:#07092a;--panel:#0d1140;--raise:#151a55;--line:#232a6b;
+  --ink:#f2f3ff;--mute:#aab1e3;--accent:#fefe59;--accent-ink:#07092a;--accent-2:#4f7cff;--warn:#ff8a65;
+}
+[data-section="vessel"]{ /* Reef */
+  --ground:#071433;--panel:#0c1d45;--raise:#132756;--line:#1f3768;
+  --ink:#eef6ff;--mute:#a7bddc;--accent:#3fb0d0;--accent-ink:#04121f;--accent-2:#e6c23a;--warn:#ff8a65;
+}
+[data-section="learn"],[data-section="saved"]{ /* Ember, yellow-led */
+  --ground:#140c06;--panel:#1f140b;--raise:#2a1c10;--line:#3e2a18;
+  --ink:#f6f2e6;--mute:#c3b4c9;--accent:#f7c21a;--accent-ink:#1a0e00;--accent-2:#5ec1e8;--warn:#ff8a65;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#050308;color:#eee;font:16px/1.45 var(--font);-webkit-font-smoothing:antialiased}
+::selection{background:var(--accent,#f2762e);color:var(--accent-ink,#111)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+/* ---------- preview chrome (not part of the design) ---------- */
+.chrome{position:fixed;inset:auto 16px 16px auto;z-index:50;display:flex;gap:4px;padding:4px;background:#000c;border:1px solid #fff2;border-radius:10px;font:500 13px var(--font);backdrop-filter:blur(8px)}
+.chrome button{padding:7px 12px;border-radius:7px;color:#bbb}
+.chrome button[aria-pressed="true"]{background:#fff;color:#000}
+.stagewrap{min-height:100%;display:flex;justify-content:center;align-items:flex-start}
+.stagewrap.phone{padding:28px 0 90px}
+.device{width:100%;min-height:100vh;container:app/inline-size;position:relative}
+.stagewrap.phone .device{width:390px;min-height:0;height:min(820px,calc(100vh - 56px));overflow:auto;border-radius:34px;box-shadow:0 0 0 10px #18151c,0 30px 80px #000}
+
+/* ---------- app shell ---------- */
+.app{min-height:100%;background:var(--ground);color:var(--ink);display:flex;flex-direction:column;transition:background .5s var(--ease)}
+.bar{display:flex;align-items:center;gap:28px;height:60px;padding:0 24px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:5}
+.mark{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.01em;font-size:18px;white-space:nowrap}
+.mark svg{flex:none}
+.tabs{display:flex;gap:2px;height:100%}
+.tab{position:relative;padding:0 14px;color:var(--mute);font-weight:600;font-size:15px}
+.tab[aria-selected="true"]{color:var(--ink)}
+.tab[aria-selected="true"]::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:3px;border-radius:3px 3px 0 0;background:var(--accent)}
+.tab:hover{color:var(--ink)}
+.bar .save{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mute)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent-2)}
+kbd{font:500 11px var(--mono);padding:1px 5px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;color:var(--mute);background:var(--raise)}
+
+/* ---------- editor ---------- */
+.editor{flex:none;display:grid;grid-template-columns:220px minmax(0,1fr) 340px;grid-template-rows:minmax(0,1fr) auto;height:calc(100vh - 60px)}
+.stagewrap.phone .editor{height:auto}
+.inspector,.rail{overflow:auto;min-height:0}
+.rail,.inspector{background:var(--panel);padding:20px 18px;display:flex;flex-direction:column;gap:22px}
+.rail{border-right:1px solid var(--line)}
+.inspector{border-left:1px solid var(--line)}
+h2{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin-bottom:10px}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tool{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px 8px;border-radius:10px;background:var(--raise);font-size:13px;color:var(--mute);border:1px solid transparent;min-height:66px;transition:border-color .2s,color .2s}
+.tool:hover{color:var(--ink)}
+.tool[aria-pressed="true"]{border-color:var(--accent);color:var(--ink)}
+.tool svg{width:26px;height:26px}
+.tool kbd{position:absolute;opacity:0}
+.stage{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:52px 28px 20px;min-height:0}
+.slicebox{position:relative;width:min(520px,100%,calc(100vh - 300px));aspect-ratio:1}
+.slicebox svg{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
+.hint{position:absolute;top:18px;left:24px;right:24px;display:flex;justify-content:space-between;font-size:13px;color:var(--mute);gap:12px}
+.hint span{display:flex;align-items:center;gap:6px}
+.readouts{display:flex;gap:28px;margin-top:18px;flex-wrap:wrap;justify-content:center}
+.ro{min-width:110px;text-align:center}
+.ro b{display:block;font:600 28px/1.1 var(--mono);letter-spacing:-.03em}
+.ro span{font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em}
+.ro.calc b{color:var(--accent)}
+.slider{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.slider label{display:flex;justify-content:space-between;color:var(--mute)}
+.slider output{font:500 13px var(--mono);color:var(--ink)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;margin-top:-9px;background:var(--ink);border:4px solid var(--accent)}
+input[type=range]::-moz-range-track{height:4px;border-radius:4px;background:var(--line)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--ink);border:4px solid var(--accent)}
+.casing{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.layer{display:grid;grid-template-columns:20px 30px 1fr auto;align-items:center;gap:10px;min-height:48px;border-bottom:1px solid var(--line);font-size:14px}
+.layer .n{font:500 12px var(--mono);color:var(--mute)}
+.layer .mm{font:12px var(--mono);color:var(--mute)}
+.layer .ord{display:flex;gap:2px}
+.layer .ord button{width:30px;height:30px;border-radius:6px;display:grid;place-items:center;color:var(--mute)}
+.layer .ord button:hover{background:var(--raise);color:var(--ink)}
+.layer .ord button:disabled{opacity:.3;cursor:default;background:none}
+.chip{width:30px;height:22px;border-radius:4px;box-shadow:inset 0 0 0 1px #ffffff40}
+.chart{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.sw{display:flex;flex-direction:column;align-items:stretch;border-radius:8px;background:var(--raise);overflow:hidden;text-align:left;border:1px solid transparent}
+.sw i{display:block;height:28px}
+.sw span{padding:5px 7px 6px;font-size:12px;line-height:1.2}
+.sw small{display:block;color:var(--mute);font:11px var(--mono)}
+.sw[aria-pressed="true"]{border-color:var(--ink)}
+.sw.toxic small{color:var(--warn)}
+.strip{grid-column:1/-1;display:flex;align-items:center;gap:30px;padding:14px 24px;border-top:1px solid var(--line);background:var(--panel)}
+.strip .k{font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em}
+.strip .v{font-weight:600}
+.check{display:flex;align-items:center;gap:8px}
+.check svg{color:var(--accent-2)}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:12px 20px;border-radius:10px;font-weight:700;background:var(--accent);color:var(--accent-ink);transition:transform .2s var(--ease)}
+.btn:hover{transform:translateY(-1px)}
+.btn.ghost{background:var(--raise);color:var(--ink)}
+.strip .btn{margin-left:auto}
+.dock{display:none}
+
+/* ---------- plan ---------- */
+.plan{flex:1;display:flex;flex-direction:column}
+.field{position:relative;height:300px;overflow:hidden}
+.field canvas{position:absolute;inset:0;width:100%;height:100%}
+.field .over{position:absolute;left:32px;bottom:26px;right:32px;display:flex;align-items:flex-end;gap:24px}
+.field h1{font-size:clamp(30px,4.6cqi,60px);line-height:.98;letter-spacing:-.035em;font-weight:800;text-wrap:balance;background:var(--ground);padding:14px 20px 16px;border-radius:12px;box-shadow:0 12px 40px #0008}
+.field .meta{font:500 14px var(--mono);color:var(--ink);background:var(--ground);padding:9px 12px;border-radius:8px;box-shadow:0 12px 40px #0008}
+.planbar{display:flex;align-items:center;gap:10px;padding:16px 32px;border-bottom:1px solid var(--line);background:var(--panel)}
+.seg{display:inline-flex;background:var(--raise);border-radius:10px;padding:3px}
+.seg button{padding:8px 16px;border-radius:8px;color:var(--mute);font-weight:600;font-size:14px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.planbar .btn{margin-left:auto}
+.planbody{padding:36px 32px 64px;display:flex;justify-content:center}
+
+/* print sheet: paper, ink in Primary navy */
+.sheet{width:min(820px,100%);background:#fbfbf8;color:#0b0e2e;border-radius:4px;box-shadow:0 30px 80px #0008,0 2px 6px #0004;padding:44px 48px;display:grid;grid-template-columns:260px 1fr;gap:28px 36px}
+.sheet header{grid-column:1/-1;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #0b0e2e;padding-bottom:14px}
+.sheet header h3{font-size:30px;letter-spacing:-.03em;line-height:1}
+.sheet header p{font:13px var(--mono);color:#454a72}
+.sheet h4{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#454a72;margin-bottom:8px}
+.sheet table{width:100%;border-collapse:collapse;font-size:14px}
+.sheet td{padding:7px 0;border-bottom:1px solid #d9dae6;vertical-align:middle}
+.sheet td.num{font:13px var(--mono);text-align:right}
+.sheet .chip{box-shadow:inset 0 0 0 1px #0003;display:inline-block;vertical-align:middle;margin-right:8px;width:22px;height:16px}
+.pull{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;font:600 15px var(--mono);margin-top:4px}
+.pull small{display:block;font:12px var(--font);color:#454a72}
+.pull svg{color:#1430d8}
+.steps{display:flex;flex-direction:column}
+.step{display:grid;grid-template-columns:28px 56px 1fr;gap:14px;align-items:center;padding:10px 0;border-bottom:1px solid #d9dae6}
+.step .n{font:600 14px var(--mono);color:#1430d8}
+.step b{display:block;font-size:15px}
+.step p{font-size:13px;color:#454a72;line-height:1.35}
+.notes{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr 180px;gap:24px;align-items:start;border-top:2px solid #0b0e2e;padding-top:16px;font-size:13px;line-height:1.45}
+.notes .warn b{color:#b3261e}
+.notes .ok b{color:#1f6b3a}
+
+/* checklist phone */
+.phonewrap{display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;justify-content:center}
+.handset{width:360px;border-radius:30px;background:var(--panel);box-shadow:0 0 0 8px #0b0d26,0 30px 70px #0009;overflow:hidden}
+.handset .top{padding:18px 20px 0;display:flex;justify-content:space-between;font:12px var(--mono);color:var(--mute)}
+.prog{display:flex;gap:4px;padding:14px 20px 0}
+.prog i{flex:1;height:4px;border-radius:4px;background:var(--line)}
+.prog i.on{background:var(--accent)}
+.prog i.cur{background:var(--accent-2)}
+.cur-step{padding:26px 22px 22px}
+.cur-step .big{font:600 76px/1 var(--mono);color:var(--accent);letter-spacing:-.05em}
+.cur-step h3{font-size:28px;line-height:1.1;letter-spacing:-.02em;margin:10px 0 10px;text-wrap:balance}
+.cur-step p{color:var(--mute);font-size:16px}
+.cur-step .cols{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px 6px 6px;border-radius:999px;background:var(--raise);font-size:14px}
+.pill i{width:20px;height:20px;border-radius:50%;box-shadow:inset 0 0 0 1px #fff4}
+.cur-step .thumb{margin-top:18px;display:flex;justify-content:center}
+.actions{display:grid;grid-template-columns:1fr 2fr;gap:8px;padding:0 22px 24px}
+.actions .btn{justify-content:center;padding:16px;font-size:17px}
+.awake{padding:0 22px 22px;font-size:13px;color:var(--mute);display:flex;gap:8px;align-items:center}
+.side-notes{max-width:300px;color:var(--mute);font-size:15px;line-height:1.55;padding-top:24px}
+.side-notes b{color:var(--ink)}
+
+.placeholder{flex:1;display:grid;place-items:center;color:var(--mute);padding:80px 24px;text-align:center}
+
+/* loading overlay: the field, alive */
+.loading{position:absolute;inset:60px 0 0 0;z-index:20;pointer-events:none;opacity:0;transition:opacity .45s var(--ease)}
+.loading.on{opacity:1;pointer-events:auto;cursor:crosshair}
+.loading canvas{width:100%;height:100%;display:block}
+.loading p{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);pointer-events:none;font:600 14px var(--mono);background:var(--ground);padding:8px 14px;border-radius:8px}
+
+.note{position:fixed;left:16px;bottom:16px;z-index:50;font:12px var(--font);color:#999;max-width:380px}
+
+/* ---------- phone (container query on the device frame) ---------- */
+@container app (max-width:760px){
+  .editor{height:auto;flex:1}
+  .field h1{padding:10px 14px 12px}
+  .bar{gap:12px;padding:0 14px;height:56px}
+  .mark span{display:none}
+  .tab{padding:0 9px;font-size:14px}
+  .bar .save{display:none}
+  .editor{grid-template-columns:1fr;grid-template-rows:auto auto auto}
+  .stage{position:sticky;top:56px;z-index:3;background:var(--ground);min-height:0;padding:12px 16px 10px;border-bottom:1px solid var(--line)}
+  .slicebox{width:min(300px,82cqi)}
+  .hint{display:none}
+  .readouts{gap:14px;margin-top:8px}
+  .ro{min-width:0}.ro b{font-size:20px}.ro span{font-size:10px}
+  .rail,.inspector{border:0;padding:16px}
+  .rail,.inspector>section{display:none}
+  .editor[data-dock="tools"] .rail{display:flex}
+  .editor[data-dock="colour"] .inspector [data-p="colour"],
+  .editor[data-dock="casing"] .inspector [data-p="casing"],
+  .editor[data-dock="casing"] .inspector [data-p="rod"]{display:block}
+  .editor[data-dock="plan"] .inspector,.editor[data-dock="tools"] .inspector{display:none}
+  .editor:not([data-dock="plan"]) .strip{display:none}
+  .strip{flex-wrap:wrap;gap:12px 20px;padding:16px}
+  .strip .btn{margin-left:0;width:100%;justify-content:center}
+  .dock{display:grid;grid-template-columns:repeat(4,1fr);position:sticky;bottom:0;z-index:6;background:var(--panel);border-top:1px solid var(--line);padding:6px 6px 14px}
+  .dock button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;min-height:52px;border-radius:10px;font-size:12px;font-weight:600;color:var(--mute)}
+  .dock button[aria-pressed="true"]{color:var(--ink);background:var(--raise)}
+  .dock svg{width:22px;height:22px}
+  .field{height:220px}.field .over{left:16px;right:16px;bottom:16px;flex-direction:column;align-items:flex-start;gap:10px}
+  .planbar{padding:12px 16px;flex-wrap:wrap}.planbar .btn{display:none}
+  .planbody{padding:16px}
+  .sheet{grid-template-columns:1fr;padding:24px 20px}
+  .notes{grid-template-columns:1fr}
+  .handset{width:100%;box-shadow:none;border-radius:16px}
+  .side-notes{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media print{
+  body{background:#fff}
+  .chrome,.note,.bar,.field,.planbar,.loading{display:none!important}
+  .app,.planbody{background:#fff;padding:0}
+  .sheet{box-shadow:none;width:100%}
+}
+</style>
+</head>
+<body>
+<div class="stagewrap" id="wrap">
+  <div class="device">
+    <div class="app" id="app" data-section="murrini"></div>
+    <div class="loading" id="loading"><canvas id="loadcv"></canvas><p>Bundling…</p></div>
+  </div>
+</div>
+
+<div class="chrome" role="group" aria-label="Preview frame">
+  <button id="fDesk" aria-pressed="true">Desktop</button>
+  <button id="fPhone" aria-pressed="false">Phone</button>
+</div>
+<p class="note">Preview of the Vortex Garden direction with example data. Not wired to the app.</p>
+
+<script>
+/* =================== data =================== */
+const COLORANTS = {
+  'clear':           {name:'Clear',            hex:'#cfdcd8', note:'base',     op:.55},
+  'opal-white':      {name:'Opal White',       hex:'#f3f1ea', note:'opaque'},
+  'cobalt-blue':     {name:'Cobalt Blue',      hex:'#1f45a8', note:'CoO'},
+  'gold-ruby':       {name:'Gold Ruby',        hex:'#b0183a', note:'strikes'},
+  'copper-turquoise':{name:'Copper Turquoise', hex:'#1c9a8f', note:'CuO'},
+  'chromium-green':  {name:'Chromium Green',   hex:'#2e7d32', note:'Cr₂O₃'},
+  'manganese-purple':{name:'Manganese',        hex:'#6a3d8f', note:'MnO₂'},
+  'cadmium-yellow':  {name:'Cadmium Yellow',   hex:'#f2c230', note:'toxic', toxic:true},
+  'amber':           {name:'Amber',            hex:'#b8742a', note:'Fe / S'},
+  'erbium-pink':     {name:'Erbium Pink',      hex:'#e7a1b5', note:'Er₂O₃'},
+  'neodymium':       {name:'Neodymium',        hex:'#8e7cc3', note:'shifts'},
+  'black':           {name:'Black',            hex:'#17151a', note:'dense'},
+};
+const PAL = { // VORTEX GARDEN band sequences
+  murrini:['#e3501c','#f7c21a','#f2762e','#2c3fb0','#fbe016','#a2321f','#f6f2e6','#5ec1e8'],
+  plan:['#1430d8','#fefe59','#c83329','#ffffff','#4f7cff','#eceab7','#e8892b'],
+  vessel:['#2f6fd1','#f2f0ea','#e6c23a','#c8462a','#8fd14f','#b8702c','#3fb0d0','#e86aa8'],
+  learn:['#f7c21a','#e3501c','#2c3fb0','#3b7be0','#fbe016','#a2321f','#f6f2e6','#5ec1e8'],
+};
+PAL.saved = PAL.learn;
+const BG = {murrini:'#150b07',plan:'#07092a',vessel:'#071433',learn:'#140c06',saved:'#140c06'};
+
+function petals(){ const a=[]; for(let i=0;i<6;i++){ const th=i*Math.PI/3; a.push({shape:'petal',x:7.4*Math.sin(th),y:-7.4*Math.cos(th),rx:2.9,ry:4.6,rot:i*60,color:'opal-white',edge:'cobalt-blue'});} return a; }
+const S = {
+  section:'murrini', planView:'sheet', dock:'tools', tool:'circle', sel:'copper-turquoise',
+  gather:32, ratio:4, len:100, twist:180,
+  casing:[{id:'clear',t:1.5},{id:'opal-white',t:1},{id:'cobalt-blue',t:1}],
+  elements:[{shape:'circle',x:0,y:0,r:3.1,color:'gold-ruby'},{shape:'circle',x:0,y:0,r:1.2,color:'opal-white'},...petals()],
+  past:[], step:1,
+};
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = s => document.querySelector(s);
+const fmt = (n,d=0) => n.toLocaleString('en',{maximumFractionDigits:d,minimumFractionDigits:d});
+const pulledD = () => S.gather / S.ratio;
+const pulledLen = () => S.len * S.ratio * S.ratio; // volume conserved: L2 = L1·(D1/D2)²
+const casingT = () => S.casing.reduce((a,c)=>a+c.t,0);
+
+/* =================== icons (authored SVG) =================== */
+const I = {
+  check:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  up:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 15l6-6 6 6"/></svg>',
+  down:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>',
+  arrow:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  print:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z"/></svg>',
+  warn:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 3l10 18H2zM12 10v5M12 18v.5"/></svg>',
+  sun:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg>',
+  mark:'<svg width="26" height="26" viewBox="-13 -13 26 26"><circle r="12" fill="var(--accent)"/><circle r="9.5" fill="var(--ground)"/><g fill="var(--accent-2)">'+[0,60,120,180,240,300].map(a=>`<ellipse cy="-5" rx="1.9" ry="3" transform="rotate(${a})"/>`).join('')+'</g><circle r="2" fill="var(--accent)"/></svg>',
+};
+const TOOLS = {
+  circle:{label:'Circle',key:'1',svg:'<circle cx="13" cy="13" r="8" fill="currentColor" opacity=".9"/>'},
+  petal:{label:'Petal',key:'2',svg:'<ellipse cx="13" cy="13" rx="5.5" ry="9" fill="currentColor" opacity=".9"/>'},
+  ring:{label:'Ring',key:'3',svg:'<circle cx="13" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="3.5"/>'},
+  star:{label:'Star mold',key:'4',svg:'<path d="M13 3l2.6 6.4 6.9.4-5.3 4.4 1.7 6.8L13 17.3l-5.9 3.7 1.7-6.8L3.5 9.8l6.9-.4z" fill="currentColor"/>'},
+  zanfirico:{label:'Zanfirico',key:'5',svg:'<circle cx="13" cy="13" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><g fill="currentColor">'+[0,1,2,3,4,5,6,7].map(i=>`<circle cx="${13+6.5*Math.cos(i*Math.PI/4)}" cy="${13+6.5*Math.sin(i*Math.PI/4)}" r="1.6"/>`).join('')+'</g>'},
+  tripod:{label:'Tripod',key:'6',svg:'<g fill="currentColor"><circle cx="13" cy="8" r="4.2"/><circle cx="8.6" cy="15.6" r="4.2"/><circle cx="17.4" cy="15.6" r="4.2"/></g>'},
+  grid:{label:'Cane grid',key:'7',svg:'<g fill="currentColor">'+[7,13,19].flatMap(x=>[7,13,19].map(y=>`<circle cx="${x}" cy="${y}" r="2.4"/>`)).join('')+'</g>'},
+  frame:{label:'Frame',key:'8',svg:'<rect x="4" y="4" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="13" cy="13" r="3.5" fill="currentColor"/>'},
+};
+
+/* =================== slice SVG (mm space) =================== */
+function sliceSVG(opts={}){
+  const R = S.gather/2, pad = opts.ticks ? 3.2 : .6, vb = R+pad;
+  let s = `<svg viewBox="${-vb} ${-vb} ${vb*2} ${vb*2}" ${opts.id?`id="${opts.id}"`:''} role="img" aria-label="Cross-section, ${S.gather} mm gather">`;
+  if (opts.ticks){
+    for (let i=0;i<Math.round(Math.PI*S.gather);i++){ // one tick per mm of circumference
+      const a=i/(Math.PI*S.gather)*Math.PI*2, long=i%5===0, r1=R+.7, r2=R+(long?2:1.2);
+      s+=`<line x1="${r1*Math.sin(a)}" y1="${-r1*Math.cos(a)}" x2="${r2*Math.sin(a)}" y2="${-r2*Math.cos(a)}" stroke="var(--mute)" stroke-width="${long?.18:.1}"/>`;
+    }
+  }
+  let r = R;
+  for (let i=S.casing.length-1;i>=0;i--){ const c=COLORANTS[S.casing[i].id]; s+=`<circle r="${r}" fill="${c.hex}" ${c.op?`fill-opacity="${c.op}"`:''}/>`; r-=S.casing[i].t; }
+  s += `<circle r="${r}" fill="#dfe8e4" fill-opacity=".5"/>`;
+  for (const e of S.elements){
+    const c = COLORANTS[e.color].hex;
+    if (e.shape==='petal') s+=`<ellipse cx="${e.x}" cy="${e.y}" rx="${e.rx}" ry="${e.ry}" transform="rotate(${e.rot} ${e.x} ${e.y})" fill="${c}" stroke="${COLORANTS[e.edge].hex}" stroke-width=".55"/>`;
+    else if (e.shape==='ring') s+=`<circle cx="${e.x}" cy="${e.y}" r="${e.r}" fill="none" stroke="${c}" stroke-width="${e.r*.45}"/>`;
+    else s+=`<circle cx="${e.x}" cy="${e.y}" r="${e.r}" fill="${c}"/>`;
+  }
+  return s+'</svg>';
+}
+
+/* =================== plan logic =================== */
+function buildSteps(){
+  const extra = S.elements.slice(8);
+  const groups = {};
+  extra.forEach(e => { const k=e.shape+'|'+e.color; groups[k]=(groups[k]||0)+1; });
+  const steps = [
+    {t:'Pull the core cane', d:'Gold Ruby gathered over an Opal White centre.', c:['gold-ruby','opal-white'], min:15},
+    {t:'Pull 6 petal canes', d:'Opal White in a petal mold, cased thin in Cobalt Blue.', c:['opal-white','cobalt-blue'], min:35},
+  ];
+  for (const [k,n] of Object.entries(groups)){ const [shape,col]=k.split('|'); steps.push({t:`Pull ${n} ${COLORANTS[col].name} ${shape==='ring'?'ring':'cane'}${n>1?'s':''}`, d:'Simple cane, same pull as the petals.', c:[col], min:10+5*n}); }
+  steps.push({t:'Bundle and gather', d:`Petals around the core${extra.length?', extras in place':''}, picked up on a ${S.gather} mm gather.`, c:[], min:15});
+  steps.push({t:'Case, inside to out', d:S.casing.map(c=>COLORANTS[c.id].name).join(' → ')+`, ${fmt(casingT(),1)} mm total.`, c:S.casing.map(c=>c.id), min:20});
+  steps.push({t:`Pull to Ø ${fmt(pulledD(),1)} mm`, d:`${S.ratio} : 1 reduction. Expect about ${fmt(pulledLen()/1000,1)} m of cane, then slice.`, c:[], min:10});
+  return steps;
+}
+const used = () => [...new Set([...S.elements.map(e=>e.color),...S.elements.filter(e=>e.edge).map(e=>e.edge),...S.casing.map(c=>c.id)])];
+
+/* =================== render =================== */
+const app = $('#app');
+function render(){
+  app.dataset.section = S.section;
+  const tabs = ['murrini','vessel','plan','learn','saved'].map(k=>`<button class="tab" role="tab" aria-selected="${S.section===k}" data-tab="${k}">${k[0].toUpperCase()+k.slice(1)}</button>`).join('');
+  app.innerHTML = `<header class="bar"><div class="mark">${I.mark}<span>Before The Heat</span></div><nav class="tabs" role="tablist">${tabs}</nav><div class="save"><span class="dot"></span>Saved in this browser</div></header>`
+    + (S.section==='murrini' ? editorHTML() : S.section==='plan' ? planHTML() : `<div class="placeholder"><div><p style="font-size:20px;color:var(--ink);margin-bottom:6px">${S.section[0].toUpperCase()+S.section.slice(1)} is outside this preview.</p><p>It takes the ${S.section==="vessel"?"Reef":"Ember"} palette from Vortex Garden.</p></div></div>`);
+  bind();
+  if (S.section==='plan') drawField($('#fieldcv'), {animate:false});
+}
+
+function editorHTML(){
+  const tool = k => `<button class="tool" aria-pressed="${S.tool===k}" data-tool="${k}" title="${TOOLS[k].label} (${TOOLS[k].key})"><svg viewBox="0 0 26 26">${TOOLS[k].svg}</svg>${TOOLS[k].label}</button>`;
+  const layers = S.casing.map((c,i)=>`<div class="layer"><span class="n">${i+1}</span><span class="chip" style="background:${COLORANTS[c.id].hex}"></span><span>${COLORANTS[c.id].name} <span class="mm">${fmt(c.t,1)} mm</span></span><span class="ord"><button aria-label="Move ${COLORANTS[c.id].name} inward" data-mv="${i},-1" ${i===0?'disabled':''}>${I.up}</button><button aria-label="Move ${COLORANTS[c.id].name} outward" data-mv="${i},1" ${i===S.casing.length-1?'disabled':''}>${I.down}</button></span></div>`).join('');
+  const chart = Object.entries(COLORANTS).filter(([k])=>k!=='clear').map(([k,c])=>`<button class="sw${c.toxic?' toxic':''}" aria-pressed="${S.sel===k}" data-sel="${k}"><i style="background:${c.hex}"></i><span>${c.name}<small>${c.note}</small></span></button>`).join('');
+  const n = used().length;
+  return `<main class="editor" data-dock="${S.dock}">
+    <aside class="rail"><section><h2>Single cane</h2><div class="tools">${['circle','petal','ring','star'].map(tool).join('')}</div></section>
+      <section><h2>Bundles</h2><div class="tools">${['zanfirico','tripod','grid','frame'].map(tool).join('')}</div></section></aside>
+    <section class="stage">
+      <div class="hint"><span>Six-petal radial · true scale, 1 tick = 1 mm</span><span>Click to place <kbd>⌘Z</kbd> undo <kbd>P</kbd> plan</span></div>
+      <div class="slicebox">${sliceSVG({ticks:true,id:'slice'})}</div>
+      <div class="readouts"><div class="ro"><b>${S.gather}</b><span>gather Ø mm</span></div><div class="ro"><b>${S.ratio}:1</b><span>pull ratio</span></div><div class="ro calc"><b>${fmt(pulledD(),1)}</b><span>pulled Ø mm</span></div></div>
+    </section>
+    <aside class="inspector">
+      <section data-p="rod"><h2>Rod</h2>
+        <div class="slider"><label for="g">Gather diameter <output>${S.gather} mm</output></label><input id="g" type="range" min="16" max="60" value="${S.gather}"></div>
+        <div class="slider"><label for="r">Pull ratio <output>${S.ratio} : 1</output></label><input id="r" type="range" min="2" max="20" value="${S.ratio}"></div></section>
+      <section data-p="casing"><h2>Casing, inside to out</h2><div class="casing">${layers}</div></section>
+      <section data-p="colour"><h2>Colour</h2><div class="chart">${chart}</div></section>
+    </aside>
+    <footer class="strip">
+      <div><div class="k">Build</div><div class="v">${buildSteps().length} steps</div></div>
+      <div><div class="k">Yield</div><div class="v">≈ ${fmt(pulledLen()/1000,1)} m of Ø ${fmt(pulledD(),1)} mm</div></div>
+      <div><div class="k">Compatibility</div><div class="v check">${I.check}${n} colourants listed, run a test strip</div></div>
+      <button class="btn" data-tab="plan">Open shop plan ${I.arrow}</button>
+    </footer>
+    <nav class="dock" aria-label="Editor panels">${['tools','colour','casing','plan'].map(k=>`<button aria-pressed="${S.dock===k}" data-dock="${k}">${dockIcon(k)}${k[0].toUpperCase()+k.slice(1)}</button>`).join('')}</nav>
+  </main>`;
+}
+function dockIcon(k){
+  return {tools:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="4"/><circle cx="16" cy="16" r="4"/></svg>',
+    colour:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>',
+    casing:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/></svg>',
+    plan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12M4 6h.5M4 12h.5M4 18h.5"/></svg>'}[k];
+}
+
+function planHTML(){
+  const steps = buildSteps(), total = steps.reduce((a,s)=>a+s.min,0);
+  const toxic = used().filter(k=>COLORANTS[k].toxic);
+  const stepRows = steps.map((s,i)=>`<div class="step"><span class="n">${i+1}</span><div>${stepThumb(s,i,steps.length)}</div><div><b>${s.t}</b><p>${s.d}</p></div></div>`).join('');
+  const sheet = `<article class="sheet">
+    <header><div><h3>Six-petal radial</h3></div><p>Before The Heat · plan ${new Date().toISOString().slice(0,10)}</p></header>
+    <div>
+      <div style="width:260px">${sliceSVG({ticks:true})}</div>
+      <h4 style="margin-top:14px">Pull</h4>
+      <div class="pull"><div>Ø ${S.gather} mm<small>${S.len} mm gather</small></div>${I.arrow}<div>Ø ${fmt(pulledD(),1)} mm<small>≈ ${fmt(pulledLen()/1000,1)} m cane</small></div></div>
+      <h4 style="margin-top:20px">Casing, inside to out</h4>
+      <table>${S.casing.map((c,i)=>`<tr><td><span class="chip" style="background:${COLORANTS[c.id].hex}"></span>${i+1}. ${COLORANTS[c.id].name}</td><td class="num">${fmt(c.t,1)} mm</td></tr>`).join('')}</table>
+    </div>
+    <div><h4>Build order · about ${Math.round(total/5)*5} min of heat</h4><div class="steps">${stepRows}</div></div>
+    <div class="notes">
+      <div class="ok"><b>Compatibility.</b> ${used().length} colourants: ${used().map(k=>COLORANTS[k].name).join(', ')}. This plan doesn't assume a COE; use rods from one compatible system and pull a test strip first.</div>
+      <div class="warn"><b>Watch.</b> Gold Ruby looks pale until it's reheated, then strikes.${toxic.length?` ${toxic.map(k=>COLORANTS[k].name).join(', ')} is toxic: no sanding without extraction.`:''}</div>
+      <div>${vesselThumb()}<p style="font-size:12px;color:#454a72;margin-top:4px">Vessel: example bowl from the Vessel tab</p></div>
+    </div></article>`;
+  const cur = steps[Math.min(S.step,steps.length)-1];
+  const checklist = `<div class="phonewrap"><div class="handset" role="region" aria-label="Shop checklist">
+      <div class="top"><span>Six-petal radial</span><span>${S.step} of ${steps.length}</span></div>
+      <div class="prog">${steps.map((s,i)=>`<i class="${i<S.step-1?'on':i===S.step-1?'cur':''}"></i>`).join('')}</div>
+      <div class="cur-step"><div class="big">${String(S.step).padStart(2,'0')}</div><h3>${cur.t}</h3><p>${cur.d}</p>
+        ${cur.c.length?`<div class="cols">${cur.c.map(k=>`<span class="pill"><i style="background:${COLORANTS[k].hex}"></i>${COLORANTS[k].name}</span>`).join('')}</div>`:''}
+        <div class="thumb" style="width:120px;margin-inline:auto">${sliceSVG()}</div></div>
+      <div class="actions"><button class="btn ghost" data-stepby="-1" ${S.step===1?'disabled':''}>Back</button><button class="btn" data-stepby="1">${S.step===steps.length?'Finish':'Done, next'} ${I.arrow}</button></div>
+      <div class="awake">${I.sun}<span id="wake">Screen stays on while this is open</span></div>
+    </div>
+    <div class="side-notes"><p><b>For the shop.</b> One step at a time, big enough to read at arm's length. The screen stays awake, and your place is kept if the tab reloads.</p><p style="margin-top:12px">Same plan as the print sheet: change the design and both update.</p></div></div>`;
+  return `<main class="plan">
+    <div class="field"><canvas id="fieldcv"></canvas><div class="over"><h1>Six-petal radial,<br>ready to pull</h1><span class="meta">Ø ${S.gather} → ${fmt(pulledD(),1)} mm · ${S.ratio} : 1 · ≈ ${fmt(pulledLen()/1000,1)} m</span></div></div>
+    <div class="planbar"><div class="seg" role="group" aria-label="Plan view"><button aria-pressed="${S.planView==='sheet'}" data-pv="sheet">Print sheet</button><button aria-pressed="${S.planView==='list'}" data-pv="list">Shop checklist</button></div>
+      <button class="btn" id="printbtn">${I.print}Print plan</button></div>
+    <div class="planbody">${S.planView==='sheet'?sheet:checklist}</div></main>`;
+}
+function stepThumb(s,i,n){
+  if (i===n-1) return `<svg viewBox="0 0 56 24" width="56" height="24"><path d="M2 6h30l20 5v2l-20 5H2z" fill="${COLORANTS['cobalt-blue'].hex}"/></svg>`;
+  if (!s.c.length) return `<div style="width:44px">${sliceSVG()}</div>`;
+  return `<svg viewBox="0 0 56 40" width="56" height="40">${s.c.slice(0,3).map((k,j)=>`<circle cx="${16+j*12}" cy="20" r="${13-j*2}" fill="${COLORANTS[k].hex}" stroke="#0b0e2e" stroke-opacity=".2"/>`).join('')}</svg>`;
+}
+function vesselThumb(){
+  let dots=''; for(let y=0;y<5;y++) for(let x=0;x<8;x++){ const px=28+x*16+(y%2)*8, py=46+y*16; if(px<20+y*3||px>160-y*3) continue; dots+=`<circle cx="${px}" cy="${py}" r="4.5" fill="${COLORANTS['cobalt-blue'].hex}"/><circle cx="${px}" cy="${py}" r="2" fill="${COLORANTS['gold-ruby'].hex}"/>`; }
+  return `<svg viewBox="0 0 180 140" width="180" height="140"><defs><clipPath id="bowl"><path d="M16 30 C16 110 50 132 90 132 S164 110 164 30Z"/></clipPath></defs><path d="M16 30 C16 110 50 132 90 132 S164 110 164 30Z" fill="#dfe8e4"/><g clip-path="url(#bowl)">${dots}</g><path d="M16 30 C16 110 50 132 90 132 S164 110 164 30" fill="none" stroke="#0b0e2e" stroke-width="1.5"/></svg>`;
+}
+
+/* =================== cane field (Plan + loading) =================== */
+const spriteCache = new Map();
+function murrineSprite(px){
+  const svg = sliceSVG().replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" '), key = px+'|'+svg;
+  if (spriteCache.has(key)) return spriteCache.get(key);
+  const c = document.createElement('canvas'); c.width=c.height=px; const g=c.getContext('2d');
+  const img = new Image();
+  const p = new Promise(res=>{ img.onload=()=>{ g.drawImage(img,0,0,px,px); res(c); }; img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg); });
+  if (spriteCache.size > 12) spriteCache.clear();
+  spriteCache.set(key, p); return p;
+}
+const anims = new WeakMap();
+const rnd = (a,b) => a + Math.random()*(b-a);
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const hex2rgb = h => [1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const shade = (h,k) => { const c=hex2rgb(h).map(v=>Math.round(v+(255-v)*k)); return `rgb(${c})`; };
+const MSGS = ['Gathering…','Bundling…','Casing…','Marvering…','Reheating…','Pulling cane…','Slicing…'];
+let lastMsg = '';
+// pointer tracked everywhere, so the vortex can be born where the tab was clicked
+const ptr = {x:null, y:null, t:-1e9};
+addEventListener('pointermove', e => { ptr.x=e.clientX; ptr.y=e.clientY; ptr.t=performance.now(); });
+addEventListener('pointerdown', e => { ptr.x=e.clientX; ptr.y=e.clientY; ptr.t=performance.now(); });
+
+// A fresh roll for every loading moment, the way VORTEX GARDEN's applyPalette() reshuffles.
+function rollField(){
+  const pal = PAL[S.section], seq = []; let prev = null;
+  for (let i=0, L=Math.floor(rnd(10,18)); i<L; i++){
+    let c = Math.random()<.35 ? pal[0] : pick(pal);
+    if (c===prev) c = pal[(pal.indexOf(c)+1)%pal.length];
+    seq.push(c); prev = c;
+  }
+  return {
+    seq, twist: rnd(1.5,5)*pick([-1,1]), band: rnd(.012,.03),
+    glyph: Math.random()<.4 ? 'murrine' : pick(['rings','pixel','spark']),
+    spacing: rnd(28,38), wander: [rnd(0,6.28), rnd(0,6.28), rnd(.1,.2)],
+  };
+}
+
+async function drawField(cv, {animate, ms=1300, roll=null}){
+  if (!cv) return;
+  const dpr = roll ? Math.min(1.5, devicePixelRatio||1) : Math.min(2, devicePixelRatio||1), W = cv.clientWidth, H = cv.clientHeight;
+  cv.width = W*dpr; cv.height = H*dpr; const g = cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0);
+  // the Plan field stays a faithful still of the real design; loading takes a roll
+  const cfg = roll || { seq:PAL[S.section], twist:S.twist/90, band:.018, glyph:'murrine', spacing:Math.max(18,Math.min(30,Math.sqrt(W*H/1500))), wander:[0,0,.2] };
+  const sp = cfg.spacing, seq = cfg.seq, bg = BG[S.section];
+  const sprite = await murrineSprite(Math.ceil(sp*dpr*1.1));
+  const outer = COLORANTS[S.casing.at(-1).id].hex, mid = COLORANTS[S.casing.at(-2)?.id || S.casing[0].id].hex, core = COLORANTS[S.elements[0].color].hex;
+  const cells=[]; const dy=sp*.866;
+  for(let r=0,y=0;y<H+sp;r++,y+=dy) for(let x=(r%2)*sp/2;x<W+sp;x+=sp) cells.push({x,y,a:0,s:1});
+  // Glyph atlas: each band colour's glyph drawn once, then stamped per cell (one drawImage, no paths).
+  const MAX_S = 1.0, ATLAS_SCALE = MAX_S, size = Math.ceil(sp*ATLAS_SCALE*dpr*1.3), half = size/2, gs = sp*ATLAS_SCALE*dpr;
+  const atlas = seq.map((col,i) => {
+    const col2 = seq[(i+1)%seq.length], cv2 = document.createElement('canvas'); cv2.width = cv2.height = size;
+    const x = cv2.getContext('2d'); x.translate(half, half);
+    if (cfg.glyph==='murrine'){
+      x.fillStyle=col; x.globalAlpha=.9; x.beginPath(); for(let k=0;k<6;k++){ const a=Math.PI/6+k*Math.PI/3; x.lineTo(Math.cos(a)*gs*.56, Math.sin(a)*gs*.56);} x.fill(); x.globalAlpha=1;
+      x.drawImage(sprite,-gs*.4,-gs*.4,gs*.8,gs*.8);
+    } else if (cfg.glyph==='rings'){
+      [[outer,.48],[col,.36],[mid,.24],[core,.12]].forEach(([f,r])=>{ x.fillStyle=f; x.beginPath(); x.arc(0,0,gs*r,0,Math.PI*2); x.fill(); });
+    } else if (cfg.glyph==='pixel'){
+      x.fillStyle=col; x.beginPath(); x.arc(0,0,gs*.46,0,Math.PI*2); x.fill();
+      x.fillStyle=core; x.beginPath(); x.arc(0,0,gs*.14,0,Math.PI*2); x.fill();
+      x.fillStyle='rgba(255,255,255,.25)'; x.beginPath(); x.arc(-gs*.15,-gs*.15,gs*.12,0,Math.PI*2); x.fill();
+    } else {
+      x.strokeStyle=col; x.lineWidth=Math.max(1,gs*.09); x.beginPath(); x.moveTo(-gs*.55,0); x.lineTo(gs*.42,0); x.stroke();
+      x.fillStyle=col2; x.beginPath(); x.arc(gs*.48,0,gs*.14,0,Math.PI*2); x.fill();
+      x.fillStyle=shade(core,.2); x.beginPath(); x.arc(gs*.48,0,gs*.06,0,Math.PI*2); x.fill();
+    }
+    return cv2;
+  });
+  const box = cv.getBoundingClientRect();
+  const local = () => ptr.x==null ? null : {x:ptr.x-box.left, y:ptr.y-box.top};
+  const start = local();
+  const main = start ? {x:start.x,y:start.y,tx:start.x,ty:start.y} : {x:W/2,y:H/2,tx:W/2,ty:H/2};
+  const vortices = [], ripples = start ? [{x:start.x,y:start.y,t0:0}] : [];
+  const t0 = performance.now();
+  if (animate){
+    cv.onpointerdown = e => { const x=e.clientX-box.left, y=e.clientY-box.top, t=(performance.now()-t0)/1000;
+      vortices.push({x,y,s:rnd(.7,1.2),spin:pick([-1,1]),life:1}); if (vortices.length>2) vortices.shift(); ripples.push({x,y,t0:t}); };
+  }
+  const frame = now => {
+    const t = animate ? (now-t0)/1000 : 2.2, [p1,p2,wf] = cfg.wander;
+    const L = local();
+    if (animate && L && now-ptr.t < 1500){ main.tx=L.x; main.ty=L.y; }
+    else if (animate){ main.tx = W*(.5+.3*Math.sin(t*wf*4+p1)); main.ty = H*(.5+.28*Math.sin(t*wf*3+p2)); }
+    else { main.tx = W*.62; main.ty = H*.55; }
+    main.x += (main.tx-main.x)*(animate?.12:1); main.y += (main.ty-main.y)*(animate?.12:1);
+    const all = [{x:main.x,y:main.y,s:1.4,spin:Math.sign(cfg.twist)||1,life:1}, ...vortices];
+    const R = Math.min(W,H)*.6;
+    g.setTransform(dpr,0,0,dpr,0,0); g.fillStyle = bg; g.fillRect(0,0,W,H);
+    const live = ripples.filter(r=>t-r.t0<3.5);
+    for (const c of cells){
+      let vx=0, vy=0, nd=Infinity, na=0;
+      for (const v of all){
+        const dx=c.x-v.x, dy=c.y-v.y, d=Math.hypot(dx,dy)+1, w=(v.s*v.life)/(1+(d*d)/(R*R));
+        vx += (-dy/d)*w*v.spin - (dx/d)*w*.25; vy += (dx/d)*w*v.spin - (dy/d)*w*.25;
+        if (d/(v.s*v.life) < nd){ nd=d/(v.s*v.life); na=Math.atan2(dy,dx); }
+      }
+      let da = Math.atan2(vy,vx) - c.a; da = Math.atan2(Math.sin(da),Math.cos(da)); c.a += animate ? da*.2 : da;
+      let boost = 0;
+      for (const r of live){ const age=t-r.t0, d=Math.hypot(c.x-r.x,c.y-r.y)-age*420; if (d*d<16000) boost += Math.exp(-(d*d)/1800)*(1-age/3.5)*1.1; }
+      const near = 1-Math.min(1,nd/R);
+      c.s += (Math.min(MAX_S, .62 + near*.32 + Math.min(boost,.2)) - c.s)*(animate?.25:1);
+      // spiral bands: distance + angle, the way a twisted cane reads end-on
+      const phase = nd*cfg.band*10/(sp/2) + (na/(Math.PI*2))*cfg.twist*seq.length/4 - t*.35;
+      const bi = ((Math.floor(phase)%seq.length)+seq.length)%seq.length, col = seq[bi], col2 = seq[(bi+1)%seq.length];
+      // one stamp per cell from the pre-drawn atlas: rotate and scale evenly, never stretch
+      const k = c.s/ATLAS_SCALE, co=Math.cos(c.a)*k, si=Math.sin(c.a)*k;
+      g.setTransform(co, si, -si, co, c.x*dpr, c.y*dpr);
+      g.drawImage(atlas[bi], -half, -half);
+    }
+    for (const v of vortices) v.life -= 1/60/6;
+    if (animate && now-t0<ms && !reduce) anims.set(cv, requestAnimationFrame(frame));
+  };
+  cancelAnimationFrame(anims.get(cv)); anims.set(cv, requestAnimationFrame(frame));
+}
+
+/* =================== events =================== */
+let leaving = null;
+function go(section){
+  if (section===S.section) return;
+  const L = $('#loading'), msg = L.querySelector('p');
+  S.section = section;
+  if (reduce){ render(); return; }
+  let m; do { m = pick(MSGS); } while (m===lastMsg); lastMsg = m; msg.textContent = m;
+  app.dataset.section = section;
+  L.classList.add('on');
+  drawField($('#loadcv'), {animate:true, ms:1150, roll:rollField()});
+  setTimeout(render, 200);                 // the page swaps underneath while the field plays
+  clearTimeout(leaving); leaving = setTimeout(()=>L.classList.remove('on'), 900);
+}
+function commit(fn){ S.past.push(JSON.stringify({e:S.elements,c:S.casing})); fn(); render(); }
+function bind(){
+  app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>go(b.dataset.tab));
+  app.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>{S.tool=b.dataset.tool; render();});
+  app.querySelectorAll('[data-sel]').forEach(b=>b.onclick=()=>{S.sel=b.dataset.sel; render();});
+  app.querySelectorAll('[data-dock]').forEach(b=>{ if(b.tagName==='BUTTON') b.onclick=()=>{S.dock=b.dataset.dock; render();}; });
+  app.querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>{ const [i,d]=b.dataset.mv.split(',').map(Number); commit(()=>{ const a=S.casing; [a[i],a[i+d]]=[a[i+d],a[i]]; }); });
+  app.querySelectorAll('[data-pv]').forEach(b=>b.onclick=()=>{S.planView=b.dataset.pv; render();});
+  app.querySelectorAll('[data-stepby]').forEach(b=>b.onclick=()=>{ const n=buildSteps().length; S.step=Math.max(1,Math.min(n,S.step+Number(b.dataset.stepby))); render(); keepAwake(); });
+  const pb=$('#printbtn'); if(pb) pb.onclick=()=>{ S.planView='sheet'; render(); setTimeout(()=>print(),50); };
+  const g=$('#g'), r=$('#r');
+  if (g) g.oninput=e=>{S.gather=+e.target.value; render(); $('#g').focus();};
+  if (r) r.oninput=e=>{S.ratio=+e.target.value; render(); $('#r').focus();};
+  const sl=$('#slice');
+  if (sl) sl.onpointerdown=e=>{
+    const pt=sl.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY; const p=pt.matrixTransform(sl.getScreenCTM().inverse());
+    const inner=S.gather/2-casingT(); if (Math.hypot(p.x,p.y)>inner-1) return;
+    const shape = S.tool==='petal'?'petal':S.tool==='ring'?'ring':'circle';
+    commit(()=>S.elements.push(shape==='petal'?{shape,x:p.x,y:p.y,rx:2.2,ry:3.4,rot:Math.atan2(p.x,-p.y)*180/Math.PI,color:S.sel,edge:'cobalt-blue'}:{shape,x:p.x,y:p.y,r:shape==='ring'?1.8:1.6,color:S.sel}));
+  };
+}
+async function keepAwake(){ try{ if('wakeLock' in navigator && !window._wl) window._wl = await navigator.wakeLock.request('screen'); }catch(e){} }
+addEventListener('keydown',e=>{
+  if ((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='z'){ e.preventDefault(); const p=S.past.pop(); if(p){ const o=JSON.parse(p); S.elements=o.e; S.casing=o.c; render(); } return; }
+  if (e.target.tagName==='INPUT') return;
+  const tk = Object.entries(TOOLS).find(([,t])=>t.key===e.key); if (tk && S.section==='murrini'){ S.tool=tk[0]; render(); }
+  if (e.key==='p'||e.key==='P') go(S.section==='plan'?'murrini':'plan');
+});
+$('#fDesk').onclick=()=>{ $('#wrap').classList.remove('phone'); $('#fDesk').setAttribute('aria-pressed','true'); $('#fPhone').setAttribute('aria-pressed','false'); render(); };
+$('#fPhone').onclick=()=>{ $('#wrap').classList.add('phone'); $('#fPhone').setAttribute('aria-pressed','true'); $('#fDesk').setAttribute('aria-pressed','false'); render(); };
+addEventListener('resize',()=>{ if(S.section==='plan') drawField($('#fieldcv'),{animate:false}); });
+render();
+</script>
+</body>
+</html>

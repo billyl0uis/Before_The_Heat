@@ -46,6 +46,16 @@ export function renderElementsToCanvas(elements, canvasConfig, targetCanvas, out
   ctx.translate(size / 2, size / 2)
   ctx.scale(scale, -scale)
 
+  drawElements(ctx, elements)
+
+  ctx.restore()
+  return canvas
+}
+
+// Draws elements in engine coordinates onto a context the caller has
+// already transformed (centered, +y up). Shared by the texture rasterizer
+// above and the rod-slice plate, so both trace the exact same geometry.
+export function drawElements(ctx, elements) {
   for (const element of elements) {
     const definition = SHAPE_TYPES[element.shape]
     if (!definition) continue
@@ -54,14 +64,11 @@ export function renderElementsToCanvas(elements, canvasConfig, targetCanvas, out
     ctx.save()
     ctx.translate(element.x, element.y)
     ctx.rotate((element.rotation * Math.PI) / 180)
-    ctx.globalAlpha = element.opacity
+    ctx.globalAlpha = element.opacity ?? 1
     ctx.fillStyle = element.color
     fillShapePath(ctx, shape)
     ctx.restore()
   }
-
-  ctx.restore()
-  return canvas
 }
 
 // Union bounding box of every element's actual geometry (rotation applied),
@@ -133,20 +140,9 @@ export function renderPatternTile(
   ctx.scale(scale, -scale)
   ctx.translate(-centerX, -centerY)
 
-  for (const element of elements) {
-    const definition = SHAPE_TYPES[element.shape]
-    if (!definition) continue
-
-    const shape = definition.createShape(element.params)
-    ctx.save()
-    ctx.translate(element.x, element.y)
-    ctx.rotate((element.rotation * Math.PI) / 180)
-    ctx.globalAlpha = element.opacity
-    ctx.fillStyle = element.color
-    fillShapePath(ctx, shape)
-    ctx.restore()
-  }
+  drawElements(ctx, elements)
 
   ctx.restore()
   return canvas
 }
+

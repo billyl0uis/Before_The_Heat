@@ -1,13 +1,149 @@
 @import "tailwindcss";
 
+/* Vortex Garden: one palette per section, lifted from the VORTEX GARDEN
+   sketch. App.jsx sets data-section on <html>, so the whole page (body,
+   scrollbars, selection) follows the tab you're on. */
+:root,
+[data-section="murrini"] {
+  /* Ember, orange-led, on a warm ground (orange, not purple, by request) */
+  --ground: #150b07;
+  --panel: #1f120c;
+  --raise: #2b1911;
+  --line: #40271b;
+  --ink: #fbf1e8;
+  --ink-soft: #ead8ca;
+  --mute: #cdb5a5;
+  --faint: #a8907f;
+  --accent: #f2762e;
+  --accent-ink: #1a0a02;
+  --accent-2: #5ec1e8;
+}
+[data-section="plan"] {
+  /* Primary */
+  --ground: #07092a;
+  --panel: #0d1140;
+  --raise: #151a55;
+  --line: #232a6b;
+  --ink: #f2f3ff;
+  --ink-soft: #dfe2fb;
+  --mute: #aab1e3;
+  --faint: #8890c8;
+  --accent: #fefe59;
+  --accent-ink: #07092a;
+  --accent-2: #4f7cff;
+}
+[data-section="vessel"] {
+  /* Reef */
+  --ground: #071433;
+  --panel: #0c1d45;
+  --raise: #132756;
+  --line: #1f3768;
+  --ink: #eef6ff;
+  --ink-soft: #d9e7f7;
+  --mute: #a7bddc;
+  --faint: #8299bb;
+  --accent: #3fb0d0;
+  --accent-ink: #04121f;
+  --accent-2: #e6c23a;
+}
+[data-section="learn"],
+[data-section="vault"],
+[data-section="about"] {
+  /* Ember, yellow-led */
+  --ground: #140c06;
+  --panel: #1f140b;
+  --raise: #2a1c10;
+  --line: #3e2a18;
+  --ink: #f6f2e6;
+  --ink-soft: #e8e0cc;
+  --mute: #c9b9a0;
+  --faint: #a4937b;
+  --accent: #f7c21a;
+  --accent-ink: #1a0e00;
+  --accent-2: #5ec1e8;
+}
+
+@theme inline {
+  --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --color-ground: var(--ground);
+  --color-panel: var(--panel);
+  --color-raise: var(--raise);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-mute: var(--mute);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-2: var(--accent-2);
+
+  /* The pages outside this redesign (Vessel internals, Learn, Saved, About)
+     were written against Tailwind's neutral and purple scales. Mapping those
+     scales onto the section tokens re-themes them without touching their
+     markup, and retires the purple. */
+  --color-neutral-950: var(--ground);
+  --color-neutral-900: var(--panel);
+  --color-neutral-800: var(--raise);
+  --color-neutral-700: var(--line);
+  --color-neutral-600: var(--faint);
+  --color-neutral-500: var(--faint);
+  --color-neutral-400: var(--mute);
+  --color-neutral-300: var(--ink-soft);
+  --color-neutral-200: var(--ink);
+  --color-neutral-100: var(--ink);
+  --color-purple-300: var(--accent);
+  --color-purple-400: var(--accent);
+  --color-purple-500: var(--accent);
+}
+
 html {
   color-scheme: dark;
   /* Every Tailwind text-* size is a rem value, so bumping the root size
      scales all of them proportionally — the base default (16px) reads
      small against a dark background at normal viewing distance. */
   font-size: 18px;
+  background: var(--ground);
+  scrollbar-color: var(--line) var(--ground);
+  transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body {
-  @apply bg-neutral-950 text-neutral-100;
+  @apply bg-ground font-sans text-ink antialiased;
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Range inputs carry the section accent instead of the browser default. */
+input[type="range"] {
+  accent-color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* The printed plan: only the sheet, on white, no app chrome. */
+@media print {
+  html,
+  body {
+    background: #fff !important;
+  }
+  [data-print-hide] {
+    display: none !important;
+  }
 }

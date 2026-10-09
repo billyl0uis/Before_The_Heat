@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
+import { findColorant, ROD_WORLD_RADIUS } from '../../engine/murrini/rod'
 import { SHAPE_TYPES } from '../../engine/murrini/shapes'
 import { WebGLUnavailable } from '../WebGLUnavailable'
 
@@ -8,6 +9,37 @@ function disposeGroupChildren(group) {
     child.geometry.dispose()
     child.material.dispose()
   }
+}
+
+// The rod itself: a clear-glass core behind the canes, then the casing
+// layers and an outer mask in front of them. Drawing casing over the canes
+// is what a real cross-section looks like (a cane can't poke through its
+// casing), and the mask trims anything placed past the rod's edge.
+function populateRod(behind, front, slice) {
+  disposeGroupChildren(behind)
+  behind.clear()
+  disposeGroupChildren(front)
+  front.clear()
+  if (!slice) return
+
+  const flat = (geometry, color, opacity = 1) =>
+    new THREE.Mesh(
+      geometry,
+      new THREE.MeshBasicMaterial({ color, transparent: opacity < 1, opacity }),
+    )
+  const core = flat(new THREE.CircleGeometry(slice.contentRadius, 96), findColorant('clear').swatch, 0.16)
+  behind.add(core)
+
+  for (const ring of slice.rings) {
+    const colorant = findColorant(ring.colorantId)
+    const mesh = flat(
+      new THREE.RingGeometry(ring.inner, ring.outer, 128),
+      colorant?.swatch ?? '#888888',
+      colorant?.family === 'transparent' ? 0.82 : 1,
+    )
+    front.add(mesh)
+  }
+  front.add(flat(new THREE.RingGeometry(ROD_WORLD_RADIUS, ROD_WORLD_RADIUS * 2, 128), slice.groundColor))
 }
 
 // Shared by both the setup effect and the elements effect below, so a
@@ -47,6 +79,7 @@ export function MurriniCanvas({
   preview,
   displayWidth,
   displayHeight,
+  slice = null,
 }) {
   // The logical coordinate system (world units used for placement math,
   // pattern repeat, saved designs) is always canvas.width/height — fixed,
@@ -63,6 +96,9 @@ export function MurriniCanvas({
   const rendererRef = useRef(null)
   const cameraRef = useRef(null)
   const previewMeshRef = useRef(null)
+  const rodBehindRef = useRef(null)
+  const rodFrontRef = useRef(null)
+  const sliceRef = useRef(slice)
   const onPlaceRef = useRef(onPlace)
   // Read by the setup effect below so it can immediately repopulate a
   // freshly (re)created group with whatever's currently placed, without
@@ -95,11 +131,15 @@ export function MurriniCanvas({
   }, [preview.shape])
 
   useEffect(() => {
+    sliceRef.current = slice
+  }, [slice])
+
+  useEffect(() => {
     const mount = mountRef.current
     const { width, height, backgroundColor } = canvas
 
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color(backgroundColor)
+    scene.background = new THREE.Color(sliceRef.current?.groundColor ?? backgroundColor)
 
     // Orthographic camera sized to exactly match the canvas in pixels, so
     // world units == pixel offsets from center. That keeps click-to-place
@@ -125,9 +165,18 @@ export function MurriniCanvas({
     renderer.setPixelRatio(window.devicePixelRatio)
     mount.appendChild(renderer.domElement)
 
+    const rodBehind = new THREE.Group()
+    rodBehind.position.z = -0.05
+    scene.add(rodBehind)
     const group = new THREE.Group()
     scene.add(group)
     populateGroup(group, elementsRef.current)
+    const rodFront = new THREE.Group()
+    rodFront.position.z = 0.05
+    scene.add(rodFront)
+    populateRod(rodBehind, rodFront, sliceRef.current)
+    rodBehindRef.current = rodBehind
+    rodFrontRef.current = rodFront
 
     // Ghost of whatever shape/color is about to be placed, following the
     // cursor so you can see exactly where and what will land before you
@@ -144,6 +193,7 @@ export function MurriniCanvas({
     )
     previewMesh.visible = false
     previewMesh.position.z = 0.1
+    previewMesh.renderOrder = 2
     scene.add(previewMesh)
     previewMeshRef.current = previewMesh
 
@@ -190,6 +240,8 @@ export function MurriniCanvas({
       renderer.domElement.removeEventListener('pointermove', handlePointerMove)
       renderer.domElement.removeEventListener('pointerleave', handlePointerLeave)
       disposeGroupChildren(group)
+      disposeGroupChildren(rodBehind)
+      disposeGroupChildren(rodFront)
       previewMesh.geometry.dispose()
       previewMesh.material.dispose()
       renderer.dispose()
@@ -204,6 +256,14 @@ export function MurriniCanvas({
     populateGroup(group, elements)
     rendererRef.current.render(sceneRef.current, cameraRef.current)
   }, [elements, webglFailed])
+
+  useEffect(() => {
+    const scene = sceneRef.current
+    if (!scene || webglFailed) return
+    if (slice) scene.background = new THREE.Color(slice.groundColor)
+    populateRod(rodBehindRef.current, rodFrontRef.current, slice)
+    rendererRef.current.render(scene, cameraRef.current)
+  }, [slice, webglFailed])
 
   useEffect(() => {
     const mesh = previewMeshRef.current
@@ -226,7 +286,7 @@ export function MurriniCanvas({
   return (
     <div
       ref={mountRef}
-      className="h-fit w-fit overflow-hidden rounded-lg border border-neutral-800"
+      className={slice ? 'h-fit w-fit' : 'h-fit w-fit overflow-hidden rounded-lg border border-neutral-800'}
     />
   )
 }

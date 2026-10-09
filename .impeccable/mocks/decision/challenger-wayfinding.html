@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Shop Wayfinding</title>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1440px;height:900px;overflow:hidden;background:#f4f4f2;color:#111;font:16px/1.4 'Hanken Grotesk',sans-serif}
+header{height:54px;display:flex;align-items:center;gap:28px;padding:0 28px;background:#111;color:#fff}
+header a{color:#aaa}header a.on{color:#ffd200;font-weight:600}
+.band{background:#ffd200;height:120px;display:flex;align-items:center;gap:28px;padding:0 28px}
+.band .no{background:#111;color:#fff;width:84px;height:84px;display:flex;align-items:center;justify-content:center;font:800 54px 'Hanken Grotesk'}
+.band h1{font:800 44px/1.05 'Hanken Grotesk'}.band p{font-size:17px}
+.band .arrow{margin-left:auto;font:800 64px 'Hanken Grotesk'}
+main{display:grid;grid-template-columns:1fr 360px;height:572px}
+.stage{display:flex;align-items:center;justify-content:center}
+.side{padding:24px;border-left:1px solid #ddd}
+.side h3{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#666;margin-bottom:10px}
+.t{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #ddd}.t i{width:24px;height:24px;border:1px solid #999}
+.route{height:100px;background:#111;color:#fff;display:flex}
+.route div{flex:1;padding:18px 24px;border-right:1px solid #333}.route div.on{background:#ffd200;color:#111}
+.route b{display:block;font:800 26px 'Hanken Grotesk'}
+</style></head><body>
+<header><b>Before The Heat</b><a class="on">Murrini</a><a>Vessel</a><a>Plan</a><a>Learn</a><a>Saved</a></header>
+<div class="band"><div class="no">2</div><div><h1>Pull the petal cane</h1><p>Opal White cased in Cobalt Blue · star mold · make 6 lengths</p></div><div class="arrow">→</div></div>
+<main>
+  <section class="stage"><svg width="500" height="500" viewBox="-130 -130 260 260"><circle r="116" fill="#1f45a8" opacity=".25"/><circle r="108" fill="#f3f1ea" opacity=".4"/><circle r="100" fill="#dfe6e2" opacity=".5"/>
+    <g fill="#f3f1ea" stroke="#1f45a8" stroke-width="3"><ellipse cy="-55" rx="24" ry="38"/><ellipse cy="-55" rx="24" ry="38" transform="rotate(60)"/><ellipse cy="-55" rx="24" ry="38" transform="rotate(120)"/><ellipse cy="-55" rx="24" ry="38" transform="rotate(180)"/><ellipse cy="-55" rx="24" ry="38" transform="rotate(240)"/><ellipse cy="-55" rx="24" ry="38" transform="rotate(300)"/></g>
+    <circle r="22" fill="#b0183a" opacity=".3"/></svg></section>
+  <section class="side"><h3>Colours in this step</h3><div class="t"><i style="background:#f3f1ea"></i>Opal White · opaque</div><div class="t"><i style="background:#1f45a8"></i>Cobalt Blue · CoO</div>
+    <h3 style="margin-top:20px">Then</h3><div class="t">3 · Case clear, opal, cobalt</div><div class="t">4 · Pull 32 → 8 mm (4 : 1)</div></section>
+</main>
+<div class="route"><div><b>1</b>Ruby core</div><div class="on"><b>2</b>Petal cane ×6</div><div><b>3</b>Case</div><div><b>4</b>Pull 4 : 1</div></div>
+</body></html>
