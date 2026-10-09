@@ -19,11 +19,8 @@ const MurriniEditor = lazy(() =>
 const VesselEditor = lazy(() =>
   import('./pages/VesselEditor').then((m) => ({ default: m.VesselEditor })),
 )
-const ColorIndexPage = lazy(() =>
-  import('./pages/ColorIndexPage').then((m) => ({ default: m.ColorIndexPage })),
-)
-const TechniqueGuidePage = lazy(() =>
-  import('./pages/TechniqueGuidePage').then((m) => ({ default: m.TechniqueGuidePage })),
+const LearnPage = lazy(() =>
+  import('./pages/LearnPage').then((m) => ({ default: m.LearnPage })),
 )
 const DesignVaultPage = lazy(() =>
   import('./pages/DesignVaultPage').then((m) => ({ default: m.DesignVaultPage })),
@@ -31,18 +28,12 @@ const DesignVaultPage = lazy(() =>
 const AboutPage = lazy(() =>
   import('./pages/AboutPage').then((m) => ({ default: m.AboutPage })),
 )
-const FreeSculptPage = lazy(() =>
-  import('./pages/FreeSculptPage').then((m) => ({ default: m.FreeSculptPage })),
-)
 
 const TABS = [
-  { key: 'murrini', label: 'Murrini Pattern' },
-  { key: 'vessel', label: 'Vessel Morphograph' },
-  { key: 'sculpt', label: 'Free Sculpt' },
-  { key: 'colors', label: 'Color Index' },
-  { key: 'techniques', label: 'Technique Guide' },
-  { key: 'vault', label: 'Design Vault' },
-  { key: 'about', label: 'About' },
+  { key: 'murrini', label: 'Murrini' },
+  { key: 'vessel', label: 'Vessel' },
+  { key: 'learn', label: 'Learn' },
+  { key: 'vault', label: 'Saved' },
 ]
 
 function TabLoadingFallback() {
@@ -71,21 +62,32 @@ function App() {
 
   return (
     <div className="min-h-svh">
-      <nav className="flex flex-wrap justify-center gap-2 border-b border-neutral-800 bg-neutral-900 p-3">
-        {TABS.map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            onClick={() => setActiveTab(tab.key)}
-            className={`rounded px-3 py-1.5 text-base transition-colors sm:px-4 ${
-              tab.key === activeTab
-                ? 'bg-purple-500 text-white'
-                : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <nav className="flex flex-wrap items-center justify-between gap-1 border-b border-neutral-800 bg-neutral-900 px-3 py-2">
+        <div className="flex gap-1">
+          {TABS.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setActiveTab(tab.key)}
+              className={`rounded px-2.5 py-1.5 text-sm transition-colors sm:px-4 sm:text-base ${
+                tab.key === activeTab
+                  ? 'bg-purple-500 text-white'
+                  : 'text-neutral-300 hover:bg-neutral-800'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => setActiveTab('about')}
+          className={`px-2 text-sm transition-colors ${
+            activeTab === 'about' ? 'text-purple-400' : 'text-neutral-500 hover:text-neutral-300'
+          }`}
+        >
+          About
+        </button>
       </nav>
       <ErrorBoundary key={activeTab}>
         <Suspense fallback={<TabLoadingFallback />}>
@@ -93,9 +95,7 @@ function App() {
           {activeTab === 'vessel' && (
             <VesselEditor design={design} vessel={vessel} vesselPattern={vesselPattern} />
           )}
-          {activeTab === 'sculpt' && <FreeSculptPage />}
-          {activeTab === 'colors' && <ColorIndexPage />}
-          {activeTab === 'techniques' && <TechniqueGuidePage />}
+          {activeTab === 'learn' && <LearnPage />}
           {activeTab === 'about' && <AboutPage />}
           {activeTab === 'vault' && (
             <DesignVaultPage

@@ -7,10 +7,11 @@ export function TechniqueReference({ elements, shape, params }) {
   if (!technique) return null
 
   return (
-    <div className="flex w-64 flex-col gap-4 rounded-lg border border-neutral-800 bg-neutral-900 p-5">
-      <h2 className="text-base font-medium text-neutral-100">How it's really made</h2>
+    <details className="flex w-64 flex-col gap-4 rounded-lg border border-neutral-800 bg-neutral-900 p-5 [&[open]>summary]:mb-4">
+      <summary className="cursor-pointer text-base font-medium text-neutral-100">
+        How it's made: {technique.title}
+      </summary>
       <TechniqueDiagram techniqueKey={techniqueKey} params={params} />
-      <p className="text-base font-medium text-neutral-200">{technique.title}</p>
       <p className="text-base leading-relaxed text-neutral-300">{technique.summary}</p>
       <ol className="flex flex-col gap-1 text-base text-neutral-300">
         {technique.steps.map((step, index) => (
@@ -20,6 +21,6 @@ export function TechniqueReference({ elements, shape, params }) {
           </li>
         ))}
       </ol>
-    </div>
+    </details>
   )
 }

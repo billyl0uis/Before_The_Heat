@@ -220,8 +220,7 @@ export function MurriniEditor({ design }) {
           Murrini Pattern Engine
         </h1>
         <p className="text-left text-base leading-relaxed text-neutral-400">
-          Pick a shape and a real glass color, then click the canvas to place
-          it. Turn on a repeat to see it as a full cane cross-section.
+          Pick a shape and color, then click the canvas to place it.
         </p>
       </div>
       <div className="flex w-full min-w-0 flex-col items-start gap-6 lg:flex-row">

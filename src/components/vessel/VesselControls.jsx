@@ -66,11 +66,6 @@ export function VesselControls({
             </button>
           ))}
         </div>
-        <p className="text-sm text-neutral-500">
-          Standard vessel archetypes, also cataloged by name in glass-cane
-          design software (VirtualGlass) — a starting point for the sliders
-          below, not a locked shape.
-        </p>
       </div>
 
       <div className="flex gap-2">
@@ -131,16 +126,10 @@ export function VesselControls({
           />
         ))}
       </div>
-      <p className="text-sm leading-relaxed text-neutral-500">
-        Works in both Parametric and Free-form — a real vessel-wall
-        technique (angle-dependent radius), not a texture trick, so it
-        applies on top of whatever silhouette is active.
-      </p>
 
       {freeform && (
         <p className="text-base leading-relaxed text-neutral-400">
-          Drag the points on the silhouette to reshape the wall by hand.
-          Switch back to Parametric to use these sliders again.
+          Drag the points on the outline to reshape it.
         </p>
       )}
 

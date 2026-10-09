@@ -99,8 +99,7 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
           Vessel Morphograph
         </h1>
         <p className="text-left text-base leading-relaxed text-neutral-400">
-          Sculpt a vessel silhouette from math — taper, bulge, a spherical
-          blend, and a surface ripple. Drag to orbit, scroll to zoom.
+          Shape a vessel. Drag to rotate, scroll to zoom.
         </p>
       </div>
       <div className="flex w-full min-w-0 flex-col items-start gap-6 lg:flex-row">
@@ -126,7 +125,7 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
               disabled={!hasPattern}
               onChange={(event) => handleSetManualMode(event.target.checked)}
             />
-            Place murrini by hand (click the vessel to press a slice on)
+            Place murrini by hand
           </label>
           {manualMode && (
             <label className="flex flex-col gap-1 text-base text-neutral-300">
@@ -171,11 +170,7 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
           )}
           {!hasPattern && (
             <p className="max-w-[360px] text-base leading-relaxed text-neutral-400">
-              Draw something in the Murrini Pattern tab first, then come
-              back here and click the vessel to press slices of it onto the
-              wall by hand — like pressing real murrini onto a hot gather.
-              It's a flat texture, not a real simulation of how the cane
-              would stretch when actually blown into this shape.
+              Make a pattern in the Murrini tab to press it onto the vessel.
             </p>
           )}
 
@@ -185,19 +180,10 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
               checked={reticelloMode}
               onChange={(event) => handleSetReticelloMode(event.target.checked)}
             />
-            Reticello wrap (crossed diagonal cane technique)
+            Reticello wrap
           </label>
           {reticelloMode && (
             <>
-              <p className="max-w-[360px] text-base leading-relaxed text-neutral-400">
-                Real reticello covers the whole piece, not spots pressed on
-                by hand: two canes of parallel threads, twisted in opposite
-                directions, are each blown into a bubble, then one nested
-                inside the other and inflated until they fuse. The threads
-                touch and fuse where the two grids cross; the diamond gap
-                between crossings is where air gets trapped as the bubbles
-                seal together.
-              </p>
               <label className="flex flex-col gap-1 text-base text-neutral-300">
                 Thread density: {reticelloDensity}
                 <input
@@ -237,8 +223,7 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
                   ))}
                 </div>
                 <p className="text-sm text-neutral-500">
-                  Click a swatch for rib A (white outline), shift-click for
-                  rib B (purple outline).
+                  Click for color A, shift-click for color B.
                 </p>
               </div>
             </>

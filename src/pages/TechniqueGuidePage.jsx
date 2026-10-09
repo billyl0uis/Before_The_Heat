@@ -57,15 +57,7 @@ export function TechniqueGuidePage() {
       <div className="max-w-2xl text-center">
         <h1 className="text-2xl font-medium text-neutral-100">Cane &amp; Murrini Techniques</h1>
         <p className="mt-1 text-left text-base leading-relaxed text-neutral-400">
-          Every technique this app simulates, gathered in one place — what
-          it's called, how it's really made, and the same diagram the
-          pattern editor shows while you work. These aren't simplified
-          analogies made up for the app; each one is a real, documented
-          glassblowing method. Some map to a specific tool in the Murrini
-          Pattern Engine's toolbar (Ring, Spiral, Jellyroll, Pinwheel,
-          Zanfirico); others — Casing, Bundling, Embedded Thread — are
-          read back from the actual geometry of whatever you've placed,
-          however you built it.
+          The real glassblowing methods behind every tool in the editor.
         </p>
       </div>
 
