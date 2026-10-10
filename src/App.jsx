@@ -36,12 +36,24 @@ const AboutPage = lazy(() =>
   import('./pages/AboutPage').then((m) => ({ default: m.AboutPage })),
 )
 
+// Saved needs online saving set up (Firebase). Without it the tab could only
+// explain that it doesn't work, so it stays out of the nav until it does.
+// Read straight from the env so the Firebase SDK still loads lazily.
+const SAVING_ON = [
+  import.meta.env.VITE_FIREBASE_API_KEY,
+  import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  import.meta.env.VITE_FIREBASE_APP_ID,
+].every(Boolean)
+
 const TABS = [
   { key: 'murrini', label: 'Murrini' },
   { key: 'vessel', label: 'Vessel' },
   { key: 'plan', label: 'Plan' },
   { key: 'learn', label: 'Learn' },
-  { key: 'vault', label: 'Saved' },
+  ...(SAVING_ON ? [{ key: 'vault', label: 'Saved' }] : []),
 ]
 
 function TabLoadingFallback() {
@@ -127,7 +139,7 @@ function App() {
     <div className="min-h-svh">
       <header
         data-print-hide
-        className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-line bg-panel px-3 sm:gap-6 sm:px-5"
+        className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-line bg-panel px-3 sm:gap-6 sm:px-5"
       >
         <button
           type="button"
@@ -156,13 +168,18 @@ function App() {
             </button>
           ))}
         </nav>
-        <ModeSwitch mode={mode} onChange={setMode} className="ml-auto max-sm:hidden" />
-        <p className="hidden shrink-0 items-center gap-2 text-sm text-mute lg:flex" role="status">
-          <span
-            className={`h-2 w-2 rounded-full ${murriniHook.savedLocally ? 'bg-accent-2' : 'bg-faint'}`}
-          />
-          {murriniHook.savedLocally ? 'Saved in this browser' : 'Not saved yet'}
-        </p>
+        <div className="ml-auto flex shrink-0 items-center gap-3 sm:gap-6">
+          {/* Simple and Advanced are two ways into the Murrini editor, so the
+              switch only belongs there. */}
+          {activeTab === 'murrini' && <ModeSwitch mode={mode} onChange={setMode} className="max-sm:hidden" />}
+          <p className="flex shrink-0 items-center gap-2 text-sm text-mute" role="status">
+            <span
+              className={`h-2 w-2 rounded-full ${murriniHook.savedLocally ? 'bg-accent-2' : 'bg-faint'}`}
+            />
+            <span className="lg:hidden">{murriniHook.savedLocally ? 'Saved' : 'Not saved'}</span>
+            <span className="max-lg:hidden">{murriniHook.savedLocally ? 'Saved in this browser' : 'Not saved yet'}</span>
+          </p>
+        </div>
       </header>
       <LoadingField trigger={transition.count} section={transition.section} design={design} />
       <ErrorBoundary key={activeTab}>
