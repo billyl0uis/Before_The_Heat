@@ -188,7 +188,7 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
                 type="button"
                 aria-pressed={view === option.key}
                 onClick={() => setView(option.key)}
-                className={`rounded-md px-3 py-1 text-sm font-semibold ${
+                className={`rounded-md px-3 py-1 text-sm font-semibold max-sm:min-h-[44px] ${
                   view === option.key ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
                 }`}
               >
@@ -238,7 +238,7 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
                 type="button"
                 aria-current={index === step ? 'step' : undefined}
                 onClick={() => setStep(index)}
-                className={`flex flex-1 flex-col gap-1.5 text-left text-xs font-semibold sm:text-sm ${
+                className={`flex flex-1 flex-col gap-1.5 text-left text-xs font-semibold max-sm:min-h-[44px] sm:text-sm ${
                   index === step ? 'text-ink' : index < step ? 'text-mute' : 'text-faint'
                 }`}
               >

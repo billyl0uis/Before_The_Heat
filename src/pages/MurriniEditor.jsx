@@ -348,7 +348,7 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
                 type="button"
                 aria-pressed={viewMode === mode.key}
                 onClick={() => setViewMode(mode.key)}
-                className={`rounded-md px-3 py-1 text-sm font-semibold ${
+                className={`rounded-md px-3 py-1 text-sm font-semibold max-sm:min-h-[44px] ${
                   viewMode === mode.key ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
                 }`}
               >
