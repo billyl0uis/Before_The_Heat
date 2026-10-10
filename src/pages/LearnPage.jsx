@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { AboutPage } from './AboutPage'
 import { ColorIndexPage } from './ColorIndexPage'
 import { TechniqueGuidePage } from './TechniqueGuidePage'
 
 const SECTIONS = [
   { key: 'techniques', label: 'Techniques' },
   { key: 'colors', label: 'Colors' },
+  { key: 'about', label: 'About' },
 ]
 
 // Reference material lives under one tab so the main nav stays short.
@@ -32,7 +34,9 @@ export function LearnPage() {
           </div>
         </div>
       </div>
-      {section === 'techniques' ? <TechniqueGuidePage /> : <ColorIndexPage />}
+      {section === 'techniques' && <TechniqueGuidePage />}
+      {section === 'colors' && <ColorIndexPage />}
+      {section === 'about' && <AboutPage />}
     </div>
   )
 }

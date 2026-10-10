@@ -541,7 +541,7 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
               onClick={() => setStep(0)}
               className="flex-1 rounded-xl bg-raise px-5 py-3 font-bold"
             >
-              Start a new design
+              Choose another recipe
             </button>
           )}
         </div>
