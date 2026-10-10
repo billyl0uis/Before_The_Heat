@@ -1,0 +1,1178 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-09T19:50:32.440975+00:00",
+  "title": "Design System: Before The Heat",
+  "extensions": {
+    "colorMeta": {
+      "ember-ground": {
+        "role": "neutral",
+        "displayName": "Ember Ground",
+        "tonalRamp": [
+          "#0d0b09",
+          "#282321",
+          "#463e3b",
+          "#665b56",
+          "#8b7d77",
+          "#b0a19b",
+          "#d2c8c4",
+          "#f1eeec"
+        ],
+        "canonical": "#150b07",
+        "section": "Murrini (orange Ember)"
+      },
+      "ember-panel": {
+        "role": "neutral",
+        "displayName": "Ember Panel",
+        "tonalRamp": [
+          "#0d0a09",
+          "#292220",
+          "#473d39",
+          "#685a54",
+          "#8e7c74",
+          "#b3a098",
+          "#d4c8c2",
+          "#f1edec"
+        ],
+        "canonical": "#1f120c",
+        "section": "Murrini (orange Ember)"
+      },
+      "ember-raise": {
+        "role": "neutral",
+        "displayName": "Ember Raise",
+        "tonalRamp": [
+          "#0e0a08",
+          "#2a221e",
+          "#493d37",
+          "#6b5952",
+          "#927a70",
+          "#b79f94",
+          "#d7c7c0",
+          "#f2edeb"
+        ],
+        "canonical": "#2b1911",
+        "section": "Murrini (orange Ember)"
+      },
+      "ember-line": {
+        "role": "neutral",
+        "displayName": "Ember Line",
+        "tonalRamp": [
+          "#0f0a08",
+          "#2c211c",
+          "#4c3c34",
+          "#6f584d",
+          "#97796b",
+          "#bc9d8e",
+          "#dbc5bc",
+          "#f4edea"
+        ],
+        "canonical": "#40271b",
+        "section": "Murrini (orange Ember)"
+      },
+      "ember-ink": {
+        "role": "neutral",
+        "displayName": "Ember Ink",
+        "tonalRamp": [
+          "#0c0b09",
+          "#262321",
+          "#443f3a",
+          "#635c56",
+          "#877e76",
+          "#aca39a",
+          "#cfc9c4",
+          "#f0eeec"
+        ],
+        "canonical": "#fbf1e8",
+        "section": "Murrini (orange Ember)"
+      },
+      "ember-ink-soft": {
+        "role": "neutral",
+        "displayName": "Ember Ink Soft",
+        "tonalRamp": [
+          "#0d0b08",
+          "#28231e",
+          "#473e37",
+          "#675b51",
+          "#8d7d70",
+          "#b2a194",
+          "#d4c8bf",
+          "#f1eeeb"
+        ],
+        "canonical": "#ead8ca",
+        "section": "Murrini (orange Ember)"
+      },
+      "ember-mute": {
+        "role": "neutral",
+        "displayName": "Ember Mute",
+        "tonalRamp": [
+          "#0e0a08",
+          "#2a221d",
+          "#493d35",
+          "#6b5a4e",
+          "#917b6c",
+          "#b79f90",
+          "#d7c7bd",
+          "#f2edea"
+        ],
+        "canonical": "#cdb5a5",
+        "section": "Murrini (orange Ember)"
+      },
+      "ember-faint": {
+        "role": "neutral",
+        "displayName": "Ember Faint",
+        "tonalRamp": [
+          "#0e0a07",
+          "#2a221c",
+          "#4a3d34",
+          "#6b5a4d",
+          "#927b6a",
+          "#b89f8e",
+          "#d7c7bc",
+          "#f3edea"
+        ],
+        "canonical": "#a8907f",
+        "section": "Murrini (orange Ember)"
+      },
+      "ember-orange": {
+        "role": "primary",
+        "displayName": "Ember Orange",
+        "tonalRamp": [
+          "#190500",
+          "#401500",
+          "#6b2900",
+          "#993e00",
+          "#cf5600",
+          "#f97c36",
+          "#ffb48c",
+          "#ffe8db"
+        ],
+        "canonical": "#f2762e",
+        "section": "Murrini (orange Ember)"
+      },
+      "ember-accent-ink": {
+        "role": "neutral",
+        "displayName": "Ember Accent Ink",
+        "tonalRamp": [
+          "#0e0a08",
+          "#2a221d",
+          "#493d35",
+          "#6b5a4f",
+          "#917b6d",
+          "#b79f91",
+          "#d7c7bd",
+          "#f2edea"
+        ],
+        "canonical": "#1a0a02",
+        "section": "Murrini (orange Ember)"
+      },
+      "ember-sky": {
+        "role": "secondary",
+        "displayName": "Ember Sky",
+        "tonalRamp": [
+          "#010d14",
+          "#032835",
+          "#0a465b",
+          "#136783",
+          "#1e8cb2",
+          "#4eb2d9",
+          "#9ad4ee",
+          "#e0f2fa"
+        ],
+        "canonical": "#5ec1e8",
+        "section": "Murrini (orange Ember)"
+      },
+      "primary-ground": {
+        "role": "neutral",
+        "displayName": "Primary Ground",
+        "tonalRamp": [
+          "#090b12",
+          "#1f2332",
+          "#393e56",
+          "#545c7c",
+          "#737ea8",
+          "#97a2cf",
+          "#c1c9e7",
+          "#ebeef8"
+        ],
+        "canonical": "#07092a",
+        "section": "Plan (Primary)"
+      },
+      "primary-panel": {
+        "role": "neutral",
+        "displayName": "Primary Panel",
+        "tonalRamp": [
+          "#080a14",
+          "#1e2337",
+          "#363e5d",
+          "#505b86",
+          "#6e7db5",
+          "#92a1dc",
+          "#bec9f0",
+          "#eaeefb"
+        ],
+        "canonical": "#0d1140",
+        "section": "Plan (Primary)"
+      },
+      "primary-raise": {
+        "role": "neutral",
+        "displayName": "Primary Raise",
+        "tonalRamp": [
+          "#080a16",
+          "#1d223a",
+          "#343d62",
+          "#4e5a8d",
+          "#6b7bbf",
+          "#8ea0e7",
+          "#bbc8f7",
+          "#e9eefd"
+        ],
+        "canonical": "#151a55",
+        "section": "Plan (Primary)"
+      },
+      "primary-line": {
+        "role": "neutral",
+        "displayName": "Primary Line",
+        "tonalRamp": [
+          "#080a17",
+          "#1d223b",
+          "#343c64",
+          "#4e5990",
+          "#6b7ac3",
+          "#8e9feb",
+          "#bbc8fa",
+          "#e9eefe"
+        ],
+        "canonical": "#232a6b",
+        "section": "Plan (Primary)"
+      },
+      "primary-ink": {
+        "role": "neutral",
+        "displayName": "Primary Ink",
+        "tonalRamp": [
+          "#0b0b0d",
+          "#232427",
+          "#3f3f45",
+          "#5c5d65",
+          "#7e7f8a",
+          "#a3a4af",
+          "#c9cad1",
+          "#eeeef1"
+        ],
+        "canonical": "#f2f3ff",
+        "section": "Plan (Primary)"
+      },
+      "primary-ink-soft": {
+        "role": "neutral",
+        "displayName": "Primary Ink Soft",
+        "tonalRamp": [
+          "#0a0b0f",
+          "#22232b",
+          "#3d3f4b",
+          "#5a5c6d",
+          "#7c7e95",
+          "#a0a3ba",
+          "#c7c9d9",
+          "#edeef3"
+        ],
+        "canonical": "#dfe2fb",
+        "section": "Plan (Primary)"
+      },
+      "primary-mute": {
+        "role": "neutral",
+        "displayName": "Primary Mute",
+        "tonalRamp": [
+          "#090a13",
+          "#202333",
+          "#3a3d57",
+          "#565a7e",
+          "#767cab",
+          "#9aa1d2",
+          "#c3c8e9",
+          "#eceef8"
+        ],
+        "canonical": "#aab1e3",
+        "section": "Plan (Primary)"
+      },
+      "primary-faint": {
+        "role": "neutral",
+        "displayName": "Primary Faint",
+        "tonalRamp": [
+          "#090a14",
+          "#202235",
+          "#393d5b",
+          "#545a83",
+          "#747bb2",
+          "#98a0d9",
+          "#c2c8ee",
+          "#ebeefa"
+        ],
+        "canonical": "#8890c8",
+        "section": "Plan (Primary)"
+      },
+      "primary-yellow": {
+        "role": "primary",
+        "displayName": "Primary Yellow",
+        "tonalRamp": [
+          "#0d0c00",
+          "#272600",
+          "#454300",
+          "#656200",
+          "#8a8600",
+          "#aeac00",
+          "#d0d175",
+          "#f0f1d6"
+        ],
+        "canonical": "#fefe59",
+        "section": "Plan (Primary)"
+      },
+      "primary-accent-ink": {
+        "role": "neutral",
+        "displayName": "Primary Accent Ink",
+        "tonalRamp": [
+          "#090b12",
+          "#1f2332",
+          "#393e56",
+          "#545c7c",
+          "#737ea8",
+          "#97a2cf",
+          "#c1c9e7",
+          "#ebeef8"
+        ],
+        "canonical": "#07092a",
+        "section": "Plan (Primary)"
+      },
+      "primary-cobalt": {
+        "role": "secondary",
+        "displayName": "Primary Cobalt",
+        "tonalRamp": [
+          "#030920",
+          "#10204d",
+          "#213980",
+          "#3354b7",
+          "#4874f6",
+          "#6a9bff",
+          "#a4c8ff",
+          "#e2efff"
+        ],
+        "canonical": "#4f7cff",
+        "section": "Plan (Primary)"
+      },
+      "reef-ground": {
+        "role": "neutral",
+        "displayName": "Reef Ground",
+        "tonalRamp": [
+          "#080b12",
+          "#1d2432",
+          "#354055",
+          "#4f5e7b",
+          "#6d80a7",
+          "#90a5ce",
+          "#bdcbe6",
+          "#eaeff7"
+        ],
+        "canonical": "#071433",
+        "section": "Vessel (Reef)"
+      },
+      "reef-panel": {
+        "role": "neutral",
+        "displayName": "Reef Panel",
+        "tonalRamp": [
+          "#070b14",
+          "#1c2435",
+          "#333f5a",
+          "#4b5d82",
+          "#6880b0",
+          "#8ca4d7",
+          "#bacbec",
+          "#e9eff9"
+        ],
+        "canonical": "#0c1d45",
+        "section": "Vessel (Reef)"
+      },
+      "reef-raise": {
+        "role": "neutral",
+        "displayName": "Reef Raise",
+        "tonalRamp": [
+          "#070b15",
+          "#1a2437",
+          "#313f5d",
+          "#495d86",
+          "#657fb6",
+          "#88a4dd",
+          "#b8cbf1",
+          "#e8effb"
+        ],
+        "canonical": "#132756",
+        "section": "Vessel (Reef)"
+      },
+      "reef-line": {
+        "role": "neutral",
+        "displayName": "Reef Line",
+        "tonalRamp": [
+          "#060b15",
+          "#1a2437",
+          "#303f5e",
+          "#485d87",
+          "#6380b7",
+          "#86a5de",
+          "#b7cbf1",
+          "#e8effb"
+        ],
+        "canonical": "#1f3768",
+        "section": "Vessel (Reef)"
+      },
+      "reef-ink": {
+        "role": "neutral",
+        "displayName": "Reef Ink",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#222427",
+          "#3c4044",
+          "#595e64",
+          "#7a8189",
+          "#9ea5ae",
+          "#c6cbd1",
+          "#edeff0"
+        ],
+        "canonical": "#eef6ff",
+        "section": "Vessel (Reef)"
+      },
+      "reef-ink-soft": {
+        "role": "neutral",
+        "displayName": "Reef Ink Soft",
+        "tonalRamp": [
+          "#090b0e",
+          "#20242a",
+          "#3a4048",
+          "#555f6a",
+          "#758290",
+          "#99a6b5",
+          "#c3ccd6",
+          "#eceff2"
+        ],
+        "canonical": "#d9e7f7",
+        "section": "Vessel (Reef)"
+      },
+      "reef-mute": {
+        "role": "neutral",
+        "displayName": "Reef Mute",
+        "tonalRamp": [
+          "#080b10",
+          "#1d252f",
+          "#354150",
+          "#4f5f75",
+          "#6d829f",
+          "#91a6c5",
+          "#becce0",
+          "#eaeff5"
+        ],
+        "canonical": "#a7bddc",
+        "section": "Vessel (Reef)"
+      },
+      "reef-faint": {
+        "role": "neutral",
+        "displayName": "Reef Faint",
+        "tonalRamp": [
+          "#080b11",
+          "#1d2430",
+          "#344052",
+          "#4e5f78",
+          "#6b82a3",
+          "#8fa6c9",
+          "#bccce3",
+          "#eaeff6"
+        ],
+        "canonical": "#8299bb",
+        "section": "Vessel (Reef)"
+      },
+      "reef-teal": {
+        "role": "primary",
+        "displayName": "Reef Teal",
+        "tonalRamp": [
+          "#000e13",
+          "#002934",
+          "#004758",
+          "#006880",
+          "#018eae",
+          "#44b4d4",
+          "#97d6eb",
+          "#dff2f9"
+        ],
+        "canonical": "#3fb0d0",
+        "section": "Vessel (Reef)"
+      },
+      "reef-accent-ink": {
+        "role": "neutral",
+        "displayName": "Reef Accent Ink",
+        "tonalRamp": [
+          "#080c0f",
+          "#1e252b",
+          "#37414b",
+          "#515f6d",
+          "#708394",
+          "#94a7b9",
+          "#bfccd8",
+          "#ebeff3"
+        ],
+        "canonical": "#04121f",
+        "section": "Vessel (Reef)"
+      },
+      "reef-gold": {
+        "role": "secondary",
+        "displayName": "Reef Gold",
+        "tonalRamp": [
+          "#110a00",
+          "#2f2200",
+          "#503d00",
+          "#755a00",
+          "#9f7c00",
+          "#c5a100",
+          "#e0ca80",
+          "#f5efd8"
+        ],
+        "canonical": "#e6c23a",
+        "section": "Vessel (Reef)"
+      },
+      "yellow-ember-ground": {
+        "role": "neutral",
+        "displayName": "Yellow Ember Ground",
+        "tonalRamp": [
+          "#0d0b09",
+          "#272320",
+          "#453e3a",
+          "#645c55",
+          "#897e75",
+          "#aea299",
+          "#d1c9c3",
+          "#f0eeec"
+        ],
+        "canonical": "#140c06",
+        "section": "Learn, Saved, About (yellow Ember)"
+      },
+      "yellow-ember-panel": {
+        "role": "neutral",
+        "displayName": "Yellow Ember Panel",
+        "tonalRamp": [
+          "#0d0b09",
+          "#28231f",
+          "#463e38",
+          "#665b53",
+          "#8c7d72",
+          "#b1a196",
+          "#d3c8c1",
+          "#f1eeeb"
+        ],
+        "canonical": "#1f140b",
+        "section": "Learn, Saved, About (yellow Ember)"
+      },
+      "yellow-ember-raise": {
+        "role": "neutral",
+        "displayName": "Yellow Ember Raise",
+        "tonalRamp": [
+          "#0e0a08",
+          "#29231e",
+          "#473e36",
+          "#685b50",
+          "#8e7c6e",
+          "#b3a192",
+          "#d4c8be",
+          "#f2eeea"
+        ],
+        "canonical": "#2a1c10",
+        "section": "Learn, Saved, About (yellow Ember)"
+      },
+      "yellow-ember-line": {
+        "role": "neutral",
+        "displayName": "Yellow Ember Line",
+        "tonalRamp": [
+          "#0e0a07",
+          "#2b221b",
+          "#4a3d32",
+          "#6c5a4a",
+          "#937b67",
+          "#b89f8a",
+          "#d8c7b9",
+          "#f3ede9"
+        ],
+        "canonical": "#3e2a18",
+        "section": "Learn, Saved, About (yellow Ember)"
+      },
+      "yellow-ember-ink": {
+        "role": "neutral",
+        "displayName": "Yellow Ember Ink",
+        "tonalRamp": [
+          "#0c0b09",
+          "#252420",
+          "#42403a",
+          "#605d55",
+          "#848075",
+          "#a8a499",
+          "#cdcac3",
+          "#efeeec"
+        ],
+        "canonical": "#f6f2e6",
+        "section": "Learn, Saved, About (yellow Ember)"
+      },
+      "yellow-ember-ink-soft": {
+        "role": "neutral",
+        "displayName": "Yellow Ember Ink Soft",
+        "tonalRamp": [
+          "#0c0b08",
+          "#26241d",
+          "#433f35",
+          "#635d4f",
+          "#87806d",
+          "#aca491",
+          "#cfcabe",
+          "#f0eeea"
+        ],
+        "canonical": "#e8e0cc",
+        "section": "Learn, Saved, About (yellow Ember)"
+      },
+      "yellow-ember-mute": {
+        "role": "neutral",
+        "displayName": "Yellow Ember Mute",
+        "tonalRamp": [
+          "#0d0b07",
+          "#28231b",
+          "#473e32",
+          "#675c4a",
+          "#8d7e66",
+          "#b2a28a",
+          "#d3c9b9",
+          "#f1eee9"
+        ],
+        "canonical": "#c9b9a0",
+        "section": "Learn, Saved, About (yellow Ember)"
+      },
+      "yellow-ember-faint": {
+        "role": "neutral",
+        "displayName": "Yellow Ember Faint",
+        "tonalRamp": [
+          "#0e0b07",
+          "#29231b",
+          "#473e31",
+          "#685c4a",
+          "#8e7d66",
+          "#b3a289",
+          "#d4c9b9",
+          "#f2eee9"
+        ],
+        "canonical": "#a4937b",
+        "section": "Learn, Saved, About (yellow Ember)"
+      },
+      "yellow-ember-yellow": {
+        "role": "primary",
+        "displayName": "Yellow Ember Yellow",
+        "tonalRamp": [
+          "#120900",
+          "#322100",
+          "#563a00",
+          "#7d5600",
+          "#a97700",
+          "#d09c00",
+          "#e8c776",
+          "#f8eed6"
+        ],
+        "canonical": "#f7c21a",
+        "section": "Learn, Saved, About (yellow Ember)"
+      },
+      "yellow-ember-accent-ink": {
+        "role": "neutral",
+        "displayName": "Yellow Ember Accent Ink",
+        "tonalRamp": [
+          "#0d0b07",
+          "#29231b",
+          "#473e32",
+          "#685c4b",
+          "#8d7e68",
+          "#b2a28b",
+          "#d4c9ba",
+          "#f1eee9"
+        ],
+        "canonical": "#1a0e00",
+        "section": "Learn, Saved, About (yellow Ember)"
+      },
+      "yellow-ember-sky": {
+        "role": "secondary",
+        "displayName": "Yellow Ember Sky",
+        "tonalRamp": [
+          "#010d14",
+          "#032835",
+          "#0a465b",
+          "#136783",
+          "#1e8cb2",
+          "#4eb2d9",
+          "#9ad4ee",
+          "#e0f2fa"
+        ],
+        "canonical": "#5ec1e8",
+        "section": "Learn, Saved, About (yellow Ember)"
+      },
+      "caution-text": {
+        "role": "tertiary",
+        "displayName": "Caution Text",
+        "tonalRamp": [
+          "#120a00",
+          "#312200",
+          "#543c00",
+          "#795800",
+          "#a57900",
+          "#cb9f00",
+          "#e4c875",
+          "#f7eed6"
+        ],
+        "canonical": "oklch(87.9% 0.169 91.605)",
+        "note": "Tailwind v4 default (amber-300); fixed across sections."
+      },
+      "safety-text": {
+        "role": "tertiary",
+        "displayName": "Safety Text",
+        "tonalRamp": [
+          "#150607",
+          "#38191a",
+          "#602f30",
+          "#8a4748",
+          "#bb6264",
+          "#e38687",
+          "#f7b8b7",
+          "#fee9e8"
+        ],
+        "canonical": "oklch(80.8% 0.114 19.571)",
+        "note": "Tailwind v4 default (red-300); fixed across sections."
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242423",
+          "#40403e",
+          "#5e5e5c",
+          "#80807e",
+          "#a5a5a2",
+          "#cacac9",
+          "#eeeeee"
+        ],
+        "canonical": "#fbfbf8"
+      },
+      "paper-ink": {
+        "role": "neutral",
+        "displayName": "Paper Ink",
+        "tonalRamp": [
+          "#090b12",
+          "#202331",
+          "#393e55",
+          "#555c7b",
+          "#747ea7",
+          "#98a2cd",
+          "#c2c9e6",
+          "#eceef7"
+        ],
+        "canonical": "#0b0e2e"
+      },
+      "paper-mute": {
+        "role": "neutral",
+        "displayName": "Paper Mute",
+        "tonalRamp": [
+          "#090a12",
+          "#202332",
+          "#3a3e56",
+          "#565b7c",
+          "#767da8",
+          "#9aa1cf",
+          "#c3c9e7",
+          "#eceef8"
+        ],
+        "canonical": "#454a72"
+      },
+      "paper-rule": {
+        "role": "neutral",
+        "displayName": "Paper Rule",
+        "tonalRamp": [
+          "#0b0b0d",
+          "#232427",
+          "#3f3f45",
+          "#5c5d65",
+          "#7e7f8a",
+          "#a3a4af",
+          "#c9cad1",
+          "#eeeef1"
+        ],
+        "canonical": "#d9dae6"
+      },
+      "paper-cobalt": {
+        "role": "tertiary",
+        "displayName": "Paper Cobalt",
+        "tonalRamp": [
+          "#020825",
+          "#0b1d57",
+          "#18348f",
+          "#274ecc",
+          "#386cff",
+          "#5995ff",
+          "#99c6ff",
+          "#dfefff"
+        ],
+        "canonical": "#1430d8"
+      },
+      "paper-green": {
+        "role": "tertiary",
+        "displayName": "Paper Green",
+        "tonalRamp": [
+          "#040e06",
+          "#112a18",
+          "#224a2d",
+          "#346b44",
+          "#4a925f",
+          "#6fb882",
+          "#aad8b4",
+          "#e5f3e7"
+        ],
+        "canonical": "#1f6b3a"
+      },
+      "paper-red": {
+        "role": "tertiary",
+        "displayName": "Paper Red",
+        "tonalRamp": [
+          "#1a0302",
+          "#42110c",
+          "#6e221b",
+          "#9e342b",
+          "#d64a3d",
+          "#ff7161",
+          "#ffaea0",
+          "#ffe6e1"
+        ],
+        "canonical": "#b3261e"
+      },
+      "clear-glass-backdrop": {
+        "role": "neutral",
+        "displayName": "Clear Glass Backdrop",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#232427",
+          "#3e4045",
+          "#5b5d64",
+          "#7d8089",
+          "#a1a4ae",
+          "#c8cad1",
+          "#eeeef0"
+        ],
+        "canonical": "#3a3d45"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Plan header title on a ground plate over the cane field; empty-state titles."
+      },
+      "numeral": {
+        "displayName": "Numeral",
+        "purpose": "Checklist current-step number and 'Done', in the accent."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Checklist step titles; the sheet's 'Shop plan' title."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Tab labels, sheet step titles, plan-strip values."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Helper copy, casing rows, compatibility notes."
+      },
+      "section-label": {
+        "displayName": "Section Label",
+        "purpose": "Uppercase rail-panel headings and sheet subsection headings; never a kicker above another heading."
+      },
+      "readout": {
+        "displayName": "Readout",
+        "purpose": "Gather diameter, pull ratio and pulled diameter under the slice."
+      },
+      "measure": {
+        "displayName": "Measure",
+        "purpose": "Slider values, thicknesses, totals, key hints, loading words. Mono is for measurements and keys only."
+      }
+    },
+    "sections": {
+      "murrini": "ember-*",
+      "plan": "primary-*",
+      "vessel": "reef-*",
+      "learn": "yellow-ember-*",
+      "vault": "yellow-ember-*",
+      "about": "yellow-ember-*",
+      "mechanism": "App.jsx sets data-section on <html>; index.css defines --ground, --panel, --raise, --line, --ink, --ink-soft, --mute, --faint, --accent, --accent-ink, --accent-2 per section and exposes them as Tailwind colors (bg-ground, text-accent, ...).",
+      "legacyRemap": "neutral-950..100 and purple-300/400/500 resolve to section tokens so legacy pages lose purple without markup changes."
+    },
+    "caneField": {
+      "bands": {
+        "murrini": [
+          "#e3501c",
+          "#f7c21a",
+          "#f2762e",
+          "#2c3fb0",
+          "#fbe016",
+          "#a2321f",
+          "#f6f2e6",
+          "#5ec1e8"
+        ],
+        "plan": [
+          "#1430d8",
+          "#fefe59",
+          "#c83329",
+          "#ffffff",
+          "#4f7cff",
+          "#eceab7",
+          "#e8892b"
+        ],
+        "vessel": [
+          "#2f6fd1",
+          "#f2f0ea",
+          "#e6c23a",
+          "#c8462a",
+          "#8fd14f",
+          "#b8702c",
+          "#3fb0d0",
+          "#e86aa8"
+        ],
+        "learn": [
+          "#f7c21a",
+          "#e3501c",
+          "#2c3fb0",
+          "#3b7be0",
+          "#fbe016",
+          "#a2321f",
+          "#f6f2e6",
+          "#5ec1e8"
+        ]
+      },
+      "source": "User's VORTEX GARDEN p5 sketch (seed key cd7ae8d5); src/engine/field/caneField.js SECTION_BANDS.",
+      "maxScale": 1,
+      "stretch": "never non-uniform",
+      "uses": [
+        "Plan header: still frame, synchronous, banded by real twist",
+        "Tab-change loading: rolled fresh, pointer-following, click drops vortex + ripple"
+      ]
+    },
+    "shadows": [
+      {
+        "name": "field-plate",
+        "value": "0 12px 40px rgb(0 0 0 / 0.5)",
+        "purpose": "Ground plates holding text over the cane field."
+      },
+      {
+        "name": "paper-lift",
+        "value": "0 30px 80px rgb(0 0 0 / 0.5), 0 2px 6px rgb(0 0 0 / 0.3)",
+        "purpose": "The print sheet on screen; none in print."
+      },
+      {
+        "name": "card-lift",
+        "value": "0 0 0 1px var(--line), 0 30px 70px rgb(0 0 0 / 0.45)",
+        "purpose": "The shop checklist card."
+      },
+      {
+        "name": "swatch-edge",
+        "value": "inset 0 0 0 1px rgb(255 255 255 / 0.25)",
+        "purpose": "Inner hairline on swatches over dark panels (rgb(0 0 0 / 0.2) on paper)."
+      }
+    ],
+    "focus": {
+      "value": "outline: 2px solid var(--accent); outline-offset: 2px",
+      "purpose": "Every focusable element."
+    },
+    "motion": [
+      {
+        "name": "section-ground",
+        "value": "background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Page ground cross-fades when the section changes."
+      },
+      {
+        "name": "loading-field-hold",
+        "value": "900ms",
+        "purpose": "Loading cane field visible time after a tab change (field animates up to 1150ms beneath)."
+      },
+      {
+        "name": "loading-field-fade",
+        "value": "opacity 500ms ease-out",
+        "purpose": "Loading overlay fade out."
+      },
+      {
+        "name": "button-lift",
+        "value": "translateY(-1px)",
+        "purpose": "Primary button hover."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "transitions and animations to 0.01ms; loading field skipped",
+        "purpose": "prefers-reduced-motion: reduce."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "40rem (720px at 18px root)"
+      },
+      {
+        "name": "md",
+        "value": "48rem (864px)"
+      },
+      {
+        "name": "lg",
+        "value": "64rem (1152px); three-column editor and rails, phone dock below"
+      }
+    ],
+    "icons": {
+      "grid": "24px",
+      "stroke": "2px, round caps and joins, currentColor",
+      "shapeGlyphs": "traced from real shape geometry",
+      "mark": "accent ring, ground disc, six accent-2 petals, accent core"
+    },
+    "print": {
+      "rule": "Only the sheet prints; [data-print-hide] chrome hidden; html/body pure white.",
+      "clearGlass": "Slices on paper render on #3a3d45 with clear glass tinted at 0.28."
+    },
+    "knownGaps": [
+      "Vessel, Learn, Saved and About were re-themed only by the neutral-*/purple-* remap; their layouts and components were not redesigned and are not references for this system."
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one forward action per view, accent-filled with a trailing arrow.",
+      "html": "<button class=\"ds-btn-primary\">Open shop plan <svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg></button>",
+      "css": ":host{--ground:#150b07;--panel:#1f120c;--raise:#2b1911;--line:#40271b;--ink:#fbf1e8;--mute:#cdb5a5;--faint:#a8907f;--accent:#f2762e;--accent-ink:#1a0a02;--accent-2:#5ec1e8;font-family:'Hanken Grotesk',ui-sans-serif,system-ui,sans-serif;font-size:18px;color:var(--ink)}.ds-btn-primary{display:inline-flex;align-items:center;gap:.5rem;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:1rem;line-height:1.5;font-family:inherit;padding:.75rem 1.25rem;border:0;border-radius:.5rem;cursor:pointer;transition:transform .15s}.ds-btn-primary:hover{transform:translateY(-1px)}.ds-btn-primary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Small raise-filled action inside rails (Undo, Redo, add a casing layer).",
+      "html": "<button class=\"ds-btn-secondary\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 5v14M5 12h14\"/></svg> Clear layer</button>",
+      "css": ":host{--ground:#150b07;--panel:#1f120c;--raise:#2b1911;--line:#40271b;--ink:#fbf1e8;--mute:#cdb5a5;--faint:#a8907f;--accent:#f2762e;--accent-ink:#1a0a02;--accent-2:#5ec1e8;font-family:'Hanken Grotesk',ui-sans-serif,system-ui,sans-serif;font-size:18px;color:var(--ink)}.ds-btn-secondary{display:inline-flex;align-items:center;gap:.375rem;background:var(--raise);color:var(--ink);font-weight:400;font-size:.875rem;line-height:1.4;font-family:inherit;padding:.375rem .625rem;border:0;border-radius:.375rem;cursor:pointer}.ds-btn-secondary:hover{background:var(--line)}.ds-btn-secondary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}"
+    },
+    {
+      "name": "Destructive Button",
+      "kind": "button",
+      "refersTo": "button-destructive",
+      "description": "Red-outlined, spatially isolated from routine controls.",
+      "html": "<button class=\"ds-btn-destructive\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3\"/></svg> Delete shape</button>",
+      "css": ":host{--ground:#150b07;--panel:#1f120c;--raise:#2b1911;--line:#40271b;--ink:#fbf1e8;--mute:#cdb5a5;--faint:#a8907f;--accent:#f2762e;--accent-ink:#1a0a02;--accent-2:#5ec1e8;font-family:'Hanken Grotesk',ui-sans-serif,system-ui,sans-serif;font-size:18px;color:var(--ink)}.ds-btn-destructive{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;background:transparent;color:oklch(80.8% 0.114 19.571);font-weight:400;font-size:.875rem;line-height:1.4;font-family:inherit;padding:.5rem .75rem;border:1px solid oklch(70.4% 0.191 22.216 / .4);border-radius:.375rem;cursor:pointer}.ds-btn-destructive:hover{background:oklch(25.8% 0.092 26.042 / .4)}.ds-btn-destructive:focus-visible{outline:2px solid var(--accent);outline-offset:2px}"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "custom",
+      "refersTo": "segmented-track",
+      "description": "Two-way view switch; active option takes the accent.",
+      "html": "<div class=\"ds-seg\" role=\"group\" aria-label=\"View\"><button class=\"ds-seg-opt\" aria-pressed=\"true\">Slice</button><button class=\"ds-seg-opt\" aria-pressed=\"false\">Rod 3D</button></div>",
+      "css": ":host{--ground:#150b07;--panel:#1f120c;--raise:#2b1911;--line:#40271b;--ink:#fbf1e8;--mute:#cdb5a5;--faint:#a8907f;--accent:#f2762e;--accent-ink:#1a0a02;--accent-2:#5ec1e8;font-family:'Hanken Grotesk',ui-sans-serif,system-ui,sans-serif;font-size:18px;color:var(--ink)}.ds-seg{display:inline-flex;background:var(--raise);border-radius:.5rem;padding:.125rem}.ds-seg-opt{background:transparent;color:var(--mute);font-weight:600;font-size:.875rem;line-height:1.4;font-family:inherit;padding:.5rem 1rem;border:0;border-radius:.375rem;cursor:pointer}.ds-seg-opt:hover{color:var(--ink)}.ds-seg-opt[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}.ds-seg-opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}"
+    },
+    {
+      "name": "Tab Bar",
+      "kind": "nav",
+      "refersTo": "tab",
+      "description": "Sticky section tabs with a 3px accent underline on the active tab.",
+      "html": "<nav class=\"ds-tabs\" role=\"tablist\"><button class=\"ds-tab\" role=\"tab\" aria-selected=\"true\">Murrini</button><button class=\"ds-tab\" role=\"tab\" aria-selected=\"false\">Vessel</button><button class=\"ds-tab\" role=\"tab\" aria-selected=\"false\">Plan</button><button class=\"ds-tab\" role=\"tab\" aria-selected=\"false\">Learn</button></nav>",
+      "css": ":host{--ground:#150b07;--panel:#1f120c;--raise:#2b1911;--line:#40271b;--ink:#fbf1e8;--mute:#cdb5a5;--faint:#a8907f;--accent:#f2762e;--accent-ink:#1a0a02;--accent-2:#5ec1e8;font-family:'Hanken Grotesk',ui-sans-serif,system-ui,sans-serif;font-size:18px;color:var(--ink)}.ds-tabs{display:flex;height:3.5rem;background:var(--panel);border-bottom:1px solid var(--line);padding:0 1.25rem}.ds-tab{position:relative;background:none;border:0;color:var(--mute);font-weight:600;font-size:.95rem;line-height:1;font-family:inherit;padding:0 .875rem;cursor:pointer;transition:color .15s}.ds-tab:hover{color:var(--ink)}.ds-tab[aria-selected=true]{color:var(--ink)}.ds-tab[aria-selected=true]::after{content:'';position:absolute;left:.5rem;right:.5rem;bottom:0;height:3px;border-radius:.25rem .25rem 0 0;background:var(--accent)}.ds-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}"
+    },
+    {
+      "name": "Tool Tile",
+      "kind": "custom",
+      "refersTo": "tool-button",
+      "description": "Shape tool: real-geometry glyph over its name; active gets an accent border.",
+      "html": "<div class=\"ds-tools\"><button class=\"ds-tool\" aria-pressed=\"true\"><svg width=\"24\" height=\"24\" viewBox=\"-12 -12 24 24\" aria-hidden=\"true\"><circle r=\"9\" fill=\"currentColor\"/></svg>Circle</button><button class=\"ds-tool\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"-12 -12 24 24\" aria-hidden=\"true\"><circle r=\"9\" fill=\"currentColor\"/><circle r=\"4.5\" fill=\"var(--raise)\"/></svg>Ring</button></div>",
+      "css": ":host{--ground:#150b07;--panel:#1f120c;--raise:#2b1911;--line:#40271b;--ink:#fbf1e8;--mute:#cdb5a5;--faint:#a8907f;--accent:#f2762e;--accent-ink:#1a0a02;--accent-2:#5ec1e8;font-family:'Hanken Grotesk',ui-sans-serif,system-ui,sans-serif;font-size:18px;color:var(--ink)}.ds-tools{display:grid;grid-template-columns:repeat(2,6rem);gap:.375rem}.ds-tool{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.375rem;min-height:4rem;padding:.5rem .25rem;font-weight:400;font-size:.72rem;line-height:1.25;font-family:inherit;border-radius:.5rem;border:1px solid transparent;background:color-mix(in srgb,var(--raise) 60%,transparent);color:var(--mute);cursor:pointer;transition:background .15s,color .15s}.ds-tool:hover{background:var(--raise);color:var(--ink)}.ds-tool[aria-pressed=true]{border-color:var(--accent);background:var(--raise);color:var(--ink)}.ds-tool:focus-visible{outline:2px solid var(--accent);outline-offset:2px}"
+    },
+    {
+      "name": "Colour Chip",
+      "kind": "chip",
+      "refersTo": "colour-chip",
+      "description": "Swatch band over the colorant's name and behaviour; never colour alone.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\"><span class=\"ds-chip-sw\" style=\"background:#22348c\"></span><span class=\"ds-chip-t\">Cobalt Blue<span class=\"ds-chip-n\">transparent</span></span></button><button class=\"ds-chip\" aria-pressed=\"false\"><span class=\"ds-chip-sw\" style=\"background:#e8b21c\"></span><span class=\"ds-chip-t\">Cadmium Yellow<span class=\"ds-chip-n ds-haz\">toxic</span></span></button></div>",
+      "css": ":host{--ground:#150b07;--panel:#1f120c;--raise:#2b1911;--line:#40271b;--ink:#fbf1e8;--mute:#cdb5a5;--faint:#a8907f;--accent:#f2762e;--accent-ink:#1a0a02;--accent-2:#5ec1e8;font-family:'Hanken Grotesk',ui-sans-serif,system-ui,sans-serif;font-size:18px;color:var(--ink)}.ds-chips{display:grid;grid-template-columns:repeat(3,6.5rem);gap:.375rem}.ds-chip{display:flex;flex-direction:column;overflow:hidden;padding:0;text-align:left;background:var(--raise);color:var(--ink);border:1px solid transparent;border-radius:.5rem;cursor:pointer;font-family:inherit;transition:border-color .15s}.ds-chip:hover{border-color:var(--line)}.ds-chip[aria-pressed=true]{border-color:var(--ink)}.ds-chip-sw{display:block;height:1.75rem}.ds-chip-t{padding:.25rem .375rem .375rem;font-size:.7rem;line-height:1.25}.ds-chip-n{display:block;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.65rem;color:var(--mute)}.ds-haz{color:oklch(80.8% 0.114 19.571)}.ds-chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}"
+    },
+    {
+      "name": "Rail Panel with Slider",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Heading, content, hairline; slider label left with a mono value right.",
+      "html": "<section class=\"ds-panel\"><h2 class=\"ds-panel-h\">Rod</h2><label class=\"ds-slider-l\" for=\"ds-g\">Gather diameter<output class=\"ds-slider-v\">32 mm</output></label><input id=\"ds-g\" class=\"ds-slider\" type=\"range\" min=\"10\" max=\"60\" value=\"32\"></section>",
+      "css": ":host{--ground:#150b07;--panel:#1f120c;--raise:#2b1911;--line:#40271b;--ink:#fbf1e8;--mute:#cdb5a5;--faint:#a8907f;--accent:#f2762e;--accent-ink:#1a0a02;--accent-2:#5ec1e8;font-family:'Hanken Grotesk',ui-sans-serif,system-ui,sans-serif;font-size:18px;color:var(--ink)}.ds-panel{display:flex;flex-direction:column;gap:.75rem;width:19rem;padding:1rem 1rem 1.25rem;background:var(--panel);border-bottom:1px solid var(--line)}.ds-panel-h{margin:0;font-size:.875rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}.ds-slider-l{display:flex;justify-content:space-between;align-items:baseline;font-size:.875rem;color:var(--mute)}.ds-slider-v{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.8rem;color:var(--ink)}.ds-slider{width:100%;height:1.75rem;accent-color:var(--accent);cursor:pointer}.ds-slider:focus-visible{outline:2px solid var(--accent);outline-offset:2px}"
+    },
+    {
+      "name": "Number Input",
+      "kind": "input",
+      "refersTo": "input-number",
+      "description": "Casing thickness: ground fill, hairline stroke, mono value, mm unit.",
+      "html": "<label class=\"ds-num-l\"><input class=\"ds-num\" type=\"number\" min=\"0.5\" max=\"8\" step=\"0.5\" value=\"1.5\" aria-label=\"Clear thickness in millimetres\"> mm</label>",
+      "css": ":host{--ground:#150b07;--panel:#1f120c;--raise:#2b1911;--line:#40271b;--ink:#fbf1e8;--mute:#cdb5a5;--faint:#a8907f;--accent:#f2762e;--accent-ink:#1a0a02;--accent-2:#5ec1e8;font-family:'Hanken Grotesk',ui-sans-serif,system-ui,sans-serif;font-size:18px;color:var(--ink)}.ds-num-l{display:inline-flex;align-items:center;gap:.25rem;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.75rem;color:var(--mute)}.ds-num{width:3rem;padding:0 .25rem;background:var(--ground);color:var(--ink);border:1px solid var(--line);border-radius:.25rem;font:inherit}.ds-num:focus-visible{outline:2px solid var(--accent);outline-offset:2px}"
+    },
+    {
+      "name": "Print Sheet Step",
+      "kind": "custom",
+      "refersTo": "plan-sheet",
+      "description": "Paper-white sheet in Primary-navy ink; numbered step with its plate.",
+      "html": "<article class=\"ds-sheet\"><header class=\"ds-sheet-h\"><h2>Shop plan</h2><p>Before The Heat</p></header><div class=\"ds-step\"><span class=\"ds-step-n\">1</span><span class=\"ds-step-plate\"></span><div><p class=\"ds-step-t\">Case Opal White in Gold Ruby</p><p class=\"ds-step-d\">Opal White at the centre, with Gold Ruby gathered over it, pulled as one cane.</p></div></div></article>",
+      "css": ".ds-sheet{max-width:34rem;padding:2rem 2.5rem;background:#fbfbf8;color:#0b0e2e;border-radius:.25rem;font-family:'Hanken Grotesk',ui-sans-serif,system-ui,sans-serif;box-shadow:0 30px 80px rgb(0 0 0/.5),0 2px 6px rgb(0 0 0/.3)}.ds-sheet-h{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #0b0e2e;padding-bottom:.75rem}.ds-sheet-h h2{margin:0;font-size:1.7rem;line-height:1;font-weight:800;letter-spacing:-.025em}.ds-sheet-h p{margin:0;font-size:.875rem;color:#454a72}.ds-step{display:grid;grid-template-columns:1.5rem 3rem 1fr;gap:.75rem;align-items:start;padding:.625rem 0;border-bottom:1px solid #d9dae6}.ds-step-n{font-size:.875rem;font-weight:700;color:#1430d8;padding-top:.125rem}.ds-step-plate{width:3rem;height:3rem;border-radius:50%;background:radial-gradient(circle,#f3f1ea 0 30%,#b3263a 31%);box-shadow:0 0 0 4px #3a3d45}.ds-step-t{margin:0;font-weight:600}.ds-step-d{margin:0;font-size:.875rem;line-height:1.375;color:#454a72}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Vortex Garden",
+    "overview": "The world is pinned to the user's own VORTEX GARDEN p5 sketch: deep, warm-to-ink grounds, hex-packed cane fields banded in spirals, and saturated glass colour used as signal against near-black. The app's subject is the murrine itself, so the system stays quiet around it. The editor is still and instrument-like: a true-scale cross-section of the rod with a millimetre tick ring, flanked by flat rails separated by hairlines, never cards inside cards. Colour volume is reserved for the user's glass and the one section accent.\n\nEvery section paints the whole page (body, scrollbars, selection, focus ring) in its own palette, switched by a `data-section` attribute on the root. Murrini is orange Ember, Plan is Primary navy with yellow, Vessel is Reef, and Learn, Saved and About share yellow Ember. There is no purple anywhere; the inherited purple and neutral utility scales are remapped onto the section tokens.\n\nMotion is rare and owned by one device: the generative cane field, whose every cell is the user's real murrine. It appears only as the Plan header (one still frame of the actual design) and as the loading moment between sections (rolled fresh each time, born under the pointer, following it, a click drops a vortex with a ripple). The journey ends on paper: a white print sheet in Primary navy ink.",
+    "keyCharacteristics": [
+      "One palette per section, applied to the whole page from the root.",
+      "The design is the image: field cells, step plates and the slice are rendered from the user's real murrine, never illustrated.",
+      "Flat tonal layering (ground, panel, raise, line) with hairline separators; shadow only on things that sit over a field or a page.",
+      "Hanken Grotesk for everything readable; JetBrains Mono only for measurements and keys.",
+      "Colour is never the only signal: chips carry names and behaviour, step titles name their colours.",
+      "Standard controls and authored 24px, 2px-stroke icons."
+    ],
+    "rules": [
+      {
+        "name": "The One Palette Per Section Rule",
+        "body": "A section owns the whole page. Never mix two sections' accents on one screen, and never hard-code a section hex in a component; use the role.",
+        "section": "colors"
+      },
+      {
+        "name": "The No Purple Rule",
+        "body": "Purple is retired by user decision. Any purple utility in legacy markup resolves to the section accent; new work never introduces a purple, violet or magenta hue.",
+        "section": "colors"
+      },
+      {
+        "name": "The Name Every Colour Rule",
+        "body": "A swatch never stands alone. Colour chips print the colorant's short name and its behaviour (transparent, opaque, strikes, toxic); casing rows and step titles name their colours in words.",
+        "section": "colors"
+      },
+      {
+        "name": "The Mono Means Measurement Rule",
+        "body": "JetBrains Mono is for millimetres, ratios, lengths, counts of a measured thing and key names. Never use it for headings, labels or prose.",
+        "section": "typography"
+      },
+      {
+        "name": "The No Card In A Card Rule",
+        "body": "Rail panels are a heading, content and a hairline. Never wrap a panel's contents in another bordered or shadowed container.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** theme through the roles (ground, panel, raise, line, ink, mute, faint, accent, accent-ink, accent-2) so a component re-themes when `data-section` changes.",
+      "**Do** render every image of glass (field cells, step plates, the slice, thumbnails) from the user's actual design data.",
+      "**Do** keep the editor still; motion belongs to the cane field's loading moment only, at about a second, and is skipped under `prefers-reduced-motion`.",
+      "**Do** set text over a cane field on a ground plate with the field-plate shadow.",
+      "**Do** isolate destructive actions in space: \"Clear slice\" sits 1.5rem below Undo/Redo, and \"Delete shape\" is red-outlined and set apart from the sliders.",
+      "**Do** put names on every swatch and name colours in step titles.",
+      "**Do** keep the print sheet paper-white with Primary-navy ink, whatever section it is printed from."
+    ],
+    "donts": [
+      "**Don't** use purple, violet or magenta anywhere.",
+      "**Don't** animate the Plan header or let the cane field run in the editor.",
+      "**Don't** upscale or non-uniformly stretch field cells.",
+      "**Don't** set headings, labels or prose in JetBrains Mono.",
+      "**Don't** nest a bordered or shadowed card inside a rail panel.",
+      "**Don't** use emoji or text glyphs as icons; draw them on the 24px, 2px-stroke grid.",
+      "**Don't** let a colour be the only signal of state, hazard or identity."
+    ]
+  }
+}

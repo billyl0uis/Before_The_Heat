@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Slide Rack</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1440px;height:900px;overflow:hidden;background:#e4b23a;color:#2d3036;font:18px/1.35 'Archivo Narrow',sans-serif}
+header{height:58px;display:flex;align-items:center;gap:28px;padding:0 28px;background:#2d3036;color:#f2ecd9}
+header b{font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+header a{color:#c9c2ad;text-transform:uppercase}header a.on{color:#e4b23a;font-weight:700}
+.wrap{display:grid;grid-template-columns:560px 1fr;gap:28px;padding:28px}
+.pane{background:#f2ecd9;padding:22px;height:600px;display:flex;flex-direction:column;align-items:center}
+.pane .t{align-self:flex-start;font-weight:700;text-transform:uppercase}
+.rack{display:flex;gap:18px;padding-top:30px}
+.slide{transform:skewX(-11deg);width:150px;height:270px;background:rgba(45,48,54,.82);color:#f2ecd9;padding:16px}
+.slide>*{transform:skewX(11deg)}
+.slide.cur{background:#f2ecd9;color:#2d3036;outline:3px solid #2d3036}
+.slide b{display:block;font-weight:700;text-transform:uppercase}
+.mk{display:inline-block;width:16px;height:16px;border:2px solid currentColor;border-radius:50%;margin-right:6px;vertical-align:-2px}
+.mk.f{background:currentColor}.g{color:#2f6b48}.v{color:#c8361f}
+.tick{margin-top:26px;height:22px;border-top:2px solid #2d3036;display:flex;gap:56px;padding-top:4px}
+.tools{grid-column:1/3;display:flex;gap:18px;text-transform:uppercase}
+.tools span{background:#2d3036;color:#f2ecd9;padding:10px 16px}.tools span.on{background:#f2ecd9;color:#2d3036}
+</style></head><body>
+<header><b>Before The Heat</b><a class="on">Murrini</a><a>Vessel</a><a>Plan</a><a>Learn</a><a>Saved</a></header>
+<div class="wrap">
+  <div class="pane"><span class="t">Six-petal radial · 32 → 8 mm · example</span>
+    <svg width="440" height="440" viewBox="-130 -130 260 260"><circle r="116" fill="#1f45a8"/><circle r="108" fill="#f3f1ea"/><circle r="100" fill="#dfe6e2"/>
+      <g fill="#f3f1ea" stroke="#1f45a8" stroke-width="3"><ellipse cy="-55" rx="24" ry="38"/><ellipse cy="-55" rx="24" ry="38" transform="rotate(60)"/><ellipse cy="-55" rx="24" ry="38" transform="rotate(120)"/><ellipse cy="-55" rx="24" ry="38" transform="rotate(180)"/><ellipse cy="-55" rx="24" ry="38" transform="rotate(240)"/><ellipse cy="-55" rx="24" ry="38" transform="rotate(300)"/></g>
+      <circle r="22" fill="#b0183a"/><circle r="9" fill="#f3f1ea"/></svg></div>
+  <div>
+    <div class="rack">
+      <div class="slide"><b>01 Core</b>Gold Ruby over opal. <br><span class="mk f g"></span>compatible</div>
+      <div class="slide cur"><b>02 Petals</b>Star mold, opal cased cobalt. ×6<br><span class="mk f g"></span>holds</div>
+      <div class="slide"><b>03 Case</b>Clear, opal, cobalt.<br><span class="mk"></span>pending</div>
+      <div class="slide"><b>04 Pull</b>32 → 8 mm, 4 : 1.<br><span class="mk v f"></span>check ruby strike</div>
+    </div>
+    <div class="tick"><span>01</span><span>02</span><span>03</span><span>04</span></div>
+  </div>
+  <div class="tools"><span class="on">Circle</span><span>Petal</span><span>Ring</span><span>Zanfirico</span><span>Tripod</span><span>Frame</span></div>
+</div></body></html>

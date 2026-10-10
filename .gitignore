@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Impeccable runtime and QA captures (local only)
+.impeccable/review/
+.impeccable/live/
+.impeccable/questions/

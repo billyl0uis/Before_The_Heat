@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Before The Heat · Simple mode preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#150b07;--panel:#1f120c;--raise:#2b1911;--line:#40271b;
+  --ink:#fbf1e8;--mute:#cdb5a5;--faint:#a8907f;--accent:#f2762e;--accent-ink:#1a0a02;--accent-2:#5ec1e8;
+  --clear:#3b302b;
+  --font:'Hanken Grotesk',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:18px;background:var(--ground)}
+body{background:var(--ground);color:var(--ink);font:1rem/1.45 var(--font);-webkit-font-smoothing:antialiased;min-height:100svh}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+::selection{background:var(--accent);color:var(--accent-ink)}
+
+/* shell */
+.bar{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:20px;height:3.5rem;padding:0 20px;background:var(--panel);border-bottom:1px solid var(--line)}
+.mark{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}
+.mode{margin-left:auto;display:inline-flex;background:var(--raise);border-radius:10px;padding:3px}
+.mode button{padding:6px 14px;border-radius:8px;font-size:.85rem;font-weight:700;color:var(--mute)}
+.mode button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+
+/* layout */
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);min-height:calc(100svh - 3.5rem)}
+.guide{padding:28px 32px 120px;border-right:1px solid var(--line);background:var(--panel)}
+.stage{position:sticky;top:3.5rem;height:calc(100svh - 3.5rem);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px}
+
+/* stepper */
+.steps{display:flex;gap:6px;margin-bottom:28px}
+.steps button{flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:0;text-align:left;font-size:.8rem;font-weight:600;color:var(--faint)}
+.steps button::before{content:"";display:block;width:100%;height:4px;border-radius:4px;background:var(--line)}
+.steps button.done{color:var(--mute)}.steps button.done::before{background:var(--accent)}
+.steps button[aria-current="step"]{color:var(--ink)}.steps button[aria-current="step"]::before{background:var(--accent-2)}
+h1{font-size:1.9rem;line-height:1.05;letter-spacing:-.03em;font-weight:800;text-wrap:balance}
+.lede{color:var(--mute);margin-top:8px;max-width:34rem}
+
+/* recipes */
+.recipes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:22px}
+.recipe{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 10px 12px;border-radius:14px;background:var(--raise);border:2px solid transparent;transition:border-color .2s,transform .2s var(--ease)}
+.recipe:hover{transform:translateY(-2px)}
+.recipe[aria-pressed="true"]{border-color:var(--accent)}
+.recipe svg{width:84px;height:84px}
+.recipe b{font-size:.95rem}
+.recipe span{font-size:.75rem;color:var(--mute);text-align:center;line-height:1.3}
+
+/* colour slots */
+.slots{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+.slot{border-radius:14px;background:var(--raise);overflow:hidden}
+.slot-head{width:100%;display:flex;align-items:center;gap:14px;padding:12px 14px;text-align:left}
+.slot-head i{width:38px;height:38px;border-radius:50%;box-shadow:inset 0 0 0 1px #ffffff40;flex:none}
+.slot-head .t{display:flex;flex-direction:column}
+.slot-head .t small{color:var(--mute);font-size:.75rem;text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+.slot-head .t b{font-size:1.02rem}
+.slot-head .chev{margin-left:auto;color:var(--mute);transition:transform .2s}
+.slot[data-open="true"] .chev{transform:rotate(180deg)}
+.chips{display:none;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 14px 14px}
+.slot[data-open="true"] .chips{display:grid}
+.chip{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:9px;background:var(--panel);border:1px solid transparent;text-align:left;font-size:.8rem;line-height:1.2}
+.chip i{width:20px;height:20px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px #ffffff40}
+.chip small{display:block;color:var(--faint);font-size:.68rem}
+.chip.toxic small{color:#fca5a5}
+.chip[aria-pressed="true"]{border-color:var(--ink)}
+
+/* size */
+.size{margin-top:26px;display:flex;flex-direction:column;gap:12px}
+.size label{display:flex;justify-content:space-between;align-items:baseline;color:var(--mute);font-weight:600}
+.size output{font:600 1.5rem var(--mono);color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--accent);height:30px}
+.derived{color:var(--mute);font-size:.92rem}
+.derived b{color:var(--ink);font-family:var(--mono);font-weight:500}
+.linkish{color:var(--accent);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.more{display:none;padding:14px;border-radius:12px;background:var(--raise)}
+.more.open{display:block}
+
+/* plan */
+.plan{margin-top:22px;display:flex;flex-direction:column}
+.plan li{list-style:none;display:grid;grid-template-columns:1.6rem 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.plan li span{color:var(--accent);font-weight:800}
+.plan li p{color:var(--mute);font-size:.88rem}
+.plan-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+
+/* nav */
+.nav{position:fixed;left:0;bottom:0;width:50%;display:flex;gap:10px;padding:14px 32px;background:linear-gradient(transparent,var(--panel) 30%);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 22px;border-radius:12px;font-weight:800;background:var(--accent);color:var(--accent-ink);transition:transform .2s var(--ease)}
+.btn:hover{transform:translateY(-1px)}
+.btn.ghost{background:var(--raise);color:var(--ink)}
+.btn:disabled{opacity:.4;cursor:default;transform:none}
+.nav .btn:last-child{flex:1}
+
+/* stage */
+.slice{width:min(440px,72vh,100%);aspect-ratio:1}
+.slice svg{width:100%;height:100%;display:block}
+.readouts{display:flex;gap:28px;text-align:center}
+.readouts b{display:block;font:600 1.5rem var(--mono)}
+.readouts span{font-size:.7rem;color:var(--mute);text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}
+.readouts .hot b{color:var(--accent)}
+.caption{color:var(--mute);font-size:.9rem}
+
+/* advanced sheet */
+.adv{display:none;padding:28px 32px}
+.adv.show{display:block}
+.adv img{width:100%;max-width:980px;border-radius:12px;border:1px solid var(--line);margin-top:18px;display:block}
+.adv p{color:var(--mute);max-width:40rem;margin-top:8px}
+
+.note{position:fixed;right:14px;bottom:12px;z-index:20;font-size:.7rem;color:var(--faint);background:#000a;padding:4px 8px;border-radius:6px}
+
+@media (max-width:860px){
+  .wrap{grid-template-columns:1fr}
+  .stage{position:sticky;top:3.5rem;z-index:5;height:auto;padding:12px 16px 10px;background:var(--ground);border-bottom:1px solid var(--line);gap:8px}
+  .slice{width:min(230px,30svh)}
+  .readouts{gap:16px}.readouts b{font-size:1.15rem}.readouts span{font-size:.6rem}
+  .caption{display:none}
+  .guide{order:2;border-right:0;padding:20px 16px 110px}
+  h1{font-size:1.5rem}
+  .recipes{grid-template-columns:repeat(2,1fr)}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .nav{width:100%;padding:12px 16px 16px}
+  .mark span{display:none}
+  .adv{padding:20px 16px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="mark"><svg width="26" height="26" viewBox="-13 -13 26 26" aria-hidden="true"><circle r="12" fill="#f2762e"/><circle r="9.6" fill="#150b07"/><g fill="#5ec1e8"><ellipse cy="-5" rx="1.9" ry="3"/><ellipse cy="-5" rx="1.9" ry="3" transform="rotate(60)"/><ellipse cy="-5" rx="1.9" ry="3" transform="rotate(120)"/><ellipse cy="-5" rx="1.9" ry="3" transform="rotate(180)"/><ellipse cy="-5" rx="1.9" ry="3" transform="rotate(240)"/><ellipse cy="-5" rx="1.9" ry="3" transform="rotate(300)"/></g><circle r="2" fill="#f2762e"/></svg><span>Before The Heat</span></div>
+  <div class="mode" role="group" aria-label="Editor mode">
+    <button id="mSimple" aria-pressed="true">Simple</button>
+    <button id="mAdv" aria-pressed="false">Advanced</button>
+  </div>
+</header>
+
+<main class="wrap" id="simple">
+  <section class="guide" aria-live="polite">
+    <nav class="steps" id="steps" aria-label="Steps"></nav>
+    <div id="body"></div>
+  </section>
+  <section class="stage" aria-label="Your murrine">
+    <div class="slice" id="slice"></div>
+    <div class="readouts" id="readouts"></div>
+    <p class="caption" id="caption"></p>
+  </section>
+  <div class="nav"><button class="btn ghost" id="back">Back</button><button class="btn" id="next">Next</button></div>
+</main>
+
+<section class="adv" id="adv" aria-label="Advanced mode">
+  <h1>Advanced opens the full editor</h1>
+  <p>Every tool, pattern repeat, twist and taper, the casing stack and the 3D rod, with the recipe you built here already loaded as an editable design. Switch back to Simple at any time; nothing is lost.</p>
+  <img src="../../review/desktop.png" alt="The full Murrini editor as it is today">
+</section>
+
+<p class="note">Preview only. Not wired to the app.</p>
+
+<script>
+const C = { // real colorants from the app's colour index
+  'cobalt-blue':{n:'Cobalt Blue',h:'#1e3a8a',f:'transparent'},
+  'copper-turquoise':{n:'Copper Turquoise',h:'#0d9488',f:'transparent'},
+  'gold-ruby':{n:'Gold Ruby',h:'#be123c',f:'transparent'},
+  'opal-white':{n:'Opal White',h:'#f5f5f4',f:'opaque'},
+  'chromium-green':{n:'Chromium Green',h:'#15803d',f:'transparent'},
+  'amber':{n:'Amber',h:'#92400e',f:'transparent'},
+  'black-glass':{n:'Black',h:'#18181b',f:'transparent'},
+  'erbium-pink':{n:'Erbium Rose Pink',h:'#f9a8d4',f:'transparent'},
+  'silver-stain-yellow':{n:'Silver Stain Yellow',h:'#ca8a04',f:'transparent'},
+  'cadmium-yellow':{n:'Cadmium Yellow',h:'#eab308',f:'transparent',toxic:true},
+  'clear':{n:'Clear',h:'#cfdcd8',f:'transparent'},
+};
+const note = id => C[id].toxic ? 'toxic' : id==='clear' ? 'no colour' : C[id].f;
+
+// Each recipe: what it is, its colour slots, and how to draw it (rod radius 100).
+const RECIPES = {
+  bullseye:{name:'Bullseye',blurb:'Rings of colour round a core',slots:{core:['Core','gold-ruby'],middle:['Middle ring','opal-white'],casing:['Casing','cobalt-blue']},
+    draw:s=>`${disc(66,s.middle)}${disc(34,s.core)}`, canes:s=>[[1,`${C[s.core].n} core cased in ${C[s.middle].n}`]]},
+  flower:{name:'Flower',blurb:'Petals around a centre',slots:{centre:['Centre','silver-stain-yellow'],petals:['Petals','opal-white'],casing:['Casing','cobalt-blue']},
+    draw:s=>[0,60,120,180,240,300].map(a=>`<ellipse cy="-52" rx="17" ry="29" transform="rotate(${a})" fill="${C[s.petals].h}"/>`).join('')+disc(22,s.centre), canes:s=>[[6,`${C[s.petals].n} petal`],[1,`${C[s.centre].n} centre`]]},
+  zanfirico:{name:'Zanfirico',blurb:'Threads twisted round clear',slots:{threads:['Threads','opal-white'],casing:['Casing','clear']},
+    draw:s=>Array.from({length:12},(_,i)=>{const a=i/12*Math.PI*2;return `<circle cx="${58*Math.cos(a)}" cy="${58*Math.sin(a)}" r="9" fill="${C[s.threads].h}"/>`}).join(''), canes:s=>[[12,`${C[s.threads].n} thread`]]},
+  tripod:{name:'Tripod',blurb:'Three cased canes touching',slots:{core:['Cane core','copper-turquoise'],skin:['Cane skin','opal-white'],casing:['Casing','black-glass']},
+    draw:s=>[0,120,240].map(a=>`<g transform="rotate(${a}) translate(0,-40)">${disc(36,s.skin)}${disc(18,s.core)}</g>`).join(''), canes:s=>[[3,`${C[s.core].n} cased in ${C[s.skin].n}`]]},
+  cross:{name:'Cross',blurb:'Four canes in a cross',slots:{core:['Cane core','gold-ruby'],skin:['Cane skin','opal-white'],casing:['Casing','clear']},
+    draw:s=>[0,90,180,270].map(a=>`<g transform="rotate(${a}) translate(0,-46)">${disc(30,s.skin)}${disc(14,s.core)}</g>`).join(''), canes:s=>[[4,`${C[s.core].n} cased in ${C[s.skin].n}`]]},
+  frame:{name:'Frame',blurb:'A centre inside a ring of canes',slots:{centre:['Centre','erbium-pink'],frame:['Frame canes','chromium-green'],casing:['Casing','clear']},
+    draw:s=>Array.from({length:12},(_,i)=>{const a=i/12*Math.PI*2;return `<circle cx="${60*Math.cos(a)}" cy="${60*Math.sin(a)}" r="13" fill="${C[s.frame].h}"/>`}).join('')+disc(30,s.centre), canes:s=>[[12,`${C[s.frame].n} frame`],[1,`${C[s.centre].n} centre`]]},
+};
+function disc(r,id){return `<circle r="${r}" fill="${C[id].h}" ${C[id].f==='transparent'&&id!=='clear'?'fill-opacity=".92"':''}/>`}
+
+const S = { step:0, recipe:'flower', colours:{}, finished:8, ratio:4, open:null, moreOpen:false };
+function slotsOf(k){ const r=RECIPES[k]; const out={}; for(const [key,[,def]] of Object.entries(r.slots)) out[key]=S.colours[k+':'+key]??def; return out; }
+const STEPS=['Recipe','Colours','Size','Plan'];
+const $=id=>document.getElementById(id);
+
+function sliceSVG(k,size){
+  const s=slotsOf(k), r=RECIPES[k], cas=s.casing;
+  const clearCas = cas==='clear';
+  return `<svg viewBox="-112 -112 224 224" ${size?`width="${size}" height="${size}"`:''} aria-hidden="true">
+    ${size?'':Array.from({length:100},(_,i)=>{const a=i/100*Math.PI*2,l=i%5===0;const r1=104,r2=l?111:108;return `<line x1="${r1*Math.sin(a)}" y1="${-r1*Math.cos(a)}" x2="${r2*Math.sin(a)}" y2="${-r2*Math.cos(a)}" stroke="#cdb5a5" stroke-opacity="${l?.85:.45}" stroke-width="${l?1.2:.7}"/>`}).join('')}
+    <circle r="100" fill="${clearCas?'#5a4c45':C[cas].h}"/>
+    <circle r="91" fill="var(--clear)"/>
+    ${r.draw(s)}
+  </svg>`;
+}
+const fmt=n=>n.toLocaleString('en',{maximumFractionDigits:1});
+
+function render(){
+  // stepper
+  $('steps').innerHTML = STEPS.map((t,i)=>`<button class="${i<S.step?'done':''}" ${i===S.step?'aria-current="step"':''} data-go="${i}">${i+1}. ${t}</button>`).join('');
+  // stage
+  $('slice').innerHTML = sliceSVG(S.recipe);
+  const gather=S.finished*S.ratio, length=100*S.ratio*S.ratio/1000;
+  $('readouts').innerHTML = `<div class="hot"><b>${fmt(S.finished)}</b><span>finished Ø mm</span></div><div><b>${gather}</b><span>gather Ø mm</span></div><div><b>≈${fmt(length)}</b><span>metres of cane</span></div>`;
+  $('caption').textContent = `${RECIPES[S.recipe].name}, drawn to scale`;
+  // body
+  const b=$('body'); const r=RECIPES[S.recipe]; const s=slotsOf(S.recipe);
+  if (S.step===0){
+    b.innerHTML = `<h1>What are you making?</h1><p class="lede">Start from a real murrine recipe. You can change everything after.</p>
+      <div class="recipes">${Object.entries(RECIPES).map(([k,v])=>`<button class="recipe" aria-pressed="${k===S.recipe}" data-recipe="${k}">${sliceSVG(k,84)}<b>${v.name}</b><span>${v.blurb}</span></button>`).join('')}</div>`;
+  } else if (S.step===1){
+    b.innerHTML = `<h1>Choose the colours</h1><p class="lede">One colour for each part of the ${r.name.toLowerCase()}. Tap a part to change it.</p>
+      <div class="slots">${Object.entries(r.slots).map(([key,[label]])=>`<div class="slot" data-open="${S.open===key}">
+        <button class="slot-head" data-slot="${key}" aria-expanded="${S.open===key}"><i style="background:${C[s[key]].h}"></i><span class="t"><small>${label}</small><b>${C[s[key]].n}</b></span>
+        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="chips">${Object.entries(C).filter(([id])=>key==='casing'||id!=='clear').map(([id,c])=>`<button class="chip ${c.toxic?'toxic':''}" aria-pressed="${s[key]===id}" data-pick="${key}:${id}"><i style="background:${c.h}"></i><span>${c.n}<small>${note(id)}</small></span></button>`).join('')}</div>
+      </div>`).join('')}</div>`;
+  } else if (S.step===2){
+    b.innerHTML = `<h1>How big a cane?</h1><p class="lede">The diameter of the finished cane you'll slice. Everything else follows from it.</p>
+      <div class="size"><label for="fin">Finished diameter <output>${fmt(S.finished)} mm</output></label>
+      <input id="fin" type="range" min="3" max="15" step="0.5" value="${S.finished}">
+      <p class="derived">From a <b>${gather} mm</b> gather pulled <b>${S.ratio} : 1</b>. <button class="linkish" id="more">${S.moreOpen?'Hide':'Change pull ratio'}</button></p>
+      <div class="more ${S.moreOpen?'open':''}"><div class="size" style="margin:0"><label for="rat">Pull ratio <output>${S.ratio} : 1</output></label><input id="rat" type="range" min="2" max="12" value="${S.ratio}"><p class="derived">A higher ratio means a smaller gather and more cane.</p></div></div></div>`;
+  } else {
+    const canes=r.canes(s); const total=canes.reduce((a,[n])=>a+n,0);
+    const steps=[...canes.map(([n,t])=>[`Pull ${n} ${t} cane${n>1?'s':''}`,'']), ...(total>1?[[`Bundle all ${total} canes`,'Lay them out as the slice shows and fuse them into one rod.']]:[]),
+      [`Case in ${C[s.casing].n}`,'Over the bundle.'],[`Pull to Ø ${fmt(S.finished)} mm`,`${S.ratio} : 1 from a ${gather} mm gather gives about ${fmt(length)} m of cane to slice.`]];
+    b.innerHTML = `<h1>Your shop plan</h1><p class="lede">${steps.length} steps, read straight from your ${r.name.toLowerCase()}.</p>
+      <ol class="plan">${steps.map(([t,d],i)=>`<li><span>${i+1}</span><div><b>${t}</b>${d?`<p>${d}</p>`:''}</div></li>`).join('')}</ol>
+      <div class="plan-actions"><button class="btn">Print sheet</button><button class="btn ghost">Shop checklist</button><button class="btn ghost" data-advanced>Fine-tune in Advanced</button></div>`;
+  }
+  $('back').disabled = S.step===0;
+  // On the plan, Print sheet is the action; starting over stays available but quiet.
+  $('next').textContent = S.step===3 ? 'Start a new design' : `Next: ${STEPS[S.step+1]}`;
+  $('next').classList.toggle('ghost', S.step===3);
+  bind();
+}
+function bind(){
+  document.querySelectorAll('[data-go]').forEach(e=>e.onclick=()=>{S.step=+e.dataset.go;render()});
+  document.querySelectorAll('[data-recipe]').forEach(e=>e.onclick=()=>{S.recipe=e.dataset.recipe;render()});
+  document.querySelectorAll('[data-slot]').forEach(e=>e.onclick=()=>{S.open=S.open===e.dataset.slot?null:e.dataset.slot;render()});
+  document.querySelectorAll('[data-pick]').forEach(e=>e.onclick=()=>{const [k,id]=e.dataset.pick.split(':');S.colours[S.recipe+':'+k]=id;S.open=null;render()});
+  document.querySelectorAll('[data-advanced]').forEach(e=>e.onclick=()=>setMode('adv'));
+  const fin=$('fin'); if(fin) fin.oninput=e=>{S.finished=+e.target.value;render();$('fin').focus()};
+  const rat=$('rat'); if(rat) rat.oninput=e=>{S.ratio=+e.target.value;render();$('rat').focus()};
+  const more=$('more'); if(more) more.onclick=()=>{S.moreOpen=!S.moreOpen;render()};
+}
+$('back').onclick=()=>{S.step=Math.max(0,S.step-1);render()};
+$('next').onclick=()=>{S.step=S.step===3?0:S.step+1;render();scrollTo({top:0})};
+function setMode(m){
+  $('simple').style.display = m==='adv'?'none':''; $('adv').classList.toggle('show',m==='adv');
+  $('mSimple').setAttribute('aria-pressed',m!=='adv'); $('mAdv').setAttribute('aria-pressed',m==='adv');
+}
+$('mSimple').onclick=()=>setMode('simple'); $('mAdv').onclick=()=>setMode('adv');
+render();
+</script>
+</body>
+</html>

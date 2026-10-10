@@ -74,7 +74,7 @@ export function VesselControls({
           onClick={onExitFreeform}
           className={`flex-1 rounded px-3 py-1.5 text-base transition-colors ${
             !freeform
-              ? 'bg-purple-500 text-white'
+              ? 'bg-accent text-accent-ink'
               : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
           }`}
         >
@@ -85,7 +85,7 @@ export function VesselControls({
           onClick={onEnterFreeform}
           className={`flex-1 rounded px-3 py-1.5 text-base transition-colors ${
             freeform
-              ? 'bg-purple-500 text-white'
+              ? 'bg-accent text-accent-ink'
               : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
           }`}
         >

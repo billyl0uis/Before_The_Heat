@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Acetate Manual</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;600;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1440px;height:900px;overflow:hidden;background:#e8742a;color:#1d1b18;font:15px/1.45 'Libre Franklin',sans-serif;display:grid;grid-template-columns:1fr 132px}
+.board{padding:26px 26px 26px 30px;display:grid;grid-template-columns:230px 1fr 360px;grid-template-rows:56px 1fr 74px;gap:18px}
+.title{grid-column:1/4;display:flex;align-items:end;gap:18px;color:#1d1b18}
+.title b{font:800 30px/1 'Libre Franklin';letter-spacing:-.01em}.title span{font:13px 'JetBrains Mono'}
+.leaf{background:rgba(239,238,234,.86);position:relative;padding:20px 18px 18px 30px;box-shadow:4px 4px 0 rgba(0,0,0,.18)}
+.leaf::before,.leaf::after{content:"";position:absolute;left:10px;width:9px;height:9px;border-radius:50%;background:#e8742a}
+.leaf::before{top:18px}.leaf::after{bottom:18px}
+h3{font:800 12px 'Libre Franklin';letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.t{padding:8px 0;border-bottom:1px solid rgba(0,0,0,.12);display:flex;gap:10px;align-items:center}
+.t i{width:12px;height:12px;border:2px solid #1d1b18;border-radius:50%}.t.on i{background:#1d1b18;box-shadow:inset 0 0 0 2px #efeeea}.t.on{font-weight:600}
+.stage{display:flex;align-items:center;justify-content:center;background:rgba(239,238,234,.94)}
+.d{position:absolute;left:30px;bottom:18px;display:flex;gap:26px;font:13px 'JetBrains Mono'}.d b{display:block;font:800 28px 'Libre Franklin'}
+.row{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.12)}.row i{width:30px;height:22px;border:1px solid rgba(0,0,0,.3)}
+.row small{margin-left:auto;font:12px 'JetBrains Mono'}
+.slip{grid-column:1/4;background:rgba(239,238,234,.9);display:flex;align-items:center;gap:26px;padding:0 24px 0 32px}
+.err{background:#e03a1e;color:#fff;padding:6px 12px;font-weight:600}
+.go{margin-left:auto;background:#1d1b18;color:#efeeea;padding:12px 18px;font-weight:600}
+.rail{display:flex;flex-direction:column;background:#1d1b18}
+.tab{display:flex;align-items:center;padding-left:18px;font:800 14px 'Libre Franklin';letter-spacing:.08em;text-transform:uppercase;color:#1d1b18;border-bottom:2px solid #1d1b18}
+.tab.on{margin-left:-24px;padding-left:42px}
+</style></head><body>
+<div class="board">
+ <div class="title"><b>Murrini</b><span>Six-petal radial · example</span></div>
+ <div class="leaf"><h3>Single cane</h3><div class="t on"><i></i>Circle</div><div class="t"><i></i>Petal</div><div class="t"><i></i>Ring</div><div class="t"><i></i>Star mold</div>
+  <h3 style="margin-top:16px">Bundles</h3><div class="t"><i></i>Zanfirico</div><div class="t"><i></i>Tripod</div><div class="t"><i></i>Cane grid</div><div class="t"><i></i>Frame</div></div>
+ <div class="leaf stage"><svg width="470" height="470" viewBox="-130 -130 260 260"><circle r="116" fill="#1f45a8"/><circle r="108" fill="#f3f1ea"/><circle r="100" fill="#dfe6e2"/>
+  <g fill="#f3f1ea" stroke="#1f45a8" stroke-width="3"><ellipse cy="-55" rx="24" ry="38"/><ellipse cy="-55" rx="24" ry="38" transform="rotate(60)"/><ellipse cy="-55" rx="24" ry="38" transform="rotate(120)"/><ellipse cy="-55" rx="24" ry="38" transform="rotate(180)"/><ellipse cy="-55" rx="24" ry="38" transform="rotate(240)"/><ellipse cy="-55" rx="24" ry="38" transform="rotate(300)"/></g>
+  <circle r="22" fill="#b0183a"/><circle r="9" fill="#f3f1ea"/></svg>
+  <div class="d"><div><b>32 mm</b>gather Ø</div><div><b>8 mm</b>pulled Ø</div><div><b>4 : 1</b>reduction</div></div></div>
+ <div class="leaf"><h3>Casing, inside → out</h3><div class="row"><i style="background:#dfe6e2"></i>Clear<small>base</small></div><div class="row"><i style="background:#f3f1ea"></i>Opal White<small>opaque</small></div><div class="row"><i style="background:#1f45a8"></i>Cobalt Blue<small>CoO</small></div>
+  <h3 style="margin-top:16px">Colours</h3><div class="row"><i style="background:#b0183a"></i>Gold Ruby<small>strikes</small></div><div class="row"><i style="background:#1c9a8f"></i>Copper Turquoise<small>CuO</small></div><div class="row"><i style="background:#f2c230"></i>Cadmium Yellow<small>toxic</small></div></div>
+ <div class="slip"><span>4 steps · 32 → 8 mm</span><span class="err">Gold Ruby: check strike on reheat</span><span class="go">Open shop plan</span></div>
+</div>
+<nav class="rail"><div class="tab on" style="background:#e8742a;flex:3">Murrini</div><div class="tab" style="background:#1c8a8a;flex:2">Vessel</div><div class="tab" style="background:#2b47b8;flex:1.4">Plan</div><div class="tab" style="background:#2f9e5a;flex:2.4">Learn</div><div class="tab" style="background:#a0522d;flex:1">Saved</div></nav>
+</body></html>

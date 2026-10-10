@@ -1,19 +1,42 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { DEFAULT_EXTRUSION } from '../engine/murrini/extrude'
+import { CURRENT_SCHEMA_VERSION, migrateDesign } from '../engine/murrini/migrate'
 import { DEFAULT_PATTERN } from '../engine/murrini/pattern'
+import { DEFAULT_CASING, DEFAULT_ROD } from '../engine/murrini/rod'
 import { SHAPE_TYPES } from '../engine/murrini/shapes'
 
 const DEFAULT_CANVAS = { width: 500, height: 500, backgroundColor: '#1a1a1a' }
 
+// The working design is kept in this browser so a refresh, a crash
+// recovery reload, or a mobile browser evicting the tab never loses it.
+// Every read and write is guarded: private windows and blocked storage
+// throw, and the editor must still work without persistence.
+const AUTOSAVE_KEY = 'before-the-heat:working-design'
+
+function readAutosave() {
+  try {
+    const raw = window.localStorage.getItem(AUTOSAVE_KEY)
+    return raw ? migrateDesign(JSON.parse(raw)) : null
+  } catch {
+    return null
+  }
+}
+
 export function useMurriniDesign(canvas = DEFAULT_CANVAS) {
-  const [elements, setElements] = useState([])
+  const [initial] = useState(readAutosave)
+  const [elements, setElements] = useState(initial?.elements ?? [])
   // Undo/redo only covers `elements` (placing/removing/clearing shapes) —
   // that's the action worth undoing. Pattern/extrusion are settings, not
   // edits, and aren't tracked here.
   const [past, setPast] = useState([])
   const [future, setFuture] = useState([])
-  const [pattern, setPattern] = useState(DEFAULT_PATTERN)
-  const [extrusion, setExtrusion] = useState(DEFAULT_EXTRUSION)
+  const [pattern, setPattern] = useState(initial?.pattern ?? DEFAULT_PATTERN)
+  const [extrusion, setExtrusion] = useState(initial?.extrusion ?? DEFAULT_EXTRUSION)
+  // The rod you'll actually gather and pull, and the casing layers applied
+  // to it inside → out. Settings like pattern/extrusion, not undoable edits.
+  const [rod, setRod] = useState(initial?.rod ?? DEFAULT_ROD)
+  const [casing, setCasing] = useState(initial?.casing ?? DEFAULT_CASING)
+  const [savedLocally, setSavedLocally] = useState(Boolean(initial))
 
   // Mirrors `elements` synchronously, the instant any function here
   // changes it — not just after the next render. Without this, calling
@@ -159,14 +182,60 @@ export function useMurriniDesign(canvas = DEFAULT_CANVAS) {
   // Vault). Distinct from addElement/setPattern/setExtrusion, which only
   // ever change one piece at a time from user interaction.
   const loadDesign = useCallback((saved) => {
-    const next = saved.elements ?? []
-    elementsRef.current = next
-    setElements(next)
-    setPattern(saved.pattern ?? DEFAULT_PATTERN)
-    setExtrusion(saved.extrusion ?? DEFAULT_EXTRUSION)
+    const design = migrateDesign(saved)
+    elementsRef.current = design.elements
+    setElements(design.elements)
+    setPattern(design.pattern)
+    setExtrusion(design.extrusion)
+    setRod(design.rod)
+    setCasing(design.casing)
     setPast([])
     setFuture([])
   }, [])
+
+  // Casing edits, inside → out. Index 0 is the first layer applied.
+  const addCasingLayer = useCallback((colorantId) => {
+    setCasing((prev) => [...prev, { colorantId, thicknessMm: 1 }])
+  }, [])
+  const removeCasingLayer = useCallback((index) => {
+    setCasing((prev) => prev.filter((_, i) => i !== index))
+  }, [])
+  const moveCasingLayer = useCallback((index, direction) => {
+    setCasing((prev) => {
+      const target = index + direction
+      if (target < 0 || target >= prev.length) return prev
+      const next = [...prev]
+      ;[next[index], next[target]] = [next[target], next[index]]
+      return next
+    })
+  }, [])
+  const updateCasingLayer = useCallback((index, updates) => {
+    setCasing((prev) => prev.map((layer, i) => (i === index ? { ...layer, ...updates } : layer)))
+  }, [])
+
+  // Debounced so a slider drag writes once when it settles, not 60×/sec.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        window.localStorage.setItem(
+          AUTOSAVE_KEY,
+          JSON.stringify({
+            schemaVersion: CURRENT_SCHEMA_VERSION,
+            canvas,
+            elements,
+            pattern,
+            extrusion,
+            rod,
+            casing,
+          }),
+        )
+        setSavedLocally(true)
+      } catch {
+        setSavedLocally(false)
+      }
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [canvas, elements, pattern, extrusion, rod, casing])
 
   return {
     canvas,
@@ -175,6 +244,14 @@ export function useMurriniDesign(canvas = DEFAULT_CANVAS) {
     setPattern,
     extrusion,
     setExtrusion,
+    rod,
+    setRod,
+    casing,
+    addCasingLayer,
+    removeCasingLayer,
+    moveCasingLayer,
+    updateCasingLayer,
+    savedLocally,
     addElement,
     addElements,
     removeElement,

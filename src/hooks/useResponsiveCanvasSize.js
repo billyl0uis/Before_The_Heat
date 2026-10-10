@@ -15,23 +15,31 @@ export function useResponsiveCanvasSize(maxWidth, aspectRatio) {
     if (!container) return
 
     let frame
-    const updateSize = () => {
+    const measure = () => {
       const available = container.clientWidth
-      if (!available) return
-      const width = Math.round(Math.max(160, Math.min(maxWidth, available)))
+      if (!available) return null
+      return Math.round(Math.max(160, Math.min(maxWidth, available)))
+    }
+    const apply = (width) =>
+      setSize((prev) =>
+        prev.width === width ? prev : { width, height: Math.round(width * aspectRatio) },
+      )
+    const updateSize = () => {
+      const width = measure()
+      if (width === null) return
       // Debounced onto a rAF so a burst of resize notifications (dragging
       // a window edge, an orientation change) collapses into one update
       // instead of repeatedly tearing down and rebuilding the WebGL
       // context mid-gesture.
       cancelAnimationFrame(frame)
-      frame = requestAnimationFrame(() => {
-        setSize((prev) =>
-          prev.width === width ? prev : { width, height: Math.round(width * aspectRatio) },
-        )
-      })
+      frame = requestAnimationFrame(() => apply(width))
     }
 
-    updateSize()
+    // The first measurement applies straight away: waiting a frame here
+    // briefly renders the canvas at its desktop maximum, overflowing a
+    // phone screen until the next frame arrives.
+    const initial = measure()
+    if (initial !== null) apply(initial)
     const observer = new ResizeObserver(updateSize)
     observer.observe(container)
     return () => {

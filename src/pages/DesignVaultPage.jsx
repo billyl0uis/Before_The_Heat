@@ -19,6 +19,8 @@ function buildDesignPayload(design) {
     elements: design.elements,
     pattern: design.pattern,
     extrusion: design.extrusion,
+    rod: design.rod,
+    casing: design.casing,
     thumbnailUrl: thumbnailCanvas.toDataURL('image/png'),
   }
 }
@@ -191,7 +193,7 @@ export function DesignVaultPage({ design, onLoadDesign }) {
             <button
               type="submit"
               disabled={!user || !designName.trim() || status === 'saving'}
-              className="rounded bg-purple-500 px-4 py-1.5 text-base text-white transition-colors hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded bg-accent px-4 py-1.5 text-base text-accent-ink transition-colors hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {status === 'saving' ? 'Saving…' : 'Save current design'}
             </button>

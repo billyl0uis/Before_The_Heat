@@ -383,6 +383,11 @@ export function computeBuildPlan(elements) {
         ? (resolveCompoundTechniqueKey(cluster) ?? classifyNestedGroup(cluster))
         : resolveSingleShapeTechniqueKey(cluster[0].shape, cluster[0].params),
     caneCount: cluster.length,
+    // Which real colorants this cane is made of, for the shop plan's
+    // colour pills. Custom colours (no colorantId) simply don't appear.
+    colorantIds: [...new Set(cluster.map((element) => element.colorantId).filter(Boolean))],
+    // The cane's own elements, so a shop plan can describe and draw it.
+    elements: cluster,
   }))
 
   if (clusters.length > 1) {

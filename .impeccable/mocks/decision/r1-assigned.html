@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Colorant Roster</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1440px;height:900px;overflow:hidden;background:#fdf1e4;color:#2b2430;font:15px/1.4 Figtree,sans-serif}
+header{height:64px;display:flex;align-items:center;gap:30px;padding:0 28px}
+.mark{font:800 24px 'Baloo 2'}
+nav{display:flex;gap:6px}nav a{padding:8px 18px;border-radius:999px;background:#fff;font-weight:600}
+nav a.on{background:#2b2430;color:#fff}
+main{display:grid;grid-template-columns:210px 1fr 520px;gap:22px;padding:0 28px;height:760px}
+.tools{background:#fff;border-radius:22px;padding:18px}
+h3{font:800 15px 'Baloo 2';margin-bottom:8px}
+.t{padding:9px 12px;border-radius:12px;font-weight:500}.t.on{background:#e9f2ec}
+.stage{background:#e9f2ec;border-radius:28px;position:relative;display:flex;align-items:center;justify-content:center}
+.stage .d{position:absolute;bottom:20px;left:24px;display:flex;gap:26px}
+.stage .d b{display:block;font:800 30px/1 'Baloo 2'}.stage .d span{font-size:12px}
+.roster{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-content:start}
+.c{background:#fff;border-radius:20px;padding:12px;position:relative}
+.c.on{box-shadow:0 0 0 3px #2b2430}
+.c .blob{height:64px;border-radius:32px;border:3px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.12)}
+.c b{display:block;font:800 16px/1.1 'Baloo 2';margin-top:8px}
+.c p{font-size:12.5px;line-height:1.3;color:#5a5060}
+.c .rib{position:absolute;top:10px;right:10px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;color:#fff}
+.plan{grid-column:1/4;height:64px;background:#fff;border-radius:20px;display:flex;align-items:center;gap:26px;padding:0 22px;margin-top:-4px}
+.plan .go{margin-left:auto;background:#e4572e;color:#fff;padding:11px 20px;border-radius:999px;font-weight:600}
+</style></head><body>
+<header><div class="mark">Before The Heat</div><nav><a class="on">Murrini</a><a>Vessel</a><a>Plan</a><a>Learn</a><a>Saved</a></nav></header>
+<main>
+ <div class="tools"><h3>Single cane</h3><div class="t on">Circle</div><div class="t">Petal</div><div class="t">Ring</div><div class="t">Star mold</div><h3 style="margin-top:14px">Bundles</h3><div class="t">Zanfirico</div><div class="t">Tripod</div><div class="t">Cane grid</div><div class="t">Frame</div></div>
+ <div class="stage"><svg width="440" height="440" viewBox="-130 -130 260 260"><circle r="116" fill="#1f45a8"/><circle r="108" fill="#f3f1ea"/><circle r="100" fill="#dfe6e2"/>
+  <g fill="#f3f1ea" stroke="#1f45a8" stroke-width="3"><ellipse cy="-55" rx="24" ry="38"/><ellipse cy="-55" rx="24" ry="38" transform="rotate(60)"/><ellipse cy="-55" rx="24" ry="38" transform="rotate(120)"/><ellipse cy="-55" rx="24" ry="38" transform="rotate(180)"/><ellipse cy="-55" rx="24" ry="38" transform="rotate(240)"/><ellipse cy="-55" rx="24" ry="38" transform="rotate(300)"/></g>
+  <circle r="22" fill="#b0183a"/><circle r="9" fill="#f3f1ea"/></svg>
+  <div class="d"><div><b>32 mm</b><span>gather Ø</span></div><div><b>8 mm</b><span>pulled Ø</span></div><div><b>4 : 1</b><span>reduction</span></div></div></div>
+ <div class="roster">
+  <div class="c on"><span class="rib" style="background:#1f45a8">casing 3</span><div class="blob" style="background:#1f45a8"></div><b>Cobalt Blue</b><p>A little goes a long way. Stays put in any flame.</p></div>
+  <div class="c"><span class="rib" style="background:#8a8a8a">casing 2</span><div class="blob" style="background:#f3f1ea"></div><b>Opal White</b><p>Blocks light. Makes everything in front of it pop.</p></div>
+  <div class="c"><span class="rib" style="background:#b0183a">core</span><div class="blob" style="background:#b0183a"></div><b>Gold Ruby</b><p>Pale until reheated, then strikes to cranberry.</p></div>
+  <div class="c"><div class="blob" style="background:#1c9a8f"></div><b>Copper Turquoise</b><p>Turns red if you reduce the flame.</p></div>
+  <div class="c"><div class="blob" style="background:#f2c230"></div><b>Cadmium Yellow</b><p>Bright, and toxic. Handle frit with care.</p></div>
+  <div class="c"><div class="blob" style="background:#6a3d8f"></div><b>Manganese</b><p>Soft violet; the oldest decolouriser in the book.</p></div>
+  <div class="c"><div class="blob" style="background:#2e7d32"></div><b>Chromium Green</b><p>Steady and strong. Can leave specks if overloaded.</p></div>
+  <div class="c"><div class="blob" style="background:#7a5bd1"></div><b>Neodymium</b><p>Changes colour under different lights.</p></div>
+  <div class="c"><div class="blob" style="background:#b8742a"></div><b>Amber</b><p>Iron and sulfur; shifts with the atmosphere.</p></div>
+ </div>
+ <div class="plan"><b>Plan</b><span>4 steps · about 70 min of heat</span><span>✓ colours checked, run a test strip</span><span class="go">Open shop plan</span></div>
+</main></body></html>

@@ -1,0 +1,108 @@
+{
+  "title": "Choose the visual world for Before The Heat",
+  "question": "Bolder hand: foreign forms at full commitment, each mapped onto glassblowing. The dealt leader is the Colorant Roster. Keep it, take an alternate, or re-roll.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Colorant Roster",
+      "kicker": "THE ROLL",
+      "lineage": "Character-goods catalogue: a ranked cast of rounded characters with name plates and one-line personality notes",
+      "thesis": "Every colorant is a character with a name plate and a temperament (strikes, devitrifies, toxic), so you pick colour by getting to know it.",
+      "palette": ["#fdf1e4", "#e9f2ec", "#2b2430", "#ffffff", "#e4572e"],
+      "materials": ["pastel grounds", "white keylines", "flat fills", "a ribbon colour per colorant"],
+      "viewport": "A soft-ground shell with tabs. The rod slice sits in the centre. On the right, a roster of colorant cells: a rounded chip, name plate, one-line note ('Gold Ruby: shy until reheated, then strikes'), and its ribbon. Toxic colorants are flagged in their notes.",
+      "risk": "Cute can undercut a serious craft tool, and personality notes must stay strictly factual or they break accuracy.",
+      "raised": [
+        { "from": "challenger-console", "raise": "Destructive actions (Delete, Overwrite, Clear) stand alone, set apart by deliberate empty space." },
+        { "from": "challenger-laban", "raise": "In the plan, each step's length is its real working time, so the sheet shows where the heat time goes." }
+      ],
+      "html": ".impeccable/mocks/decision/r1-assigned.html"
+    },
+    {
+      "id": "challenger-acetate",
+      "label": "Acetate Manual",
+      "verdict": "wins",
+      "lineage": "Boxed-software manual: milk-acetate leaves hinged over full-strength coloured divider boards, stepped tab rail",
+      "thesis": "Clear leaves over a colour board work like casing over glass. Each section is a hue, and every panel is a translucent leaf over it.",
+      "palette": ["#e8742a", "#f2c22e", "#2f9e5a", "#1c8a8a", "#2b47b8", "#efeeea"],
+      "materials": ["milk acetate leaves", "full-strength section boards", "punched hinge holes", "stepped tab rail"],
+      "viewport": "A stepped tab rail down the right edge: Murrini (oxide orange), Vessel (teal), Plan (ultramarine), Learn (grass), Saved (sienna). The current board fills the ground, panels are milk-acetate leaves over it, and the rod slice sits on the top leaf. Selected states show as a punched hole and errors as a vermilion slip.",
+      "case": "It beats the leader on both axes. Glassblowers know the layering of clear over colour from casing, and the tab rail gives the whole app one clear map.",
+      "risk": "Full-strength section boards fight the glass colours; the alpha of each leaf has to be tuned to keep colorants reading true.",
+      "hero": "https://impeccable.style/worlds/cards/rw-manual-acetate-tab-board-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/rw-manual-acetate-tab-board.webp",
+      "html": ".impeccable/mocks/decision/r1-acetate.html"
+    },
+    {
+      "id": "challenger-spectrum",
+      "label": "Emission Line Rail",
+      "verdict": "competitive",
+      "lineage": "A glass spectrogram on a viewing box: charcoal continuum, needle-thin wavelength lines",
+      "thesis": "Every colorant shown by its spectrum: state carried by line form, not hue, so nothing depends on colour alone.",
+      "palette": ["#26272a", "#3a3b3f", "#e9e4d8", "#f5c542", "#6fa8ff", "#e0544b"],
+      "materials": ["charcoal continuum", "hairline emission lines", "bone legends", "ash plates"],
+      "viewport": "One off-centre rail holds every destination as a tick; the open one (Murrini) blooms into a plate. The slice is matted in graphite and the colorant list is drawn as spectral lines (cobalt's absorption bands, neodymium's sharp lines). Live state is solid, pending is dashed, and a warning is a doubled line.",
+      "case": "Best accessibility discipline and real glass science, since colorants do have spectra. It loses on identification: a spectrogram reads as lab, not hot shop.",
+      "risk": "Spectra need sourcing per colorant or they become decoration; the dark ground drifts toward the current look.",
+      "hero": "https://impeccable.style/worlds/cards/operate-c-emission-line-rail-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/operate-c-emission-line-rail.webp",
+      "html": ".impeccable/mocks/decision/r1-spectrum.html"
+    },
+    {
+      "id": "challenger-jcard",
+      "label": "Shop J-Card",
+      "verdict": "competitive",
+      "lineage": "A mixtape j-card: ballpoint on lined inlay stock, side A / side B timed to fit the tape",
+      "thesis": "The plan is written like a mixtape inlay, timed to fit your hot-shop slot: side A prep, side B on the pipe.",
+      "palette": ["#fbfbf7", "#1f3fa6", "#9a9a9a", "#d62b2b"],
+      "materials": ["lined inlay stock", "ballpoint blue", "pencil grey", "brand stripe"],
+      "viewport": "Ruled white stock with a red brand stripe. The slice sits on the front flap, and steps run as ballpoint tracks with right-aligned times that must fit a 3-hour slot. Tentative steps are in pencil grey.",
+      "case": "Glassblowers do scrawl shop plans by hand, and timing against a booked slot is real. Clarity drops in the editor, where handwriting slows scanning.",
+      "risk": "Hand-lettered type hurts legibility in dense controls; it must stay confined to the plan.",
+      "hero": "https://impeccable.style/worlds/cards/vernacular-ephemera-cassette-j-card-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/vernacular-ephemera-cassette-j-card.webp",
+      "html": ".impeccable/mocks/decision/r1-jcard.html"
+    },
+    {
+      "id": "challenger-console",
+      "label": "Dark Console",
+      "verdict": "declined",
+      "lineage": "Dark-first developer console with hairline seams",
+      "thesis": "Graphite panels with hairline seams and syntax accents.",
+      "palette": ["#1b1d21", "#2a2d33", "#7ee787", "#ff7b72"],
+      "materials": ["graphite", "hairline seams"],
+      "viewport": "Tiled graphite panels.",
+      "case": "It loses both axes: it is effectively today's look.",
+      "kept": "Destructive actions set apart by empty space.",
+      "risk": "Same as the current UI.",
+      "hero": "https://impeccable.style/worlds/cards/digital-design-canon-dark-first-developer-console-hero.webp"
+    },
+    {
+      "id": "challenger-laban",
+      "label": "Labanotation Score",
+      "verdict": "declined",
+      "lineage": "Dance notation: a vertical staff where block length is exact duration",
+      "thesis": "The build as a score for gaffer and assistant.",
+      "palette": ["#ffffff", "#111111", "#cfcfcf"],
+      "materials": ["score paper", "hatched blocks"],
+      "viewport": "Gaffer and assistant columns flank a centre staff, with time running upward.",
+      "case": "It loses both axes: notation literacy is too high a bar, and the editor has no place in a score.",
+      "kept": "Step length equals real working time.",
+      "risk": "Unreadable without training.",
+      "hero": "https://impeccable.style/worlds/cards/notation-diagram-systems-labanotation-hero.webp"
+    }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] },
+  "buildPath": { "value": "code", "toggle": false },
+  "canon": true,
+  "canonCard": {
+    "label": "The category standard",
+    "thesis": "A dark pro creative tool, like the canvas apps people already use, executed impeccably.",
+    "palette": ["#1c1c1e", "#2c2c2e", "#f2f2f7", "#0a84ff"],
+    "materials": ["dark panels", "icon toolbars", "inspector sidebar"],
+    "viewport": "A left tool rail with icons, a centre canvas, and a right inspector with collapsible sections.",
+    "risk": "It reads like every design tool, which is close to the current look.",
+    "html": ".impeccable/mocks/decision/r1-canon.html"
+  },
+  "steer": true
+}
