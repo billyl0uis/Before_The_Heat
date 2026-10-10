@@ -26,3 +26,18 @@ export function fieldInputs(design, spritePx = 64) {
 export function sectionGround() {
   return getComputedStyle(document.documentElement).getPropertyValue('--ground').trim() || '#150b07'
 }
+
+// The field plays once per browser session, on the first move between
+// sections. After that, switching tabs is instant: a repeated delay is
+// friction, and the moment is only special the first time. Called from the
+// tab-change handler, never from an effect.
+const PLAYED_KEY = 'before-the-heat:field-played'
+export function claimFirstTransition() {
+  try {
+    if (window.sessionStorage.getItem(PLAYED_KEY)) return false
+    window.sessionStorage.setItem(PLAYED_KEY, '1')
+    return true
+  } catch {
+    return false
+  }
+}

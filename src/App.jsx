@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { Mark } from './components/icons'
+import { claimFirstTransition } from './components/fieldShared'
 import { LoadingField } from './components/LoadingField'
 import { ModeSwitch } from './components/ModeSwitch'
 import { computeRepeatedElements } from './engine/murrini/pattern'
@@ -80,8 +81,10 @@ function App() {
     }
     goTo('plan')
   }
-  // Bumped on every tab change so the loading field rolls a fresh hand.
-  const [transition, setTransition] = useState(0)
+  // Set once, on the first section change of a session: the loading field
+  // plays for this transition only. The section travels with it so a later
+  // tab change can't re-trigger the field on its own.
+  const [transition, setTransition] = useState({ count: 0, section: 'murrini' })
 
   // Lifted up here (rather than owned by MurriniEditor) so the pattern
   // survives switching tabs and the Vessel Morphograph can preview it.
@@ -101,7 +104,7 @@ function App() {
   const goTo = (key) => {
     if (key === activeTab) return
     setActiveTab(key)
-    setTransition((n) => n + 1)
+    if (claimFirstTransition()) setTransition((t) => ({ count: t.count + 1, section: key }))
   }
 
   // Each section paints the whole page in its own Vortex Garden palette.
@@ -163,7 +166,7 @@ function App() {
           {murriniHook.savedLocally ? 'Saved in this browser' : 'Not saved yet'}
         </p>
       </header>
-      <LoadingField trigger={transition} section={activeTab} design={design} />
+      <LoadingField trigger={transition.count} section={transition.section} design={design} />
       <ErrorBoundary key={activeTab}>
         <Suspense fallback={<TabLoadingFallback />}>
           {activeTab === 'murrini' &&

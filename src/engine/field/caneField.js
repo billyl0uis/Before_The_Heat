@@ -152,7 +152,9 @@ export function runCaneField(
     if (vortices.length > 2) vortices.shift()
     ripples.push({ x, y, t0: (performance.now() - t0) / 1000 })
   }
-  if (animate) canvas.addEventListener('pointerdown', onDown)
+  // Listen on the window, not the canvas: the overlay is click-through so
+  // it can never block the app, and clicks still drop a vortex while it plays.
+  if (animate) window.addEventListener('pointerdown', onDown)
 
   const frame = (now) => {
     const t = animate ? (now - t0) / 1000 : 2.2
@@ -229,6 +231,6 @@ export function runCaneField(
 
   return () => {
     cancelAnimationFrame(frameId)
-    canvas.removeEventListener('pointerdown', onDown)
+    window.removeEventListener('pointerdown', onDown)
   }
 }
