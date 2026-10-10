@@ -69,11 +69,21 @@ export function PlanPage({ design, vessel, onEdit }) {
 
   return (
     <div className="flex flex-col">
-      <FieldHeader design={design}>
-        <h1 className="rounded-xl bg-ground px-4 py-3 text-[clamp(1.8rem,4.6vw,3.4rem)] leading-[0.98] font-extrabold tracking-tight shadow-[0_12px_40px_rgb(0_0_0/0.5)] sm:px-5">
+      {/* At the furnace (the checklist, or any phone) the field shrinks to a
+          strip, so the step itself starts near the top of the screen. */}
+      <FieldHeader design={design} compact={view === 'checklist'}>
+        <h1
+          className={`rounded-xl bg-ground px-4 py-3 leading-[0.98] font-extrabold tracking-tight shadow-[0_12px_40px_rgb(0_0_0/0.5)] sm:px-5 ${
+            view === 'checklist' ? 'text-[1.6rem] max-sm:py-2' : 'text-[clamp(1.8rem,4.6vw,3.4rem)]'
+          }`}
+        >
           Ready to pull
         </h1>
-        <p className="rounded-lg bg-ground px-3 py-2 font-mono text-sm shadow-[0_12px_40px_rgb(0_0_0/0.5)]">
+        <p
+          className={`rounded-lg bg-ground px-3 py-2 font-mono text-sm shadow-[0_12px_40px_rgb(0_0_0/0.5)] ${
+            view === 'checklist' ? 'max-sm:hidden' : ''
+          }`}
+        >
           Ø {rod.gatherDiameterMm} → {pulledDiameterMm(rod).toFixed(1)} mm · {rod.pullRatio} : 1 · ≈{' '}
           {(pulledLengthMm(rod) / 1000).toFixed(1)} m
           {extrusion.twistDegrees ? ` · ${turnsLabel(extrusion.twistDegrees)}` : ''}

@@ -12,7 +12,7 @@ export function ModeSwitch({ mode, onChange, className = '' }) {
           type="button"
           aria-pressed={mode === option.key}
           onClick={() => onChange(option.key)}
-          className={`rounded-md px-2.5 py-1 text-xs font-bold sm:px-3 sm:text-sm ${
+          className={`rounded-md px-2.5 py-1 text-xs font-bold max-sm:min-h-[44px] sm:px-3 sm:text-sm ${
             mode === option.key ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
           }`}
         >

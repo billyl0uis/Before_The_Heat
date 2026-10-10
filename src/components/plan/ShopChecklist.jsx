@@ -61,7 +61,7 @@ export function ShopChecklist({ design, steps, warnings = [] }) {
   return (
     <section
       aria-label="Shop checklist"
-      className="mx-auto w-full max-w-md overflow-hidden rounded-3xl bg-panel shadow-[0_0_0_1px_var(--line),0_30px_70px_rgb(0_0_0/0.45)]"
+      className="mx-auto w-full max-w-md overflow-clip rounded-3xl bg-panel shadow-[0_0_0_1px_var(--line),0_30px_70px_rgb(0_0_0/0.45)]"
     >
       <div className="flex gap-1 px-5 pt-5" aria-hidden="true">
         {steps.map((s, i) => (
@@ -118,7 +118,7 @@ export function ShopChecklist({ design, steps, warnings = [] }) {
       )}
 
       {!done && (
-        <div className="grid grid-cols-[1fr_2fr] gap-2 px-5 pb-4">
+        <div className="grid grid-cols-[1fr_2fr] gap-2 bg-panel px-5 pb-4 max-sm:sticky max-sm:bottom-0 max-sm:z-10 max-sm:pt-3 max-sm:pb-[max(1rem,env(safe-area-inset-bottom))] max-sm:shadow-[0_-12px_24px_-12px_rgb(0_0_0/0.6)]">
           <button
             type="button"
             disabled={current === 0}
