@@ -1,4 +1,4 @@
-import { pulledDiameterMm, pulledLengthMm } from '../murrini/rod'
+import { findColorant, pulledDiameterMm, pulledLengthMm } from '../murrini/rod'
 import { turnsLabel } from '../murrini/shopPlan'
 import { VESSEL_FORM_PRESETS, vesselRadiusFunction } from './profile'
 
@@ -135,6 +135,7 @@ export function planPickup(vessel, design) {
     patch,
     step: {
       key: 'pickup',
+      after: 'after “Pull”',
       title: `Cut ${upTo}${count.toLocaleString('en')} slices and pick them up`,
       detail: lines.join(' '),
       lines,
@@ -148,4 +149,37 @@ export function planPickup(vessel, design) {
 export function ribTwistLabel(degrees) {
   if (!degrees) return 'Straight'
   return `${turnsLabel(degrees) || `${fmt(Math.abs(degrees) / 360, 2)} turns`}, ${degrees > 0 ? 'right' : 'left'}`
+}
+
+const colourName = (id) => findColorant(id)?.name.split(' / ')[0].replace(/ \(.*\)$/, '') ?? 'glass'
+
+// Reticello as a plan step: two sets of rib canes, each picked up and
+// twisted into a cup the opposite way, one cup blown inside the other so
+// the threads cross and trap air in the diamonds (see reticello.js for the
+// sources). It stands on its own: it doesn't use the cane above.
+export function planReticello(vessel) {
+  if (vessel.pattern !== 'reticello') return null
+  const wall = measureWall(vesselRadiusFunction(vessel), vessel.params.height)
+  const perSide = Math.max(4, Math.round(vessel.ribsAround / 2))
+  const a = colourName(vessel.ribA)
+  const b = colourName(vessel.ribB)
+  const lengthMm = Math.round((wall.length + 20) / 10) * 10
+  const outline = []
+  for (let j = 0; j <= 24; j++) outline.push(wall.radii[Math.round((j / 24) * wall.rows)])
+  const lines = [
+    `Pull ${perSide} ${a} rib canes and ${perSide} ${b} rib canes, each at least ${lengthMm} mm long: the wall's length, ${fmt(wall.length, 0)} mm, plus a little to work with.`,
+    `Lay the ${a} canes side by side on a kiln shelf, heat them, pick them up and close them into a cylinder, then twist it one way as you blow it into a cup. Do the same with the ${b} canes, twisting the other way.`,
+    `Blow one cup inside the other until they meet, so the threads cross and trap a bubble in each diamond. Then blow out to ${formPhrase(vessel)}: ${fmt(wall.height, 0)} mm tall, Ø ${fmt(wall.rimRadius * 2, 0)} mm at the rim.`,
+  ]
+  return {
+    step: {
+      key: 'reticello',
+      after: 'its own step, separate from the cane',
+      title: `Make the reticello: ${perSide} + ${perSide} rib canes`,
+      detail: lines.join(' '),
+      lines,
+      colorantIds: [vessel.ribA, vessel.ribB].filter((id) => findColorant(id)),
+      plate: { kind: 'vessel', outline, height: wall.height },
+    },
+  }
 }

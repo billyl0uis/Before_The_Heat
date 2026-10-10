@@ -1,7 +1,7 @@
 import { computeBuildPlan, MURRINI_TECHNIQUES } from '../../content/murrineTechniques'
 import { COMPOUND_SHAPE_TYPES } from './compoundShapes'
 import { checkColorCompatibility } from './colorCompatibility'
-import { findColorant, pulledDiameterMm, pulledLengthMm } from './rod'
+import { findColorant, mmPerWorldUnit, pulledDiameterMm, pulledLengthMm } from './rod'
 import { computeShapeReach, SHAPE_TYPES } from './shapes'
 
 // How many copies of the drawn base cell the repeat produces.
@@ -47,22 +47,22 @@ function copiesOf(cluster, pattern) {
 
 // Title and description written from the cane itself: which colours, in
 // what order, how many. Never a generic technique paragraph.
-function describeCane(cluster, techniqueKey, count) {
+function describeCane(cluster, techniqueKey, count, rod) {
   const compoundType = cluster[0].compoundType
   if (compoundType && COMPOUND_SHAPE_TYPES[compoundType]) {
     const colours = [...new Set(cluster.map(colourName))]
     const label = MURRINI_TECHNIQUES[techniqueKey]?.title ?? COMPOUND_SHAPE_TYPES[compoundType].label
     return {
-      title: `${label} in ${colours.join(' and ')}\u00a0×${count}`,
+      title: `${label} in ${colours.join(' and ')}${count > 1 ? `\u00a0×${count}` : ''}`,
       detail: `${plural(count, COMPOUND_SHAPE_TYPES[compoundType].label.toLowerCase() + ' cane')} built from ${colours.join(', ')}.`,
     }
   }
   if (cluster.length === 1) {
     const element = cluster[0]
-    const shape = SHAPE_TYPES[element.shape]?.label.toLowerCase() ?? 'cane'
+    const shape = element.shape === 'circle' ? 'round' : (SHAPE_TYPES[element.shape]?.label.toLowerCase() ?? 'cane')
     return {
-      title: `Pull ${count} ${colourName(element)} ${shape} cane${count === 1 ? '' : 's'}`,
-      detail: `${shape[0].toUpperCase()}${shape.slice(1)} cross-section in ${colourName(element)}, pulled as a simple cane.`,
+      title: `Pull ${count} ${colourName(element)} ${shape} cane${count === 1 ? '' : 's'}, ${sizePhrase(element, mmPerWorldUnit(rod))}`,
+      detail: `${shape[0].toUpperCase()}${shape.slice(1)} cross-section in ${colourName(element)}, pulled as a simple cane to this size.`,
     }
   }
   // Nested: biggest piece outside, the rest inside it, smallest at the core.
@@ -72,9 +72,56 @@ function describeCane(cluster, techniqueKey, count) {
   const outer = colourName(layers[0])
   const inner = layers.slice(1).reverse().map(colourName)
   return {
-    title: `Case ${inner.join(' and ')} in ${outer}\u00a0×${count}`,
+    title: `Case ${inner.join(' and ')} in ${outer}${count > 1 ? `\u00a0×${count}` : ''}`,
     detail: `${inner[0]} at the centre${inner.length > 1 ? `, then ${inner.slice(1).join(', ')}` : ''}, with ${outer} gathered over it, pulled as one cane.`,
   }
+}
+
+// Bundle tools (Tripod, Cross, Row, Grid, Frame) place several separate
+// canes at once. Each one is pulled on its own before they're bundled, so
+// the plan lists them by kind (shape, colour, size), not as one "cane".
+const BUNDLE_COMPOUNDS = new Set(['tripod', 'cross', 'row', 'grid', 'frame'])
+
+function isBundleCluster(cluster) {
+  const type = cluster[0]?.compoundType
+  return BUNDLE_COMPOUNDS.has(type) && cluster.every((element) => element.compoundType === type)
+}
+
+// A cane's size as it sits in the gather, which is the size to pull it to
+// before bundling.
+function sizePhrase(element, mmPerUnit) {
+  const params = element.params ?? {}
+  const mm = (value) => fmt(value * mmPerUnit)
+  if (element.shape === 'circle') return `Ø\u00a0${mm(params.radius * 2)}\u00a0mm`
+  if (element.shape === 'square') {
+    return params.width === params.height
+      ? `${mm(params.width)}\u00a0mm square`
+      : `${mm(params.width)} × ${mm(params.height)}\u00a0mm`
+  }
+  return `${mm(computeShapeReach(element.shape, params) * 2)}\u00a0mm across`
+}
+
+function bundleComponents(cluster, pattern, rod) {
+  const label = COMPOUND_SHAPE_TYPES[cluster[0].compoundType].label
+  const mmPerUnit = mmPerWorldUnit(rod)
+  const kinds = new Map()
+  for (const element of cluster) {
+    const size = sizePhrase(element, mmPerUnit)
+    const key = `${element.shape}|${element.colorantId ?? element.color}|${size}`
+    const kind = kinds.get(key) ?? { element, size, count: 0 }
+    kind.count += copiesOf([element], pattern)
+    kinds.set(key, kind)
+  }
+  return [...kinds.values()].map(({ element, size, count }) => {
+    const shape = element.shape === 'circle' ? 'round' : (SHAPE_TYPES[element.shape]?.label.toLowerCase() ?? '')
+    return {
+      count,
+      title: `Pull ${count} ${colourName(element)} ${shape} cane${count === 1 ? '' : 's'}, ${size}`,
+      detail: `For the ${label}: pull ${count === 1 ? 'it' : 'each one'} to this size on its own before bundling.`,
+      colorantIds: element.colorantId ? [element.colorantId] : [],
+      elements: [element],
+    }
+  })
 }
 
 // The whole design as the ordered steps you'd actually work through at the
@@ -87,12 +134,29 @@ function describeCane(cluster, techniqueKey, count) {
 export function buildShopPlan({ elements, pattern, rod, casing, extrusion }) {
   const steps = []
   let caneTotal = 0
+  const bundleLabels = new Set()
+  let looseCanes = 0
 
   for (const step of computeBuildPlan(elements)) {
     if (step.techniqueKey === 'bundle' || !step.elements) continue
+    if (isBundleCluster(step.elements)) {
+      bundleLabels.add(COMPOUND_SHAPE_TYPES[step.elements[0].compoundType].label)
+      for (const part of bundleComponents(step.elements, pattern, rod)) {
+        caneTotal += part.count
+        steps.push({
+          key: `cane-${steps.length}`,
+          title: part.title,
+          detail: part.detail,
+          colorantIds: part.colorantIds,
+          plate: { kind: 'cane', elements: part.elements },
+        })
+      }
+      continue
+    }
     const count = copiesOf(step.elements, pattern)
     caneTotal += count
-    const { title, detail } = describeCane(step.elements, step.techniqueKey, count)
+    looseCanes += count
+    const { title, detail } = describeCane(step.elements, step.techniqueKey, count, rod)
     steps.push({
       key: `cane-${steps.length}`,
       title,
@@ -105,7 +169,10 @@ export function buildShopPlan({ elements, pattern, rod, casing, extrusion }) {
   if (caneTotal > 1) {
     steps.push({
       key: 'bundle',
-      title: `Bundle all ${caneTotal} canes`,
+      title:
+        bundleLabels.size === 1 && !looseCanes
+          ? `Bundle the ${caneTotal} canes into the ${[...bundleLabels][0]}`
+          : `Bundle all ${caneTotal} canes`,
       detail: 'Lay them out as the slice shows, then pick them up together and fuse them into one rod.',
       colorantIds: [],
       plate: { kind: 'slice', casingUpTo: -1 },

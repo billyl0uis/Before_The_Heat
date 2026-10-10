@@ -10,8 +10,8 @@ export function PickupReadout({ vessel, pickup, hasDesign }) {
   if (vessel.pattern === 'reticello') {
     sentence = (
       <>
-        Reticello, <Num>{vessel.ribsAround / 2}</Num> rib canes each way. A preview for now: reticello gets its own
-        steps in the plan later.
+        Reticello, <Num>{vessel.ribsAround / 2}</Num> rib canes each way, twisted in opposite directions. It goes in
+        your plan as its own step.
       </>
     )
   } else if (vessel.pattern !== 'murrini') {
