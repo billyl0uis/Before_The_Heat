@@ -13,6 +13,7 @@ import {
   RECIPES,
 } from '../engine/murrini/recipes'
 import { CLEAR_GLASS, DEFAULT_ROD, findColorant, pulledLengthMm } from '../engine/murrini/rod'
+import { CURRENT_SCHEMA_VERSION } from '../engine/murrini/migrate'
 import { computeRepeatedElements } from '../engine/murrini/pattern'
 import { buildShopPlan } from '../engine/murrini/shopPlan'
 import { renderSlicePlate } from '../engine/murrini/slicePlate'
@@ -35,6 +36,26 @@ function readStore() {
     return JSON.parse(window.localStorage.getItem(STORE_KEY) ?? 'null')
   } catch {
     return null
+  }
+}
+
+// The Advanced design a recipe replaced, kept so it can be brought back.
+const SET_ASIDE_KEY = 'before-the-heat:set-aside-design'
+
+function readSetAside() {
+  try {
+    return JSON.parse(window.localStorage.getItem(SET_ASIDE_KEY) ?? 'null')
+  } catch {
+    return null
+  }
+}
+
+function writeSetAside(value) {
+  try {
+    if (value) window.localStorage.setItem(SET_ASIDE_KEY, JSON.stringify(value))
+    else window.localStorage.removeItem(SET_ASIDE_KEY)
+  } catch {
+    // It can still be brought back until the page is closed.
   }
 }
 
@@ -82,6 +103,7 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
   const [customised, setCustomised] = useState(
     () => !empty && stored?.signature !== currentSignature,
   )
+  const [setAside, setSetAside] = useState(readSetAside)
 
   const apply = (next) => {
     const colours = { ...defaultColours(next.recipe), ...next.colours[next.recipe] }
@@ -92,6 +114,13 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
     }
     const twistDegrees = next.twist?.[next.recipe] ?? defaultTwist(next.recipe)
     const built = buildRecipe(next.recipe, colours, rod, { twistDegrees })
+    // Replacing work done in Advanced: keep it, so it's one tap to undo.
+    if (customised) {
+      const { canvas, elements, pattern, extrusion, rod: oldRod, casing } = design
+      const kept = { schemaVersion: CURRENT_SCHEMA_VERSION, canvas, elements, pattern, extrusion, rod: oldRod, casing }
+      writeSetAside(kept)
+      setSetAside(kept)
+    }
     design.loadDesign(built)
     writeStore({ ...next, signature: designSignature(built) })
     setChoice(next)
@@ -227,10 +256,39 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
             <p role="status" className="mb-5 flex gap-2 rounded-xl border border-amber-400/40 bg-amber-950/30 p-3 text-sm text-amber-100">
               <Icon name="warning" size={18} className="mt-0.5 shrink-0" />
               <span>
-                Your current design was changed in Advanced. Picking a recipe replaces it, so save it
-                under Saved first if you want to keep it.
+                You changed this design in Advanced. Picking a recipe replaces it, but it's kept: you can
+                bring it back straight after.
               </span>
             </p>
+          )}
+          {!customised && setAside && (
+            <div role="status" className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl bg-raise p-3 text-sm">
+              <span className="min-w-0 flex-1">Your Advanced design was replaced by this recipe. It's kept for you.</span>
+              <span className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    design.loadDesign(setAside)
+                    writeSetAside(null)
+                    setSetAside(null)
+                    onMode('advanced')
+                  }}
+                  className="rounded-lg bg-accent px-3 py-1.5 font-bold text-accent-ink"
+                >
+                  Bring it back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    writeSetAside(null)
+                    setSetAside(null)
+                  }}
+                  className="font-semibold text-mute hover:text-ink"
+                >
+                  Discard it
+                </button>
+              </span>
+            </div>
           )}
 
           {step === 0 && (
