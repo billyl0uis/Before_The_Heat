@@ -3,7 +3,7 @@ import { ProfileCurveEditor } from '../components/vessel/ProfileCurveEditor'
 import { VesselCanvas } from '../components/vessel/VesselCanvas'
 import { VesselControls } from '../components/vessel/VesselControls'
 import { GLASS_COLOR_INDEX } from '../content/glassColorIndex'
-import { renderPatternTile } from '../engine/murrini/rasterize'
+import { renderSlicePlate } from '../engine/murrini/slicePlate'
 import { useResponsiveCanvasSize } from '../hooks/useResponsiveCanvasSize'
 
 const STAMP_SIZE = 96
@@ -66,14 +66,16 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
     if (checked) setManualMode(false)
   }
 
+  // A murrine pressed onto a gather is a whole slice of the cane: every
+  // repeat of the pattern plus its casing rings, cut round. Stamping only
+  // the drawn base cell showed a fragment the plan never builds.
   const handlePlacePattern = (u, v) => {
-    const stampCanvas = renderPatternTile(
-      design.elements,
-      design.canvas.backgroundColor,
-      STAMP_SIZE,
-      undefined,
-      true,
-    )
+    const stampCanvas = renderSlicePlate({
+      elements: design.repeatedElements,
+      rod: design.rod,
+      casing: design.casing,
+      size: STAMP_SIZE,
+    })
     addPlacement(u, v, stampCanvas, stampFraction)
   }
 

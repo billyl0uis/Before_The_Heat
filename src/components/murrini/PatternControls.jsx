@@ -1,7 +1,21 @@
+import { DEFAULT_PATTERN } from '../../engine/murrini/pattern'
+
 const REPEAT_TYPES = ['none', 'grid', 'radial']
 
 export function PatternControls({ pattern, onChange }) {
   const setField = (key, value) => onChange({ ...pattern, [key]: value })
+
+  // Switching on a repeat whose count still says "1" (older designs, or a
+  // grid left at 1 × 1) jumps to a count that visibly repeats something.
+  const chooseRepeat = (type) => {
+    const next = { ...pattern, repeatType: type }
+    if (type === 'radial' && pattern.radialCount < 2) next.radialCount = DEFAULT_PATTERN.radialCount
+    if (type === 'grid' && pattern.rows * pattern.columns < 2) {
+      next.rows = DEFAULT_PATTERN.rows
+      next.columns = DEFAULT_PATTERN.columns
+    }
+    onChange(next)
+  }
 
   return (
     <div className="flex flex-col gap-3 border-b border-line pb-5">
@@ -12,7 +26,7 @@ export function PatternControls({ pattern, onChange }) {
           <button
             key={type}
             type="button"
-            onClick={() => setField('repeatType', type)}
+            onClick={() => chooseRepeat(type)}
             className={`rounded-md px-3 py-1.5 text-sm capitalize transition-colors ${
               type === pattern.repeatType
                 ? 'bg-accent text-accent-ink'
