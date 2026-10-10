@@ -5,7 +5,7 @@ import { PlanSheet } from '../components/plan/PlanSheet'
 import { ShopChecklist } from '../components/plan/ShopChecklist'
 import { pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
 import { buildShopPlan, shopPlanWarnings, turnsLabel, usedColorants } from '../engine/murrini/shopPlan'
-import { planPickup } from '../engine/vessel/pickup'
+import { planPickup, planReticello } from '../engine/vessel/pickup'
 
 const VIEW_KEY = 'before-the-heat:plan-view'
 
@@ -22,10 +22,21 @@ export function PlanPage({ design, vessel, onEdit }) {
   const { elements, pattern, rod, casing, extrusion } = design
   // A murrini pick-up chosen on the Vessel page ends the plan.
   const pickup = useMemo(() => planPickup(vessel, design), [vessel, design])
+  const reticello = useMemo(() => planReticello(vessel), [vessel])
   const steps = useMemo(() => {
     const cane = buildShopPlan({ elements, pattern, rod, casing, extrusion })
-    return pickup && cane.length ? [...cane, pickup.step] : cane
-  }, [elements, pattern, rod, casing, extrusion, pickup])
+    if (reticello && cane.length) return [...cane, reticello.step]
+    if (!pickup || !cane.length) return cane
+    // The pull is where the work happens, so the number of pulls the
+    // vessel needs is said there too, not only in the pick-up step.
+    const pulls = pickup.totals.pulls
+    const withPulls = cane.map((step) =>
+      step.key === 'pull' && pulls > 1
+        ? { ...step, detail: `${step.detail} The vessel pick-up needs ${pulls} of these: build and pull this cane ${pulls} times.` }
+        : step,
+    )
+    return [...withPulls, pickup.step]
+  }, [elements, pattern, rod, casing, extrusion, pickup, reticello])
   const warnings = useMemo(() => shopPlanWarnings({ elements, casing }), [elements, casing])
   const colorants = useMemo(() => usedColorants({ elements, casing }), [elements, casing])
 

@@ -7,7 +7,7 @@ import { VesselControls } from '../components/vessel/VesselControls'
 import { GLASS_COLOR_INDEX } from '../content/glassColorIndex'
 import { findColorant, pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
 import { renderSlicePlate } from '../engine/murrini/slicePlate'
-import { measureWall, metres, murriniLayout, planPickup, vesselName } from '../engine/vessel/pickup'
+import { measureWall, metres, murriniLayout, planPickup, planReticello, vesselName } from '../engine/vessel/pickup'
 import { vesselRadiusFunction } from '../engine/vessel/profile'
 
 // The gather under the pattern. Transparent colours only, so the pattern
@@ -32,6 +32,7 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
   const sliceDiameterMm = pulledDiameterMm(design.rod)
   const layout = useMemo(() => murriniLayout(wall, sliceDiameterMm), [wall, sliceDiameterMm])
   const pickup = useMemo(() => planPickup(vessel, design), [vessel, design])
+  const reticello = useMemo(() => planReticello(vessel), [vessel])
 
   // A slice of the real cane, the same image the plan prints.
   const sliceImage = useMemo(
@@ -283,7 +284,7 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
         </RailSection>
 
         <RailSection title="In your plan">
-          <PickupStepCard pickup={pickup} design={design} emptyMessage={planMessage} />
+          <PickupStepCard pickup={pickup ?? reticello} design={design} emptyMessage={planMessage} />
         </RailSection>
       </aside>
     </div>

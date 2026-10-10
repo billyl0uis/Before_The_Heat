@@ -8,7 +8,7 @@ export function PickupStepCard({ pickup, design, emptyMessage }) {
         <>
           <div className="grid grid-cols-[1fr_auto] gap-3">
             <div>
-              <p className="mb-1 font-mono text-[0.8rem] text-[#454a72]">after “Pull”</p>
+              <p className="mb-1 font-mono text-[0.8rem] text-[#454a72]">{pickup.step.after}</p>
               <h3 className="text-base leading-snug font-bold tracking-tight text-balance">{pickup.step.title}</h3>
             </div>
             <StepPlate plate={pickup.step.plate} design={design} size={48} />
