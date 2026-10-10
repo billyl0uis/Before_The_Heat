@@ -17,7 +17,7 @@ function readStep(signature) {
 // One step at a time, big enough to read at arm's length in the shop.
 // The current step survives a reload (mobile browsers evict background
 // tabs), and the screen is asked to stay awake while this is open.
-export function ShopChecklist({ design, steps }) {
+export function ShopChecklist({ design, steps, warnings = [] }) {
   const signature = steps.map((step) => step.title).join('|')
   const [step, setStep] = useState(() => readStep(signature))
   const [awake, setAwake] = useState('unknown')
@@ -76,6 +76,18 @@ export function ShopChecklist({ design, steps }) {
         <div className="flex flex-col items-start gap-3 px-6 py-8">
           <p className="text-6xl leading-none font-extrabold tracking-tight text-accent">Done</p>
           <p className="text-lg text-mute">Slice the cane and check a piece against the plan.</p>
+          <div className="mt-2 flex flex-col gap-2 rounded-xl bg-raise p-4 text-sm leading-relaxed">
+            <p className="font-bold">Before you slice the whole cane</p>
+            {warnings.length ? (
+              warnings.map((warning) => (
+                <p key={warning.id}>
+                  <span className="font-semibold">{warning.title}.</span> {warning.body}
+                </p>
+              ))
+            ) : (
+              <p>Nothing flagged in the documented colorant properties. Still pull a test strip first: this plan doesn't assume a COE.</p>
+            )}
+          </div>
           <button type="button" onClick={() => setStep(0)} className="mt-2 rounded-lg bg-raise px-4 py-2.5 font-semibold">
             Start again
           </button>

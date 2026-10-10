@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { findColorant, pulledDiameterMm, pulledLengthMm } from '../../engine/murrini/rod'
+import { turnsLabel } from '../../engine/murrini/shopPlan'
 import { renderSlicePlate } from '../../engine/murrini/slicePlate'
 import { Icon } from '../icons'
 import { StepPlate } from './StepPlate'
@@ -71,6 +72,12 @@ export function PlanSheet({ design, steps, warnings, colorants }) {
               </span>
             </p>
           </div>
+          {design.extrusion?.twistDegrees ? (
+            <p className="mt-2 text-sm">
+              <span className="font-semibold">Twist:</span> {turnsLabel(design.extrusion.twistDegrees)}, the
+              same way throughout the pull
+            </p>
+          ) : null}
         </section>
         <section>
           <h3 className="mb-2 text-xs font-bold tracking-[0.08em] text-[#454a72] uppercase">Casing, inside to out</h3>
