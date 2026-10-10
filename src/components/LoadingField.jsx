@@ -19,20 +19,6 @@ if (typeof window !== 'undefined') {
 
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-// The field plays once per browser session, on the first move between
-// sections. After that, switching tabs is instant: a repeated delay is
-// friction, and the moment is only special the first time.
-const PLAYED_KEY = 'before-the-heat:field-played'
-function playedThisSession() {
-  try {
-    if (window.sessionStorage.getItem(PLAYED_KEY)) return true
-    window.sessionStorage.setItem(PLAYED_KEY, '1')
-    return false
-  } catch {
-    return false
-  }
-}
-
 // The signature moment between sections: a freshly rolled cane field that
 // follows the pointer for under a second, then gets out of the way.
 export function LoadingField({ trigger, section, design }) {
@@ -45,7 +31,12 @@ export function LoadingField({ trigger, section, design }) {
   }, [design])
 
   useEffect(() => {
-    if (trigger === 0 || reducedMotion() || playedThisSession()) return undefined
+    // Whether to play at all is decided where the tab changes (App), not
+    // here: effects can run twice (React StrictMode does this on purpose),
+    // and a "played" flag written inside one made the second run bail out
+    // after the first run's cleanup had cancelled the hide, leaving the
+    // overlay up and swallowing every click.
+    if (trigger === 0 || reducedMotion()) return undefined
     const canvas = canvasRef.current
     setMessage((previous) => {
       let next = previous
@@ -72,6 +63,8 @@ export function LoadingField({ trigger, section, design }) {
       cancelAnimationFrame(startFrame)
       clearTimeout(hide)
       stop()
+      // Never leave the overlay up: it blocks the whole app while visible.
+      setVisible(false)
     }
   }, [trigger, section])
 
@@ -79,8 +72,10 @@ export function LoadingField({ trigger, section, design }) {
     <div
       aria-hidden="true"
       data-print-hide
-      className={`fixed inset-x-0 top-14 bottom-0 z-20 transition-opacity duration-500 ease-out ${
-        visible ? 'pointer-events-auto cursor-crosshair opacity-100' : 'pointer-events-none opacity-0'
+      // Always click-through: the field is a moment to watch, never
+      // something that can stand between the user and the app.
+      className={`pointer-events-none fixed inset-x-0 top-14 bottom-0 z-20 transition-opacity duration-500 ease-out ${
+        visible ? 'opacity-100' : 'opacity-0'
       }`}
     >
       <canvas ref={canvasRef} className="block h-full w-full" />
