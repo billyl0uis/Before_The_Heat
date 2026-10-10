@@ -83,12 +83,8 @@ export const VESSEL_FORM_PRESETS = {
   plate: {
     label: 'Plate',
     params: {
-      // A LatheGeometry only revolves the profile curve itself -- it
-      // doesn't cap either end with a flat disc -- so baseRadius has to
-      // actually reach near the central axis, not just "small," or the
-      // result is a hollow open ring instead of a solid plate (caught by
-      // actually rendering this preset, not just picking numbers that
-      // sounded plate-shaped).
+      // A narrow foot under a wide, shallow body: the vessel is built as a
+      // solid with a closed base, so the foot needs no special handling.
       height: 25,
       baseRadius: 4,
       topRadius: 95,
@@ -138,46 +134,101 @@ export function computeProfilePoints(params) {
   return points
 }
 
-// A true optic-rib/twist surface needs radius as a function of BOTH
-// height and angle, which LatheGeometry structurally cannot express (it
-// revolves one 2D profile identically all the way around) -- so this
-// builds the surface directly as a height x angle grid instead of
-// revolving a curve. `radiusAtT` is whichever profile is active
-// (parametric formula or the free-form spline), kept generic so ribbing
-// works identically in both modes. `ribTwist` spirals the rib phase
-// progressively with height -- 0 gives straight vertical ribs (a real
-// "optic mold" vessel), nonzero gives the classic spiral/twist look.
-function createRibbedVesselGeometry(
-  radiusAtT,
-  height,
-  { ribAmplitude, ribCount, ribTwist },
-  radialSegments = 48,
-  heightSegments = 64,
-) {
+// A blown vessel is a solid: a wall with real thickness, a closed base, a
+// rounded lip. Revolving only the outer wall line (what LatheGeometry
+// does) leaves an open-bottomed, paper-thin shell with a knife-edge rim.
+// Instead this traces the whole cross-section as one closed path -- across
+// the base, up the outside, round the lip, down the inside, across the
+// inner floor -- and revolves that, so every vessel comes out watertight.
+//
+// Each path point carries `ribWeight`: optic ribs (radius varying with
+// angle, which a plain lathe can't express) are applied to every point
+// at its height, outside and inside alike, so a ribbed wall keeps its
+// thickness; the weight fades toward the axis so the base stays round.
+function wallThickness(maxRadius) {
+  return Math.min(5, Math.max(2, maxRadius * 0.045))
+}
+
+function arc(cx, cy, radius, fromRad, toRad, steps) {
+  const points = []
+  for (let i = 1; i <= steps; i++) {
+    const a = fromRad + ((toRad - fromRad) * i) / steps
+    points.push({ r: cx + Math.cos(a) * radius, y: cy + Math.sin(a) * radius })
+  }
+  return points
+}
+
+export function computeVesselSection(radiusAtT, height, samples = PROFILE_SAMPLES) {
+  const outer = []
+  for (let i = 0; i <= samples; i++) outer.push(radiusAtT(i / samples))
+  const maxRadius = Math.max(...outer)
+  const wall = wallThickness(maxRadius)
+  const baseThickness = Math.min(wall * 2, height * 0.25)
+  const r0 = outer[0]
+  const r1 = outer[samples]
+  const foot = Math.min(wall * 1.5, r0 * 0.35, height * 0.1)
+  const innerAt = (t) => Math.max(MIN_RADIUS * 0.5, radiusAtT(t) - wall)
+
+  const path = [{ r: 0, y: 0 }, { r: (r0 - foot) * 0.5, y: 0 }, { r: r0 - foot, y: 0 }]
+  // Rounded foot: the base turns up into the wall instead of a sharp crease.
+  path.push(...arc(r0 - foot, foot, foot, -Math.PI / 2, 0, 5))
+  // Outside wall, bottom to top.
+  for (let i = 0; i <= samples; i++) {
+    const y = (i / samples) * height
+    if (y > foot) path.push({ r: outer[i], y })
+  }
+  // Rounded lip from the outside of the rim to the inside.
+  const lipRadius = Math.min(wall / 2, (r1 - MIN_RADIUS * 0.5) / 2)
+  path.push(...arc(r1 - lipRadius, height, lipRadius, 0, Math.PI, 8))
+  // Inside wall, top down to the floor.
+  for (let i = samples; i >= 0; i--) {
+    const y = (i / samples) * height
+    if (y <= baseThickness + foot) break
+    path.push({ r: innerAt(i / samples), y })
+  }
+  // Inner floor with a small fillet, back to the axis.
+  const floorRadius = innerAt(baseThickness / height)
+  const fillet = Math.min(foot, floorRadius * 0.4)
+  path.push(...arc(floorRadius - fillet, baseThickness + fillet, fillet, 0, -Math.PI / 2, 4))
+  path.push({ r: (floorRadius - fillet) * 0.5, y: baseThickness }, { r: 0, y: baseThickness })
+
+  // Joins between pieces (wall to lip, wall to floor) can repeat a point;
+  // a repeated point revolves into a zero-height ring of broken faces.
+  const unique = path.filter(
+    (point, i) => i === 0 || Math.hypot(point.r - path[i - 1].r, point.y - path[i - 1].y) > 1e-6,
+  )
+
+  return unique.map((point) => ({
+    ...point,
+    t: Math.min(1, Math.max(0, point.y / height)),
+    ribWeight: Math.min(1, point.r / Math.max(1, r0 * 0.6)),
+  }))
+}
+
+function revolveSection(section, height, { ribAmplitude = 0, ribCount = 8, ribTwist = 0 } = {}, radialSegments = 64) {
   const positions = []
   const uvs = []
   const indices = []
   const twistRadPerT = (ribTwist * Math.PI) / 180
+  const stride = radialSegments + 1
 
-  for (let i = 0; i <= heightSegments; i++) {
-    const t = i / heightSegments
-    const y = t * height
-    const twist = twistRadPerT * t
+  for (const point of section) {
     for (let j = 0; j <= radialSegments; j++) {
       const theta = (j / radialSegments) * Math.PI * 2
-      const rib = ribAmplitude * Math.cos(ribCount * theta - twist)
-      const radius = Math.max(MIN_RADIUS, radiusAtT(t) + rib)
-      positions.push(Math.cos(theta) * radius, y, Math.sin(theta) * radius)
-      uvs.push(j / radialSegments, t)
+      const rib = ribAmplitude * Math.cos(ribCount * theta - twistRadPerT * point.t) * point.ribWeight
+      const radius = point.r === 0 ? 0 : Math.max(MIN_RADIUS * 0.5, point.r + rib)
+      positions.push(Math.sin(theta) * radius, point.y, Math.cos(theta) * radius)
+      // Stamps and textures key off height fraction around the outside.
+      uvs.push(j / radialSegments, point.t)
     }
   }
-
-  const stride = radialSegments + 1
-  for (let i = 0; i < heightSegments; i++) {
+  for (let i = 0; i < section.length - 1; i++) {
     for (let j = 0; j < radialSegments; j++) {
       const a = i * stride + j
       const b = a + stride
-      indices.push(a, b, a + 1, b, b + 1, a + 1)
+      // Wound so every face points out of the glass: down under the base,
+      // outward on the outside wall, into the cavity on the inside wall.
+      indices.push(a, a + 1, b, b, a + 1, b + 1)
     }
   }
 
@@ -186,20 +237,26 @@ function createRibbedVesselGeometry(
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
   geometry.setIndex(indices)
   geometry.computeVertexNormals()
+
+  // The first and last column are the same place (the seam where the
+  // revolve closes); averaging their normals removes the visible crease.
+  const normals = geometry.getAttribute('normal')
+  const n = new THREE.Vector3()
+  for (let i = 0; i < section.length; i++) {
+    const first = i * stride
+    const last = first + radialSegments
+    n.fromBufferAttribute(normals, first).add(new THREE.Vector3().fromBufferAttribute(normals, last)).normalize()
+    normals.setXYZ(first, n.x, n.y, n.z)
+    normals.setXYZ(last, n.x, n.y, n.z)
+  }
+  normals.needsUpdate = true
+  geometry.computeBoundingSphere()
   return geometry
 }
 
-export function createVesselGeometry(params, radialSegments = 48) {
-  if (!params.ribAmplitude) {
-    const profilePoints = computeProfilePoints(params)
-    return new THREE.LatheGeometry(profilePoints, radialSegments)
-  }
-  return createRibbedVesselGeometry(
-    (t) => computeProfileRadius(params, t),
-    params.height,
-    params,
-    radialSegments,
-  )
+export function createVesselGeometry(params, radialSegments = 64) {
+  const section = computeVesselSection((t) => computeProfileRadius(params, t), params.height)
+  return revolveSection(section, params.height, params, radialSegments)
 }
 
 // How many draggable control points the free-form profile editor exposes.
@@ -297,18 +354,11 @@ export function computeCustomProfilePoints(controlRadii, height) {
   )
 }
 
-export function createCustomVesselGeometry(controlRadii, height, radialSegments = 48, ribParams) {
-  if (!ribParams?.ribAmplitude) {
-    const profilePoints = computeCustomProfilePoints(controlRadii, height)
-    return new THREE.LatheGeometry(profilePoints, radialSegments)
-  }
+export function createCustomVesselGeometry(controlRadii, height, radialSegments = 64, ribParams) {
   const tangents = computeMonotonicTangents(controlRadii)
-  return createRibbedVesselGeometry(
-    (t) => Math.max(MIN_RADIUS, hermiteAt(controlRadii, tangents, t * (controlRadii.length - 1))),
-    height,
-    ribParams,
-    radialSegments,
-  )
+  const radiusAt = (t) =>
+    Math.max(MIN_RADIUS, hermiteAt(controlRadii, tangents, t * (controlRadii.length - 1)))
+  return revolveSection(computeVesselSection(radiusAt, height), height, ribParams, radialSegments)
 }
 
 // Snapshots whatever the current formula-based profile looks like into
