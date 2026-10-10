@@ -5,6 +5,8 @@ import { DEFAULT_PATTERN } from '../engine/murrini/pattern'
 import { DEFAULT_CASING, DEFAULT_ROD } from '../engine/murrini/rod'
 import { SHAPE_TYPES } from '../engine/murrini/shapes'
 
+// Design data, not interface colour: it's saved with every design and is the
+// backdrop of saved thumbnails, so changing it would change saved work.
 const DEFAULT_CANVAS = { width: 500, height: 500, backgroundColor: '#1a1a1a' }
 
 // The working design is kept in this browser so a refresh, a crash

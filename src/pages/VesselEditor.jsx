@@ -15,6 +15,8 @@ import { vesselRadiusFunction } from '../engine/vessel/profile'
 // still shows through.
 const BODY_GLASS = ['clear', 'cobalt-blue', 'copper-turquoise', 'sulfur-carbon-amber', 'erbium-pink', 'praseodymium-green']
 const CLEAR_SWATCH = '#dcebf0'
+// The darker edge of clear glass, so the Clear chip reads as glass, not white.
+const CLEAR_SWATCH_EDGE = '#9fb7c2'
 
 const shortName = (colorant) => colorant?.name.split(' / ')[0].replace(/ \(.*\)$/, '') ?? ''
 const fmt = (value, digits = 0) => value.toLocaleString('en', { maximumFractionDigits: digits })
@@ -128,7 +130,7 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
               return (
                 <ColourChip
                   key={id}
-                  swatch={colorant ? colorant.swatch : `linear-gradient(135deg, ${CLEAR_SWATCH} 45%, #9fb7c2)`}
+                  swatch={colorant ? colorant.swatch : `linear-gradient(135deg, ${CLEAR_SWATCH} 45%, ${CLEAR_SWATCH_EDGE})`}
                   name={colorant ? shortName(colorant) : 'Clear'}
                   pressed={vessel.glassId === id}
                   onClick={() => update({ glassId: id })}
@@ -262,7 +264,7 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
                       className="h-4 w-4 shrink-0 rounded-full shadow-[inset_0_0_0_1px_rgb(255_255_255/0.35)]"
                       style={{ background: findColorant(rib.id)?.swatch }}
                     />
-                    <span className="truncate">
+                    <span className="min-w-0 leading-tight [overflow-wrap:anywhere]">
                       {rib.label}: {shortName(findColorant(rib.id))}
                     </span>
                   </button>

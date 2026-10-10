@@ -51,5 +51,15 @@ export function StepPlate({ plate, design, size, backdrop = '#3a3d45', className
     return canvas.toDataURL('image/png')
   }, [plate, design.repeatedElements, design.rod, design.casing, size, backdrop])
 
-  return <img src={src} alt="" width={size} height={size} className={className} />
+  // The step's own title already says what this shows; the alt names
+  // the kind of picture so it isn't skipped as decoration.
+  const alt =
+    plate.kind === 'vessel'
+      ? 'Outline of the finished vessel'
+      : plate.kind === 'cane'
+        ? 'The cane, end on'
+        : plate.casingUpTo === -1
+          ? 'The bundle, end on, before casing'
+          : 'The rod, end on, at this stage'
+  return <img src={src} alt={alt} width={size} height={size} className={className} />
 }

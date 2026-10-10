@@ -11,10 +11,12 @@ const PAPER_CLEAR_BACKDROP = '#3a3d45'
 export function ColorantDots({ ids, size = 14 }) {
   if (!ids.length) return null
   return (
-    <span className="flex -space-x-1">
+    <span className="flex -space-x-1" role="list" aria-label="Colors in this step">
       {ids.map((id) => (
         <span
           key={id}
+          role="listitem"
+          aria-label={findColorant(id)?.name}
           title={findColorant(id)?.name}
           className="rounded-full shadow-[0_0_0_1.5px_#fbfbf8,inset_0_0_0_1px_rgb(0_0_0/0.2)]"
           style={{ width: size, height: size, background: findColorant(id)?.swatch }}

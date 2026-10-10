@@ -304,7 +304,7 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] lg:h-[calc(100svh-3.5rem)] lg:grid-cols-[232px_minmax(0,1fr)_344px] lg:grid-rows-[minmax(0,1fr)_auto]">
       <aside
-        className={`flex flex-col gap-5 overflow-y-auto border-line bg-panel p-4 lg:border-r ${onDock('tools')}`}
+        className={`flex min-w-0 flex-col gap-5 overflow-x-hidden overflow-y-auto border-line bg-panel p-4 lg:border-r ${onDock('tools')}`}
         aria-label="Tools"
       >
         <ToolRail
@@ -364,7 +364,7 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
         </div>
 
         {viewMode === 'flat' ? (
-          <div ref={flatContainerRef} className="flex w-full max-w-[min(520px,calc(100svh-17rem))] justify-center max-lg:max-w-[min(300px,30svh)]">
+          <div ref={flatContainerRef} className="flex w-full max-w-[min(520px,calc(100svh-20rem))] justify-center max-lg:max-w-[min(300px,30svh)]">
             <RodSlice
               canvas={canvas}
               elements={repeatedElements}

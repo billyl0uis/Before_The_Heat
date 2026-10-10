@@ -17,9 +17,14 @@ const fmt = (value) => value.toLocaleString('en', { maximumFractionDigits: 1 })
 export function turnsLabel(twistDegrees) {
   const turns = Math.abs(twistDegrees) / 360
   if (!turns) return ''
+  if (turns === 0.25) return 'a quarter turn'
   if (turns === 0.5) return 'half a turn'
+  if (turns === 0.75) return 'three quarters of a turn'
   if (turns === 1) return '1 full turn'
-  return Number.isInteger(turns) ? `${turns} full turns` : `${fmt(turns)} turns`
+  if (Number.isInteger(turns)) return `${turns} full turns`
+  const whole = Math.floor(turns)
+  const part = { 0.25: '¼', 0.5: '½', 0.75: '¾' }[turns - whole]
+  return part && whole ? `${whole}${part} turns` : `${fmt(turns)} turns`
 }
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`
 
