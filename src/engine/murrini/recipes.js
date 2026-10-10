@@ -86,7 +86,7 @@ export const RECIPES = {
     build: (c) => ({
       specs: compound('zanfirico', { coreRadius: 160, threadCount: 6 }, c.core, c.threads),
       // A zanfirico only shows its spiral once it's twisted on the pull.
-      extrusion: { ...DEFAULT_EXTRUSION, twistDegrees: 360, length: 200 },
+      extrusion: { ...DEFAULT_EXTRUSION, twistDegrees: 720, length: 200 },
     }),
   },
   tripod: {
@@ -129,8 +129,14 @@ export function defaultColours(recipeKey) {
   )
 }
 
-// The full design a recipe produces, ready for loadDesign().
-export function buildRecipe(recipeKey, colours, rod) {
+// How far a recipe twists by default when pulled (degrees over the pull).
+export function defaultTwist(recipeKey) {
+  return RECIPES[recipeKey].build(defaultColours(recipeKey)).extrusion?.twistDegrees ?? 0
+}
+
+// The full design a recipe produces, ready for loadDesign(). `twistDegrees`
+// overrides the recipe's own twist: any cane can be twisted on the pull.
+export function buildRecipe(recipeKey, colours, rod, { twistDegrees } = {}) {
   const recipe = RECIPES[recipeKey]
   const merged = { ...defaultColours(recipeKey), ...colours }
   const { specs, pattern, extrusion } = recipe.build(merged)
@@ -140,7 +146,10 @@ export function buildRecipe(recipeKey, colours, rod) {
     schemaVersion: CURRENT_SCHEMA_VERSION,
     elements: toElements(specs),
     pattern: pattern ?? DEFAULT_PATTERN,
-    extrusion: extrusion ?? DEFAULT_EXTRUSION,
+    extrusion: {
+      ...(extrusion ?? DEFAULT_EXTRUSION),
+      ...(twistDegrees === undefined ? {} : { twistDegrees }),
+    },
     rod,
     casing: [{ colorantId: merged.casing, thicknessMm: CASING_MM }],
   }
