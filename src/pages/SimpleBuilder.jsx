@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Icon } from '../components/icons'
 import { ModeSwitch } from '../components/ModeSwitch'
+import { CaneView } from '../components/murrini/CaneView'
 import { RodSlice } from '../components/murrini/RodSlice'
 import { GLASS_COLOR_INDEX } from '../content/glassColorIndex'
 import {
   buildRecipe,
   defaultColours,
+  defaultTwist,
   designSignature,
   RECIPE_ORDER,
   RECIPES,
@@ -19,6 +21,12 @@ import { useSliceGeometry } from '../hooks/useSliceGeometry'
 
 const STORE_KEY = 'before-the-heat:simple'
 const STEPS = ['Recipe', 'Colours', 'Size', 'Plan']
+const TWISTS = [
+  { degrees: 0, label: 'None' },
+  { degrees: 180, label: '½ turn' },
+  { degrees: 360, label: '1 turn' },
+  { degrees: 720, label: '2 turns' },
+]
 const MIN_GATHER = 12
 const MAX_GATHER = 60
 
@@ -56,6 +64,9 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
   const [step, setStep] = useState(0)
   const [openSlot, setOpenSlot] = useState(null)
   const [showRatio, setShowRatio] = useState(false)
+  // Slice: the cross-section, end-on. Cane: the pulled cane from the side,
+  // where twisted patterns like a zanfirico actually show.
+  const [view, setView] = useState('slice')
   const [choice, setChoice] = useState(() => ({
     recipe: stored?.recipe ?? 'flower',
     colours: stored?.colours ?? {},
@@ -78,7 +89,8 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
       gatherDiameterMm: next.finishedMm * next.ratio,
       pullRatio: next.ratio,
     }
-    const built = buildRecipe(next.recipe, colours, rod)
+    const twistDegrees = next.twist?.[next.recipe] ?? defaultTwist(next.recipe)
+    const built = buildRecipe(next.recipe, colours, rod, { twistDegrees })
     design.loadDesign(built)
     writeStore({ ...next, signature: designSignature(built) })
     setChoice(next)
@@ -135,20 +147,55 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
         aria-label="Your murrine"
         className="max-lg:sticky max-lg:top-14 max-lg:z-10 flex flex-col items-center justify-center gap-2 border-b border-line bg-ground px-4 py-3 lg:order-2 lg:border-b-0 lg:py-6"
       >
-        <ModeSwitch mode="simple" onChange={onMode} className="self-end sm:hidden" />
+        <div className="flex w-full max-w-[460px] items-center justify-between gap-2">
+          <div className="inline-flex rounded-lg bg-raise p-0.5" role="group" aria-label="View">
+            {[
+              { key: 'slice', label: 'Slice' },
+              { key: 'cane', label: 'Cane' },
+            ].map((option) => (
+              <button
+                key={option.key}
+                type="button"
+                aria-pressed={view === option.key}
+                onClick={() => setView(option.key)}
+                className={`rounded-md px-3 py-1 text-sm font-semibold ${
+                  view === option.key ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <ModeSwitch mode="simple" onChange={onMode} className="sm:hidden" />
+        </div>
         <div ref={containerRef} className="flex w-full max-w-[min(460px,calc(100svh-15rem))] justify-center max-lg:max-w-[min(250px,28svh)]">
-          <RodSlice
-            canvas={design.canvas}
-            elements={design.repeatedElements}
-            slice={slice}
-            rod={design.rod}
-            onPlace={() => {}}
-            preview={NO_PREVIEW}
-            size={size.width}
-          />
+          {view === 'slice' ? (
+            <RodSlice
+              canvas={design.canvas}
+              elements={design.repeatedElements}
+              slice={slice}
+              rod={design.rod}
+              onPlace={() => {}}
+              preview={NO_PREVIEW}
+              size={size.width}
+            />
+          ) : (
+            <CaneView
+              elements={design.repeatedElements}
+              rod={design.rod}
+              casing={design.casing}
+              twistDegrees={design.extrusion.twistDegrees}
+              width={size.width}
+              height={Math.round(size.width * 0.72)}
+            />
+          )}
         </div>
         <p className="text-sm text-mute max-lg:hidden">
-          {customised ? 'Your edited design' : `${recipe.name}, drawn to scale`}
+          {view === 'cane'
+            ? 'Side view of the pulled cane · length not to scale'
+            : customised
+              ? 'Your edited design'
+              : `${recipe.name}, drawn to scale`}
         </p>
       </section>
 
@@ -197,7 +244,11 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
                     key={key}
                     type="button"
                     aria-pressed={!customised && key === choice.recipe}
-                    onClick={() => apply({ ...choice, recipe: key })}
+                    onClick={() => {
+                      apply({ ...choice, recipe: key })
+                      // Twisted recipes are seen best from the side.
+                      setView((choice.twist?.[key] ?? defaultTwist(key)) ? 'cane' : 'slice')
+                    }}
                     className={`flex flex-col items-center gap-2 rounded-2xl border-2 bg-raise px-2 pt-3.5 pb-3 transition-[border-color,transform] duration-200 hover:-translate-y-0.5 ${
                       !customised && key === choice.recipe ? 'border-accent' : 'border-transparent'
                     }`}
@@ -338,6 +389,37 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
                     <p className="text-sm text-mute">A higher ratio starts from a bigger gather and gives more cane.</p>
                   </div>
                 )}
+
+                <div className="mt-3 flex flex-col gap-2">
+                  <p className="font-semibold text-mute">Twist while pulling</p>
+                  <div className="grid grid-cols-4 gap-1 rounded-xl bg-raise p-1" role="group" aria-label="Twist while pulling">
+                    {TWISTS.map((option) => {
+                      const current = choice.twist?.[choice.recipe] ?? defaultTwist(choice.recipe)
+                      return (
+                        <button
+                          key={option.degrees}
+                          type="button"
+                          aria-pressed={current === option.degrees}
+                          disabled={customised}
+                          onClick={() => {
+                            apply({ ...choice, twist: { ...choice.twist, [choice.recipe]: option.degrees } })
+                            // A twist only shows from the side: switch the view to it.
+                            if (option.degrees) setView('cane')
+                          }}
+                          className={`rounded-lg py-2 text-sm font-semibold disabled:opacity-50 ${
+                            current === option.degrees ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <p className="text-sm text-mute">
+                    Twisting the cane as it's pulled winds anything off-centre into a spiral, like a
+                    zanfirico. See it with <span className="font-semibold text-ink">Cane</span> above the slice.
+                  </p>
+                </div>
               </div>
             </>
           )}
