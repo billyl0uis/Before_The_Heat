@@ -353,7 +353,8 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
           </div>
           {onMode && <ModeSwitch mode="advanced" onChange={onMode} className="sm:hidden" />}
           <p className="text-right text-xs text-mute max-sm:hidden">
-            True scale · 1 tick = 1 mm · <kbd className="font-mono">⌘Z</kbd> undo
+            {viewMode === 'flat' && 'True scale · 1 tick = 1 mm · '}
+            <kbd className="font-mono">⌘Z</kbd> undo
           </p>
         </div>
 
