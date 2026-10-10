@@ -1,10 +1,12 @@
 export const DEFAULT_PATTERN = {
   repeatType: 'none',
-  rows: 1,
-  columns: 1,
+  // Counts a repeat starts at when it's switched on. A count of 1 repeats
+  // nothing, which made Grid and Radial look broken on first use.
+  rows: 3,
+  columns: 3,
   spacingX: 60,
   spacingY: 60,
-  radialCount: 1,
+  radialCount: 6,
 }
 
 // Takes the elements the user actually drew (the "base cell") and expands
