@@ -8,6 +8,68 @@ import { WebGLUnavailable } from '../WebGLUnavailable'
 
 const GLASS_COLOR = '#d97706'
 const TEXTURE_SIZE = 512
+const FOV = 40
+
+// The light glass is photographed in: a dark floor rising to a bright top,
+// with two soft vertical strip lights. Glass is read almost entirely by
+// what it reflects, and long smooth highlights read as glass, where a room
+// of box-shaped panels (three's RoomEnvironment) reflected as blotchy
+// rectangles. Painted once as an equirectangular image.
+function createStudioEnvironment(pmrem) {
+  const width = 1024
+  const height = 512
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  const ctx = canvas.getContext('2d')
+  const sweep = ctx.createLinearGradient(0, 0, 0, height)
+  sweep.addColorStop(0, '#ffffff')
+  sweep.addColorStop(0.4, '#c9ccd3')
+  sweep.addColorStop(0.56, '#4a4e58')
+  sweep.addColorStop(1, '#14161c')
+  ctx.fillStyle = sweep
+  ctx.fillRect(0, 0, width, height)
+  ctx.filter = 'blur(14px)'
+  for (const [x, w, alpha] of [
+    [0.16, 0.06, 1],
+    [0.58, 0.04, 0.85],
+    [0.86, 0.025, 0.6],
+  ]) {
+    ctx.fillStyle = `rgba(255,255,255,${alpha})`
+    ctx.fillRect(x * width, height * 0.04, w * width, height * 0.62)
+  }
+  ctx.filter = 'none'
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.mapping = THREE.EquirectangularReflectionMapping
+  texture.colorSpace = THREE.SRGBColorSpace
+  const environment = pmrem.fromEquirectangular(texture).texture
+  texture.dispose()
+  return environment
+}
+
+// A soft round shadow under the base, so the vessel sits on something
+// instead of floating. Painted once; scaled to each vessel's footprint.
+function createContactShadow() {
+  const size = 128
+  const canvas = document.createElement('canvas')
+  canvas.width = canvas.height = size
+  const ctx = canvas.getContext('2d')
+  const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
+  gradient.addColorStop(0, 'rgba(0,0,0,0.55)')
+  gradient.addColorStop(0.55, 'rgba(0,0,0,0.25)')
+  gradient.addColorStop(1, 'rgba(0,0,0,0)')
+  ctx.fillStyle = gradient
+  ctx.fillRect(0, 0, size, size)
+  const texture = new THREE.CanvasTexture(canvas)
+  const mesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(1, 1),
+    new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false }),
+  )
+  mesh.rotation.x = -Math.PI / 2
+  mesh.position.y = -0.4
+  mesh.renderOrder = -1
+  return mesh
+}
 
 export function VesselCanvas({
   params,
@@ -31,6 +93,7 @@ export function VesselCanvas({
   const texturedMaterialRef = useRef(null)
   const textureRef = useRef(null)
   const textureCanvasRef = useRef(null)
+  const shadowRef = useRef(null)
   const manualModeRef = useRef(manualMode)
   const onPlacePatternRef = useRef(onPlacePattern)
   const [webglFailed, setWebglFailed] = useState(false)
@@ -49,9 +112,12 @@ export function VesselCanvas({
     const mount = mountRef.current
 
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color('#1a1a1a')
+    // The section's own ground, so the vessel sits in the page, not a grey box.
+    const ground =
+      getComputedStyle(document.documentElement).getPropertyValue('--ground').trim() || '#071433'
+    scene.background = new THREE.Color(ground)
 
-    const camera = new THREE.PerspectiveCamera(45, width / height, 1, 2000)
+    const camera = new THREE.PerspectiveCamera(FOV, width / height, 1, 3000)
     camera.position.set(0, 150, 320)
 
     let renderer
@@ -62,24 +128,33 @@ export function VesselCanvas({
       return
     }
     renderer.setSize(width, height)
-    renderer.setPixelRatio(window.devicePixelRatio)
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio))
+    renderer.toneMapping = THREE.ACESFilmicToneMapping
+    renderer.toneMappingExposure = 1.05
     mount.appendChild(renderer.domElement)
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5))
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.2)
-    keyLight.position.set(150, 200, 200)
+    // Glass reads as glass mostly through what it reflects: a soft studio
+    // environment gives the surface highlights and edges something to show.
+    const pmrem = new THREE.PMREMGenerator(renderer)
+    const environment = createStudioEnvironment(pmrem)
+    scene.environment = environment
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.4)
+    keyLight.position.set(150, 260, 200)
     scene.add(keyLight)
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.4)
-    fillLight.position.set(-150, 50, -100)
-    scene.add(fillLight)
 
-    const plainMaterial = new THREE.MeshStandardMaterial({
+    // The vessel is a closed solid now, so one-sided rendering is correct
+    // and avoids the sorting flicker a transparent double-sided shell had.
+    const plainMaterial = new THREE.MeshPhysicalMaterial({
       color: GLASS_COLOR,
-      metalness: 0.05,
-      roughness: 0.15,
-      transparent: true,
-      opacity: 0.85,
-      side: THREE.DoubleSide,
+      metalness: 0,
+      roughness: 0.12,
+      // Opaque on purpose: transmission's low-resolution background
+      // sampling showed up as blocky bands on the wall.
+      ior: 1.5,
+      clearcoat: 1,
+      clearcoatRoughness: 0.06,
+      envMapIntensity: 1.6,
+      side: THREE.FrontSide,
     })
 
     // Offscreen 2D canvas hand-placed murrini stamps get painted onto, used
@@ -88,14 +163,18 @@ export function VesselCanvas({
     textureCanvas.width = TEXTURE_SIZE
     textureCanvas.height = TEXTURE_SIZE
     const texture = new THREE.CanvasTexture(textureCanvas)
+    texture.colorSpace = THREE.SRGBColorSpace
+    texture.anisotropy = renderer.capabilities.getMaxAnisotropy()
     texture.wrapS = THREE.RepeatWrapping
     texture.wrapT = THREE.ClampToEdgeWrapping
-    const texturedMaterial = new THREE.MeshStandardMaterial({
+    const texturedMaterial = new THREE.MeshPhysicalMaterial({
       map: texture,
       color: 0xffffff,
-      metalness: 0.05,
+      metalness: 0,
       roughness: 0.2,
-      side: THREE.DoubleSide,
+      clearcoat: 1,
+      clearcoatRoughness: 0.06,
+      side: THREE.FrontSide,
     })
 
     // Placeholder geometry — the params-driven effect below fills in the
@@ -104,6 +183,9 @@ export function VesselCanvas({
     // sliders move instead of tearing it down every drag).
     const mesh = new THREE.Mesh(new THREE.BufferGeometry(), plainMaterial)
     scene.add(mesh)
+    const shadow = createContactShadow()
+    scene.add(shadow)
+    shadowRef.current = shadow
 
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.enableDamping = true
@@ -153,6 +235,11 @@ export function VesselCanvas({
       plainMaterial.dispose()
       texturedMaterial.dispose()
       texture.dispose()
+      shadow.geometry.dispose()
+      shadow.material.map.dispose()
+      shadow.material.dispose()
+      environment.dispose()
+      pmrem.dispose()
       renderer.dispose()
       mount.removeChild(renderer.domElement)
     }
@@ -165,9 +252,30 @@ export function VesselCanvas({
 
     mesh.geometry.dispose()
     mesh.geometry = freeform
-      ? createCustomVesselGeometry(controlRadii, params.height, 48, params)
+      ? createCustomVesselGeometry(controlRadii, params.height, 64, params)
       : createVesselGeometry(params)
     controls.target.set(0, params.height / 2, 0)
+
+    // Shadow sized to the base; camera pulled in or out only when the form
+    // would otherwise be cropped or lost, so sliders don't fight the user's
+    // own orbit and zoom.
+    const box = new THREE.Box3().setFromObject(mesh)
+    const footprint = Math.max(box.max.x - box.min.x, box.max.z - box.min.z)
+    shadowRef.current?.scale.set(footprint * 1.25, footprint * 1.25, 1)
+    const camera = cameraRef.current
+    if (camera) {
+      const radius = mesh.geometry.boundingSphere.radius
+      // Fit to the narrower of the two view angles: the canvas is portrait,
+      // so a wide bowl is limited by the horizontal one.
+      const vertical = ((FOV / 2) * Math.PI) / 180
+      const horizontal = Math.atan(Math.tan(vertical) * camera.aspect)
+      const fit = (radius / Math.sin(Math.min(vertical, horizontal))) * 1.08
+      const offset = camera.position.clone().sub(controls.target)
+      const distance = offset.length()
+      if (distance < fit * 0.85 || distance > fit * 2.2) {
+        camera.position.copy(controls.target).add(offset.setLength(fit))
+      }
+    }
   }, [params, freeform, controlRadii, webglFailed])
 
   useEffect(() => {
