@@ -169,7 +169,7 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
           </div>
           <ModeSwitch mode="simple" onChange={onMode} className="sm:hidden" />
         </div>
-        <div ref={containerRef} className="flex w-full max-w-[min(460px,calc(100svh-15rem))] justify-center max-lg:max-w-[min(250px,28svh)]">
+        <div ref={containerRef} className="flex w-full max-w-[min(460px,calc(100svh-15rem))] justify-center max-lg:max-w-[min(190px,22svh)]">
           {view === 'slice' ? (
             <RodSlice
               canvas={design.canvas}

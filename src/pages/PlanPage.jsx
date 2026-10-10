@@ -68,7 +68,7 @@ export function PlanPage({ design, onEdit }) {
 
       <div
         data-print-hide
-        className="flex items-center gap-2 border-b border-line bg-panel px-4 py-3 sm:gap-3 sm:px-8"
+        className="flex flex-wrap items-center gap-2 border-b border-line bg-panel px-4 py-3 sm:gap-3 sm:px-8"
       >
         <div className="inline-flex rounded-lg bg-raise p-0.5" role="group" aria-label="Plan view">
           {[
@@ -93,15 +93,17 @@ export function PlanPage({ design, onEdit }) {
           onClick={onEdit}
           className="rounded-lg px-2 py-2 text-sm font-semibold whitespace-nowrap text-mute hover:text-ink sm:px-3"
         >
-          Edit design
+          Edit<span className="max-sm:hidden"> design</span>
         </button>
         {view === 'sheet' && (
           <button
             type="button"
             onClick={() => window.print()}
-            className="ml-auto flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 font-bold text-accent-ink max-sm:hidden"
+            aria-label="Print plan"
+            className="ml-auto flex items-center gap-2 rounded-lg bg-accent px-3 py-2.5 font-bold text-accent-ink sm:px-4"
           >
-            <Icon name="print" size={18} /> Print plan
+            {/* On a phone this opens the share / save-as-PDF sheet. */}
+            <Icon name="print" size={18} /> <span className="max-sm:sr-only">Print plan</span>
           </button>
         )}
       </div>

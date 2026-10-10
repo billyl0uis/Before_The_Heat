@@ -50,6 +50,8 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
   const [reticelloDensity, setReticelloDensity] = useState(DEFAULT_RETICELLO_DENSITY)
   const [reticelloColorAId, setReticelloColorAId] = useState(DEFAULT_RETICELLO_COLOR_A)
   const [reticelloColorBId, setReticelloColorBId] = useState(DEFAULT_RETICELLO_COLOR_B)
+  // Which rib the colour chips are setting.
+  const [ribTarget, setRibTarget] = useState('a')
   const hasPattern = design.elements.length > 0
   const { containerRef: canvasContainerRef, size: canvasSize } = useResponsiveCanvasSize(
     360,
@@ -197,36 +199,67 @@ export function VesselEditor({ design, vessel, vesselPattern }) {
                   onChange={(event) => setReticelloDensity(Number(event.target.value))}
                 />
               </label>
+              {/* Pick which rib you're colouring, then a named colour: works by
+                  tap and keyboard, where shift-click worked on neither. */}
               <div className="flex flex-col gap-2">
-                <p className="text-base text-neutral-300">Rib cane colors</p>
-                <div className="flex flex-wrap items-center gap-2">
-                  {GLASS_COLOR_INDEX.map((colorant) => (
+                <p className="text-base text-neutral-300">Rib cane colours</p>
+                <div className="grid grid-cols-2 gap-1 rounded-lg bg-raise p-1" role="group" aria-label="Rib to colour">
+                  {[
+                    { key: 'a', label: 'Rib A', id: reticelloColorAId },
+                    { key: 'b', label: 'Rib B', id: reticelloColorBId },
+                  ].map((rib) => (
                     <button
-                      key={colorant.id}
+                      key={rib.key}
                       type="button"
-                      title={colorant.name}
-                      aria-label={`${colorant.name} — click to set rib A, shift-click for rib B`}
-                      onClick={(event) =>
-                        event.shiftKey
-                          ? setReticelloColorBId(colorant.id)
-                          : setReticelloColorAId(colorant.id)
-                      }
-                      className="h-6 w-6 rounded-full border-2 transition-transform hover:scale-110"
-                      style={{
-                        backgroundColor: colorant.swatch,
-                        borderColor:
-                          colorant.id === reticelloColorAId
-                            ? '#ffffff'
-                            : colorant.id === reticelloColorBId
-                              ? '#a855f7'
-                              : 'transparent',
-                      }}
-                    />
+                      aria-pressed={ribTarget === rib.key}
+                      onClick={() => setRibTarget(rib.key)}
+                      className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm font-semibold ${
+                        ribTarget === rib.key ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
+                      }`}
+                    >
+                      <span
+                        className="h-4 w-4 shrink-0 rounded-full shadow-[inset_0_0_0_1px_rgb(255_255_255/0.35)]"
+                        style={{ backgroundColor: colorSwatch(rib.id) }}
+                      />
+                      <span className="truncate">
+                        {rib.label}: {GLASS_COLOR_INDEX.find((c) => c.id === rib.id)?.name.split(' / ')[0]}
+                      </span>
+                    </button>
                   ))}
                 </div>
-                <p className="text-sm text-neutral-500">
-                  Click for color A, shift-click for color B.
-                </p>
+                <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+                  {GLASS_COLOR_INDEX.map((colorant) => {
+                    const current = ribTarget === 'a' ? reticelloColorAId : reticelloColorBId
+                    const badges = [
+                      colorant.id === reticelloColorAId && 'A',
+                      colorant.id === reticelloColorBId && 'B',
+                    ].filter(Boolean)
+                    return (
+                      <button
+                        key={colorant.id}
+                        type="button"
+                        aria-pressed={current === colorant.id}
+                        onClick={() =>
+                          ribTarget === 'a'
+                            ? setReticelloColorAId(colorant.id)
+                            : setReticelloColorBId(colorant.id)
+                        }
+                        className={`flex min-h-10 items-center gap-2 rounded-md border bg-raise px-2 py-1 text-left text-xs leading-tight ${
+                          current === colorant.id ? 'border-ink' : 'border-transparent hover:border-line'
+                        }`}
+                      >
+                        <span
+                          className="h-5 w-5 shrink-0 rounded-full shadow-[inset_0_0_0_1px_rgb(255_255_255/0.3)]"
+                          style={{ backgroundColor: colorant.swatch }}
+                        />
+                        <span className="min-w-0 flex-1">{colorant.name.split(' / ')[0].replace(/ \(.*\)$/, '')}</span>
+                        {badges.length > 0 && (
+                          <span className="font-mono text-[0.7rem] font-semibold text-accent">{badges.join('+')}</span>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
             </>
           )}
