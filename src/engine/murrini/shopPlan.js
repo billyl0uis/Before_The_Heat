@@ -24,7 +24,7 @@ export function turnsLabel(twistDegrees) {
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`
 
 function colourName(element) {
-  const name = findColorant(element.colorantId)?.name ?? 'custom colour'
+  const name = findColorant(element.colorantId)?.name ?? 'custom color'
   return name.split(' / ')[0].replace(/ \(.*\)$/, '')
 }
 

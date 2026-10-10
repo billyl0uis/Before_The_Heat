@@ -6,7 +6,7 @@ function caneName(element) {
   if (element.compoundType && COMPOUND_SHAPE_TYPES[element.compoundType]) {
     return `the ${COMPOUND_SHAPE_TYPES[element.compoundType].label}`
   }
-  const colour = findColorant(element.colorantId)?.name.split(' / ')[0] ?? 'custom-colour'
+  const colour = findColorant(element.colorantId)?.name.split(' / ')[0] ?? 'custom-color'
   return `the ${colour} ${SHAPE_TYPES[element.shape]?.label.toLowerCase() ?? 'cane'}`
 }
 

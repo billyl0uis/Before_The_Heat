@@ -52,7 +52,7 @@ function compound(type, params, primary, accent, casing = 'clear') {
 export const RECIPES = {
   bullseye: {
     name: 'Bullseye',
-    blurb: 'A core cased in a ring of colour',
+    blurb: 'A core cased in a ring of color',
     slots: {
       core: { label: 'Core', defaultId: 'gold-ruby' },
       ring: { label: 'Ring', defaultId: 'opal-white' },

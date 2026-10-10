@@ -22,7 +22,7 @@ import { useSliceGeometry } from '../hooks/useSliceGeometry'
 
 const DOCK = [
   { key: 'tools', label: 'Tools', icon: 'tools' },
-  { key: 'colour', label: 'Colour', icon: 'colour' },
+  { key: 'colour', label: 'Color', icon: 'colour' },
   { key: 'casing', label: 'Rod', icon: 'casing' },
   { key: 'plan', label: 'Plan', icon: 'plan' },
 ]
@@ -137,7 +137,12 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
     () => buildShopPlan({ elements, pattern, rod, casing, extrusion }),
     [elements, pattern, rod, casing, extrusion],
   )
-  const colorantCount = useMemo(() => usedColorants({ elements, casing }).length, [elements, casing])
+  // Coloured glass only: clear isn't a colorant to test, and the
+  // compatibility warning counts the same way, so the numbers agree.
+  const colorantCount = useMemo(
+    () => usedColorants({ elements, casing }).filter((colorant) => colorant.id !== 'clear').length,
+    [elements, casing],
+  )
 
   // The rod as the canvas draws it: casing rings in world units and the
   // room left inside them for canes. Memoised so the WebGL scene only
@@ -400,7 +405,7 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
         className={`flex flex-col gap-5 overflow-y-auto border-line bg-panel p-4 lg:col-start-3 lg:row-start-1 lg:border-l ${
           dock === 'colour' || dock === 'casing' ? '' : 'max-lg:hidden'
         }`}
-        aria-label="Rod and colour"
+        aria-label="Rod and color"
       >
         <div className={onDock('casing')}>
           <RodPanel rod={rod} onChange={setRod} />
@@ -440,11 +445,11 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
           value={`≈ ${(pulledLengthMm(rod) / 1000).toFixed(1)} m of Ø ${pulledDiameterMm(rod).toFixed(1)} mm`}
         />
         <Stat
-          label="Colours"
+          label="Colors"
           value={
             compatibilityWarnings.some((w) => w.severity !== 'info')
               ? `${compatibilityWarnings.filter((w) => w.severity !== 'info').length} to check`
-              : `${colorantCount} listed, run a test strip`
+              : `${colorantCount} color${colorantCount === 1 ? '' : 's'}, run a test strip`
           }
         />
         <button

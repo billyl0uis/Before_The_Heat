@@ -25,7 +25,7 @@ export function ColorChart({
   const selected = GLASS_COLOR_INDEX.find((colorant) => colorant.id === colorantId)
 
   return (
-    <Panel title="Colour">
+    <Panel title="Color">
       <div className="grid grid-cols-3 gap-1.5">
         {GLASS_COLOR_INDEX.map((colorant) => {
           const active = !useCustom && colorant.id === colorantId
@@ -60,7 +60,7 @@ export function ColorChart({
         <div className="flex flex-col gap-1 text-sm">
           <p className="font-semibold">{selected.name}</p>
           <p className="text-mute">{selected.colorant}</p>
-          {selected.strikes && <p className="text-amber-300">Strikes: needs a controlled reheat to show full colour.</p>}
+          {selected.strikes && <p className="text-amber-300">Strikes: needs a controlled reheat to show full color.</p>}
           {selected.devitrifies === true && <p className="text-amber-300">Documented as prone to devitrification.</p>}
           {selected.devitrifies === 'some' && <p className="text-amber-300">Some commercial versions devitrify.</p>}
           {selected.caution && <p className="text-red-300">{selected.caution}</p>}
@@ -73,14 +73,14 @@ export function ColorChart({
           checked={useCustom}
           onChange={(event) => onToggleCustom(event.target.checked)}
         />
-        Custom colour (not a real colorant)
+        Custom color (not a real colorant)
       </label>
       {useCustom && (
         <input
           type="color"
           value={customColor}
           onChange={(event) => onCustomColorChange(event.target.value)}
-          aria-label="Custom colour"
+          aria-label="Custom color"
           className="h-9 w-16 cursor-pointer rounded border border-line bg-transparent"
         />
       )}

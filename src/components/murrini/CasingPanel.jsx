@@ -20,7 +20,7 @@ export function CasingPanel({ casing, rod, selectedColorantId, onAdd, onRemove, 
         <ol className="flex flex-col border-t border-line">
           {casing.map((layer, index) => {
             const colorant = findColorant(layer.colorantId)
-            const name = colorant?.name ?? 'Unknown colour'
+            const name = colorant?.name ?? 'Unknown color'
             return (
               <li
                 key={`${layer.colorantId}-${index}`}

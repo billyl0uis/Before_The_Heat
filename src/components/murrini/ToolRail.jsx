@@ -155,7 +155,7 @@ export function ToolRail({
             ))}
             {isCompound && (
               <div className="flex flex-col gap-2">
-                <p className="text-sm text-mute">Second colour</p>
+                <p className="text-sm text-mute">Second color</p>
                 <div className="flex flex-wrap gap-1.5">
                   <button
                     type="button"
