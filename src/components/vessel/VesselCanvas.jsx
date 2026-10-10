@@ -351,7 +351,7 @@ export function VesselCanvas({ vessel, morph, wall, layout, sliceImage, sliceDia
       <svg
         ref={rulerRef}
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 h-full w-full overflow-visible [&_line]:stroke-faint [&_text]:fill-mute [&_text]:font-mono [&_text]:text-[11px]"
+        className="pointer-events-none absolute inset-0 h-full w-full overflow-visible [&_line]:stroke-faint [&_text]:fill-mute [&_text]:font-mono [&_text]:text-[0.8rem]"
       />
     </div>
   )

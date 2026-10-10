@@ -1,3 +1,4 @@
+import { PageHeader } from '../components/PageHeader'
 import { TechniqueDiagram } from '../components/murrini/TechniqueDiagram'
 import { MURRINI_TECHNIQUES } from '../content/murrineTechniques'
 
@@ -33,39 +34,36 @@ function TechniqueCard({ techniqueKey, params }) {
   if (!technique) return null
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-neutral-800 bg-neutral-900 p-5">
-      <div className="flex items-start gap-4">
+    <article className="flex flex-col gap-3 rounded-xl border border-line bg-panel p-5">
+      <div className="flex items-center gap-4">
         <TechniqueDiagram techniqueKey={techniqueKey} params={params} />
-        <h2 className="text-base font-medium text-neutral-100">{technique.title}</h2>
+        <h2 className="text-base leading-snug font-semibold text-ink">{technique.title}</h2>
       </div>
-      <p className="text-base leading-relaxed text-neutral-300">{technique.summary}</p>
-      <ol className="flex flex-col gap-1 text-base text-neutral-300">
+      <p className="text-base leading-relaxed text-ink-soft">{technique.summary}</p>
+      <ol className="flex flex-col gap-1.5 text-base leading-relaxed text-ink-soft">
         {technique.steps.map((step, index) => (
-          <li key={step} className="flex gap-2">
-            <span className="text-neutral-400">{index + 1}.</span>
+          <li key={step} className="grid grid-cols-[1.5rem_1fr] gap-1">
+            <span className="pt-0.5 font-mono text-[0.8rem] font-semibold text-accent">{index + 1}</span>
             <span>{step}</span>
           </li>
         ))}
       </ol>
-    </div>
+    </article>
   )
 }
 
 export function TechniqueGuidePage() {
   return (
-    <div className="flex flex-col items-center gap-6 p-4 sm:p-8">
-      <div className="max-w-2xl text-center">
-        <h1 className="text-2xl font-medium text-neutral-100">Cane &amp; Murrini Techniques</h1>
-        <p className="mt-1 text-left text-base leading-relaxed text-neutral-400">
-          The real glassblowing methods behind every tool in the editor.
-        </p>
-      </div>
-
-      <div className="grid w-full max-w-5xl grid-cols-1 gap-4 lg:grid-cols-2">
+    <>
+      <PageHeader
+        title="Cane and murrini techniques"
+        lede="The real glassblowing methods behind every tool in the editor, in the order you'd learn them: single canes first, bundles last."
+      />
+      <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-4 px-4 sm:px-8 lg:grid-cols-2">
         {TECHNIQUE_ORDER.map(({ key, params }) => (
           <TechniqueCard key={key} techniqueKey={key} params={params} />
         ))}
       </div>
-    </div>
+    </>
   )
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { renderElementsToCanvas } from '../engine/murrini/rasterize'
 import { useDesignVault } from '../hooks/useDesignVault'
+import { PageHeader } from '../components/PageHeader'
 
 const THUMBNAIL_SIZE = 160
 
@@ -27,14 +28,14 @@ function buildDesignPayload(design) {
 
 function NotConfiguredNotice() {
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-3 rounded-lg border border-neutral-800 bg-neutral-900 p-6">
-      <h2 className="text-base font-semibold text-neutral-100">Saving named designs isn't switched on here</h2>
-      <p className="text-base leading-relaxed text-neutral-400">
+    <div className="flex max-w-xl flex-col gap-3 rounded-xl border border-line bg-panel p-6">
+      <h2 className="text-base font-semibold text-ink">Saving named designs isn't switched on here</h2>
+      <p className="text-base leading-relaxed text-ink-soft">
         The design you're working on is still kept in this browser as you go, so it will be here next time you
         open Before The Heat on this device. What isn't available on this copy of the app is saving several
         designs by name to come back to.
       </p>
-      <p className="text-base leading-relaxed text-neutral-400">
+      <p className="text-base leading-relaxed text-ink-soft">
         To keep a design for good, open its plan and print it or save it as a PDF.
       </p>
       {import.meta.env.DEV && (
@@ -171,14 +172,10 @@ export function DesignVaultPage({ design, onLoadDesign }) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 p-4 sm:p-8">
-      <div className="max-w-xl text-center">
-        <h1 className="text-2xl font-semibold text-neutral-100">Saved designs</h1>
-        <p className="mt-1 text-left text-base leading-relaxed text-neutral-400">
-          Save the design you're working on by name, and open it again later.
-        </p>
-      </div>
+    <div className="pb-16">
+      <PageHeader title="Saved designs" lede="Save the design you're working on by name, and open it again later." />
 
+      <div className="mx-auto w-full max-w-5xl px-4 sm:px-8">
       {!isConfigured ? (
         <NotConfiguredNotice />
       ) : (
@@ -228,6 +225,7 @@ export function DesignVaultPage({ design, onLoadDesign }) {
           </div>
         </div>
       )}
+      </div>
     </div>
   )
 }

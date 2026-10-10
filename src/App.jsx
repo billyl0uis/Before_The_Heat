@@ -146,7 +146,7 @@ function App() {
               role="tab"
               aria-selected={tab.key === activeTab}
               onClick={() => goTo(tab.key)}
-              className={`relative shrink-0 px-2 text-[0.85rem] font-semibold transition-colors sm:px-3.5 sm:text-[0.95rem] ${
+              className={`relative shrink-0 px-1.5 text-sm font-semibold transition-colors sm:px-3.5 sm:text-base ${
                 tab.key === activeTab ? 'text-ink' : 'text-mute hover:text-ink'
               } after:absolute after:inset-x-2 after:bottom-0 after:h-[3px] after:rounded-t after:bg-accent ${
                 tab.key === activeTab ? 'after:block' : 'after:hidden'

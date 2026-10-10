@@ -368,7 +368,7 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
                                 setColour(key, colorant.id)
                                 setOpenSlot(null)
                               }}
-                              className={`flex items-center gap-2 rounded-lg border bg-panel px-2 py-1.5 text-left text-[0.78rem] leading-tight ${
+                              className={`flex items-center gap-2 rounded-lg border bg-panel px-2 py-1.5 text-left text-[0.8rem] leading-tight ${
                                 colours[key] === colorant.id ? 'border-ink' : 'border-transparent hover:border-line'
                               }`}
                             >
