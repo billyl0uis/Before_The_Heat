@@ -1,30 +1,34 @@
-// Redraws the vessel's texture canvas from scratch: a base glass color,
-// then every placed murrini stamp at its UV position. Called on every
-// placement/undo/redo instead of incrementally painting, so undo can just
-// drop the last placement and replay the rest — no separate pixel-level
-// undo buffer needed.
-export function repaintVesselTexture(ctx, textureSize, glassColor, placements) {
-  ctx.clearRect(0, 0, textureSize, textureSize)
-  ctx.fillStyle = glassColor
-  ctx.fillRect(0, 0, textureSize, textureSize)
+import { radiusAtLength } from './pickup'
 
-  for (const placement of placements) {
-    const x = placement.u * textureSize
-    const y = (1 - placement.v) * textureSize
-    // Each placement keeps the size it was pressed at — like a brush size,
-    // changing it later only affects new presses, not ones already made.
-    const stampSize = textureSize * placement.sizeFraction
-    // The vessel wraps around at u=0/u=1 (LatheGeometry's seam) — drawing
-    // wrapped copies on both sides means a stamp placed near that seam
-    // doesn't get clipped in half.
-    for (const dx of [-textureSize, 0, textureSize]) {
-      ctx.drawImage(
-        placement.stampCanvas,
-        x + dx - stampSize / 2,
-        y - stampSize / 2,
-        stampSize,
-        stampSize,
-      )
+// Murrini slices painted onto the vessel's outside-wall texture at their
+// real size. The texture runs u round the wall and v up its length, so a
+// round slice is drawn as an ellipse in texture space that comes out round
+// again on the surface, at any height and on any curve.
+export function paintMurriniSkin(ctx, size, wall, slices, sliceImage, sliceDiameterMm) {
+  ctx.clearRect(0, 0, size, size)
+  if (!sliceImage) return
+  for (const { u, v } of slices) {
+    const circumference = 2 * Math.PI * radiusAtLength(wall, v * wall.length)
+    const rx = (sliceDiameterMm / 2 / circumference) * size
+    const ry = (sliceDiameterMm / 2 / wall.length) * size
+    const x = u * size
+    const y = (1 - v) * size
+    // The wall wraps at u = 0 / 1, so a slice on the seam is drawn on both
+    // sides of it instead of being cut in half.
+    for (const dx of [-size, 0, size]) {
+      if (x + dx + rx < 0 || x + dx - rx > size) continue
+      ctx.drawImage(sliceImage, x + dx - rx, y - ry, rx * 2, ry * 2)
     }
+  }
+}
+
+// The base is flat, so its slices are plain circles: mm from the centre.
+export function paintBaseSkin(ctx, size, wall, slices, sliceImage, sliceDiameterMm) {
+  ctx.clearRect(0, 0, size, size)
+  if (!sliceImage) return
+  const scale = size / 2 / wall.baseRadius
+  const d = sliceDiameterMm * scale
+  for (const { x, y } of slices) {
+    ctx.drawImage(sliceImage, size / 2 + x * scale - d / 2, size / 2 - y * scale - d / 2, d, d)
   }
 }

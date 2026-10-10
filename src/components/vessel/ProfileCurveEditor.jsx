@@ -1,33 +1,31 @@
 import { useRef } from 'react'
 import { sampleMonotonicSpline } from '../../engine/vessel/profile'
 
-const SVG_WIDTH = 200
-const SVG_HEIGHT = 320
-const AXIS_X = 24
+const SVG_WIDTH = 150
+const SVG_HEIGHT = 200
+const AXIS_X = 14
+const PAD = 8
 const MAX_RADIUS = 160
-const MIN_RADIUS = 2
+const MIN_RADIUS = 3
 const PREVIEW_SAMPLES = 40
 
 function radiusToX(radius) {
-  return AXIS_X + (radius / MAX_RADIUS) * (SVG_WIDTH - AXIS_X - 10)
+  return AXIS_X + (radius / MAX_RADIUS) * (SVG_WIDTH - AXIS_X - PAD)
 }
 
 function tToY(t) {
-  return SVG_HEIGHT - t * SVG_HEIGHT
+  return SVG_HEIGHT - PAD - t * (SVG_HEIGHT - PAD * 2)
 }
 
 // Drag any point on the silhouette to reshape the vessel wall at that
-// height — stays radially symmetric (only the radius changes, not the
-// height of each point) because that's the one constraint a real vessel
-// spun on a pipe can't break.
+// height. It stays round (only the radius changes, not the height of each
+// point), because that's the one constraint a vessel spun on a pipe can't
+// break.
 export function ProfileCurveEditor({ controlRadii, onChangeRadius }) {
   const svgRef = useRef(null)
 
   const sampledRadii = sampleMonotonicSpline(controlRadii, PREVIEW_SAMPLES)
-  const curvePoints = sampledRadii.map((radius, i) => {
-    const t = i / PREVIEW_SAMPLES
-    return `${radiusToX(Math.max(MIN_RADIUS, radius))},${tToY(t)}`
-  })
+  const curvePoints = sampledRadii.map((radius, i) => `${radiusToX(Math.max(MIN_RADIUS, radius))},${tToY(i / PREVIEW_SAMPLES)}`)
 
   const handlePointerDown = (index) => (event) => {
     event.preventDefault()
@@ -37,17 +35,12 @@ export function ProfileCurveEditor({ controlRadii, onChangeRadius }) {
 
     const updateFromEvent = (moveEvent) => {
       const rect = svg.getBoundingClientRect()
-      const scaleX = SVG_WIDTH / rect.width
-      const localX = (moveEvent.clientX - rect.left) * scaleX
-      const radius = Math.max(
-        MIN_RADIUS,
-        Math.min(MAX_RADIUS, ((localX - AXIS_X) / (SVG_WIDTH - AXIS_X - 10)) * MAX_RADIUS),
-      )
-      onChangeRadius(index, radius)
+      const localX = ((moveEvent.clientX - rect.left) / rect.width) * SVG_WIDTH
+      const radius = ((localX - AXIS_X) / (SVG_WIDTH - AXIS_X - PAD)) * MAX_RADIUS
+      onChangeRadius(index, Math.max(MIN_RADIUS, Math.min(MAX_RADIUS, radius)))
     }
 
     updateFromEvent(event)
-
     const handleMove = (moveEvent) => updateFromEvent(moveEvent)
     const handleUp = () => {
       svg.removeEventListener('pointermove', handleMove)
@@ -61,33 +54,22 @@ export function ProfileCurveEditor({ controlRadii, onChangeRadius }) {
     <svg
       ref={svgRef}
       viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
-      className="aspect-[200/320] w-full touch-none rounded-lg border border-neutral-800 bg-neutral-950 sm:w-[200px]"
+      aria-label="Vessel outline: drag the points"
+      className="h-[200px] w-[150px] shrink-0 touch-none rounded-[10px] border border-line bg-ground"
     >
-      <line
-        x1={AXIS_X}
-        y1={0}
-        x2={AXIS_X}
-        y2={SVG_HEIGHT}
-        stroke="#404040"
-        strokeDasharray="3 3"
-      />
-      <polyline points={curvePoints.join(' ')} fill="none" stroke="#d97706" strokeWidth="2" />
-      {controlRadii.map((radius, index) => {
-        const t = index / (controlRadii.length - 1)
-        return (
-          <circle
-            key={index}
-            cx={radiusToX(radius)}
-            cy={tToY(t)}
-            r={7}
-            fill="#c084fc"
-            stroke="#1a1a1a"
-            strokeWidth="1.5"
-            className="cursor-ew-resize"
-            onPointerDown={handlePointerDown(index)}
-          />
-        )
-      })}
+      <line x1={AXIS_X} y1={0} x2={AXIS_X} y2={SVG_HEIGHT} className="stroke-line" strokeDasharray="3 3" />
+      <polyline points={curvePoints.join(' ')} fill="none" strokeWidth="2" className="stroke-accent" />
+      {controlRadii.map((radius, index) => (
+        <circle
+          key={index}
+          cx={radiusToX(radius)}
+          cy={tToY(index / (controlRadii.length - 1))}
+          r={7}
+          strokeWidth="2"
+          className="cursor-ew-resize fill-accent-2 stroke-ground"
+          onPointerDown={handlePointerDown(index)}
+        />
+      ))}
     </svg>
   )
 }

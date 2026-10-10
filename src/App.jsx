@@ -6,8 +6,7 @@ import { LoadingField } from './components/LoadingField'
 import { ModeSwitch } from './components/ModeSwitch'
 import { computeRepeatedElements } from './engine/murrini/pattern'
 import { useMurriniDesign } from './hooks/useMurriniDesign'
-import { useVesselPattern } from './hooks/useVesselPattern'
-import { useVesselShape } from './hooks/useVesselShape'
+import { useVessel } from './hooks/useVessel'
 
 // Lazy-loaded so each tab's code (and its dependencies) only download when
 // actually visited. The biggest win is Design Vault: it's the only tab
@@ -98,8 +97,7 @@ function App() {
   // Same reasoning as the murrini hook above: owned here, not inside
   // VesselEditor, so sculpting isn't lost when you switch tabs to check
   // the pattern and come back.
-  const vessel = useVesselShape()
-  const vesselPattern = useVesselPattern()
+  const vesselState = useVessel()
 
   const goTo = (key) => {
     if (key === activeTab) return
@@ -176,9 +174,9 @@ function App() {
               <MurriniEditor design={design} onOpenPlan={() => goTo('plan')} onMode={setMode} />
             ))}
           {activeTab === 'vessel' && (
-            <VesselEditor design={design} vessel={vessel} vesselPattern={vesselPattern} />
+            <VesselEditor design={design} vesselState={vesselState} onEditDesign={() => goTo('murrini')} />
           )}
-          {activeTab === 'plan' && <PlanPage design={design} onEdit={() => goTo('murrini')} />}
+          {activeTab === 'plan' && <PlanPage design={design} vessel={vesselState.vessel} onEdit={() => goTo('murrini')} />}
           {activeTab === 'learn' && <LearnPage />}
           {activeTab === 'about' && <AboutPage />}
           {activeTab === 'vault' && (

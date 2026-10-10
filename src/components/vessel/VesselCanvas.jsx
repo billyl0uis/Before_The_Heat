@@ -1,19 +1,21 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { repaintVesselTexture } from '../../engine/vessel/paint'
-import { createCustomVesselGeometry, createVesselGeometry } from '../../engine/vessel/profile'
-import { paintReticelloTexture } from '../../engine/vessel/reticello'
+import { paintBaseSkin, paintMurriniSkin } from '../../engine/vessel/paint'
+import { measureWall } from '../../engine/vessel/pickup'
+import { createBaseSkin, createVesselBody, createWallSkin, vesselRadiusFunction } from '../../engine/vessel/profile'
+import { paintReticelloSkin } from '../../engine/vessel/reticello'
 import { createStudioEnvironment } from '../three/studio'
 import { WebGLUnavailable } from '../WebGLUnavailable'
 
-const GLASS_COLOR = '#d97706'
-const TEXTURE_SIZE = 512
-const FOV = 40
+const FOV = 30
+const SKIN_SIZE = 2048
+const BASE_SIZE = 1024
+// The pattern sits this far inside the outer surface, under the glass.
+const SKIN_INSET_MM = 1
+const MORPH_MS = 520
 
-// A soft round shadow under the base, so the vessel sits on something
-// instead of floating. Painted once; scaled to each vessel's footprint.
-function createContactShadow() {
+function contactShadow() {
   const size = 128
   const canvas = document.createElement('canvas')
   canvas.width = canvas.height = size
@@ -24,10 +26,9 @@ function createContactShadow() {
   gradient.addColorStop(1, 'rgba(0,0,0,0)')
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, size, size)
-  const texture = new THREE.CanvasTexture(canvas)
   const mesh = new THREE.Mesh(
     new THREE.PlaneGeometry(1, 1),
-    new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false }),
+    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true, depthWrite: false }),
   )
   mesh.rotation.x = -Math.PI / 2
   mesh.position.y = -0.4
@@ -35,275 +36,323 @@ function createContactShadow() {
   return mesh
 }
 
-export function VesselCanvas({
-  params,
-  freeform,
-  controlRadii,
-  manualMode,
-  placements,
-  onPlacePattern,
-  reticelloMode,
-  reticelloParams,
-  width = 360,
-  height = 420,
-}) {
+// Clear glass: see-through face on, denser toward its edges, the way a real
+// wall reads (at a glancing angle you look through more glass). Physical
+// transmission was tried before and banded on the wall.
+function glassMaterial() {
+  const material = new THREE.MeshPhysicalMaterial({
+    roughness: 0.05,
+    metalness: 0,
+    clearcoat: 1,
+    clearcoatRoughness: 0.04,
+    transparent: true,
+    depthWrite: false,
+    envMapIntensity: 1.4,
+  })
+  material.onBeforeCompile = (shader) => {
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <dithering_fragment>',
+      `#include <dithering_fragment>
+      float facing = abs(dot(normalize(vViewPosition), normal));
+      gl_FragColor.a = mix(gl_FragColor.a, 1.0, pow(1.0 - facing, 3.0) * 0.8);`,
+    )
+  }
+  return material
+}
+
+function skinTexture(size, renderer, wrap) {
+  const canvas = document.createElement('canvas')
+  canvas.width = canvas.height = size
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.colorSpace = THREE.SRGBColorSpace
+  texture.anisotropy = renderer.capabilities.getMaxAnisotropy()
+  if (wrap) texture.wrapS = THREE.RepeatWrapping
+  return { canvas, texture }
+}
+
+// The far side of the pattern shows through clear glass, dimmed so the
+// near side reads first, as it does when you hold the real piece.
+function skinMaterial(map, side, opacity) {
+  return new THREE.MeshPhysicalMaterial({
+    map,
+    side,
+    transparent: true,
+    opacity,
+    alphaTest: 0.05,
+    roughness: 0.35,
+  })
+}
+
+export function VesselCanvas({ vessel, morph, wall, layout, sliceImage, sliceDiameterMm, glass, ribColors, onPlace, label }) {
   const mountRef = useRef(null)
+  const rulerRef = useRef(null)
   const sceneRef = useRef(null)
-  const meshRef = useRef(null)
-  const rendererRef = useRef(null)
-  const cameraRef = useRef(null)
-  const controlsRef = useRef(null)
-  const plainMaterialRef = useRef(null)
-  const texturedMaterialRef = useRef(null)
-  const textureRef = useRef(null)
-  const textureCanvasRef = useRef(null)
-  const shadowRef = useRef(null)
-  const manualModeRef = useRef(manualMode)
-  const onPlacePatternRef = useRef(onPlacePattern)
+  const shownRef = useRef(null)
+  const lastMorph = useRef(morph)
+  const onPlaceRef = useRef(onPlace)
   const [webglFailed, setWebglFailed] = useState(false)
 
-  // Read through refs in the click listener (added once, in the setup
-  // effect below) so it always sees the latest mode/callback without
-  // tearing down and rebuilding the WebGL context on every toggle.
   useEffect(() => {
-    manualModeRef.current = manualMode
-  }, [manualMode])
-  useEffect(() => {
-    onPlacePatternRef.current = onPlacePattern
-  }, [onPlacePattern])
+    onPlaceRef.current = onPlace
+  }, [onPlace])
 
   useEffect(() => {
     const mount = mountRef.current
-
-    const scene = new THREE.Scene()
-    // The section's own ground, so the vessel sits in the page, not a grey box.
-    const ground =
-      getComputedStyle(document.documentElement).getPropertyValue('--ground').trim() || '#071433'
-    scene.background = new THREE.Color(ground)
-
-    const camera = new THREE.PerspectiveCamera(FOV, width / height, 1, 3000)
-    camera.position.set(0, 150, 320)
-
     let renderer
     try {
       renderer = new THREE.WebGLRenderer({ antialias: true })
     } catch {
       setWebglFailed(true)
-      return
+      return undefined
     }
-    renderer.setSize(width, height)
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio))
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.05
-    mount.appendChild(renderer.domElement)
+    renderer.domElement.style.display = 'block'
+    mount.prepend(renderer.domElement)
 
-    // Glass reads as glass mostly through what it reflects: a soft studio
-    // environment gives the surface highlights and edges something to show.
+    const scene = new THREE.Scene()
+    scene.background = new THREE.Color(
+      getComputedStyle(document.documentElement).getPropertyValue('--ground').trim() || '#071433',
+    )
     const pmrem = new THREE.PMREMGenerator(renderer)
     const environment = createStudioEnvironment(pmrem)
     scene.environment = environment
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.4)
-    keyLight.position.set(150, 260, 200)
-    scene.add(keyLight)
-
-    // The vessel is a closed solid now, so one-sided rendering is correct
-    // and avoids the sorting flicker a transparent double-sided shell had.
-    const plainMaterial = new THREE.MeshPhysicalMaterial({
-      color: GLASS_COLOR,
-      metalness: 0,
-      roughness: 0.12,
-      // Opaque on purpose: transmission's low-resolution background
-      // sampling showed up as blocky bands on the wall.
-      ior: 1.5,
-      clearcoat: 1,
-      clearcoatRoughness: 0.06,
-      envMapIntensity: 1.6,
-      side: THREE.FrontSide,
-    })
-
-    // Offscreen 2D canvas hand-placed murrini stamps get painted onto, used
-    // as a live-updating texture source — never attached to the DOM.
-    const textureCanvas = document.createElement('canvas')
-    textureCanvas.width = TEXTURE_SIZE
-    textureCanvas.height = TEXTURE_SIZE
-    const texture = new THREE.CanvasTexture(textureCanvas)
-    texture.colorSpace = THREE.SRGBColorSpace
-    texture.anisotropy = renderer.capabilities.getMaxAnisotropy()
-    texture.wrapS = THREE.RepeatWrapping
-    texture.wrapT = THREE.ClampToEdgeWrapping
-    const texturedMaterial = new THREE.MeshPhysicalMaterial({
-      map: texture,
-      color: 0xffffff,
-      metalness: 0,
-      roughness: 0.2,
-      clearcoat: 1,
-      clearcoatRoughness: 0.06,
-      side: THREE.FrontSide,
-    })
-
-    // Placeholder geometry — the params-driven effect below fills in the
-    // real shape immediately after mount, so this setup effect never has
-    // to depend on params itself (keeps the WebGL context stable while
-    // sliders move instead of tearing it down every drag).
-    const mesh = new THREE.Mesh(new THREE.BufferGeometry(), plainMaterial)
-    scene.add(mesh)
-    const shadow = createContactShadow()
+    const key = new THREE.DirectionalLight(0xffffff, 1.1)
+    key.position.set(300, 600, 500)
+    scene.add(key, new THREE.AmbientLight(0x8fb3ff, 0.25))
+    const shadow = contactShadow()
     scene.add(shadow)
-    shadowRef.current = shadow
 
+    const camera = new THREE.PerspectiveCamera(FOV, 1, 1, 6000)
+    camera.position.set(0, 160, 420)
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.enableDamping = true
-    controls.autoRotate = true
-    controls.autoRotateSpeed = 1.2
-    controls.minDistance = 80
-    controls.maxDistance = 800
+    controls.enablePan = false
+    controls.maxPolarAngle = Math.PI * 0.64
 
-    sceneRef.current = scene
-    cameraRef.current = camera
-    rendererRef.current = renderer
-    meshRef.current = mesh
-    controlsRef.current = controls
-    plainMaterialRef.current = plainMaterial
-    texturedMaterialRef.current = texturedMaterial
-    textureRef.current = texture
-    textureCanvasRef.current = textureCanvas
-
-    // Click-to-place: only acts in manual mode, and only when the click
-    // actually lands on the vessel wall (not a drag-to-orbit release).
-    const raycaster = new THREE.Raycaster()
-    const pointer = new THREE.Vector2()
-    const handleClick = (event) => {
-      if (!manualModeRef.current) return
-      const rect = renderer.domElement.getBoundingClientRect()
-      pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
-      pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
-      raycaster.setFromCamera(pointer, camera)
-      const [hit] = raycaster.intersectObject(mesh)
-      if (hit?.uv) onPlacePatternRef.current(hit.uv.x, hit.uv.y)
+    const wallSkin = skinTexture(SKIN_SIZE, renderer, true)
+    const baseSkin = skinTexture(BASE_SIZE, renderer, false)
+    const glassMat = glassMaterial()
+    const meshes = {
+      skinBack: new THREE.Mesh(new THREE.BufferGeometry(), skinMaterial(wallSkin.texture, THREE.BackSide, 0.5)),
+      skinFront: new THREE.Mesh(new THREE.BufferGeometry(), skinMaterial(wallSkin.texture, THREE.FrontSide, 1)),
+      base: new THREE.Mesh(new THREE.BufferGeometry(), skinMaterial(baseSkin.texture, THREE.DoubleSide, 1)),
+      body: new THREE.Mesh(new THREE.BufferGeometry(), glassMat),
     }
-    renderer.domElement.addEventListener('click', handleClick)
+    meshes.skinBack.renderOrder = 1
+    meshes.base.renderOrder = 1
+    meshes.skinFront.renderOrder = 2
+    meshes.body.renderOrder = 3
+    scene.add(...Object.values(meshes))
 
-    let frameId
-    const animate = () => {
+    const state = { meshes, wallSkin, baseSkin, glassMat, tween: null, wall: null }
+    sceneRef.current = state
+
+    // Fit the height to the view's height and the width to its width,
+    // keeping whatever angle the vessel has been turned to.
+    const fit = (fitWall) => {
+      const tan = Math.tan((FOV * Math.PI) / 360)
+      const distance = Math.max(
+        (fitWall.height * (camera.aspect < 1 ? 0.95 : 0.78)) / tan,
+        (fitWall.maxRadius * 1.7) / (tan * camera.aspect),
+      )
+      const direction = camera.position.clone().sub(controls.target)
+      if (direction.lengthSq() < 1) direction.set(0, 0.34, 1)
+      direction.normalize()
+      controls.target.set(0, fitWall.height * 0.5, 0)
+      camera.position.copy(controls.target).addScaledVector(direction, distance)
+      controls.minDistance = distance * 0.35
+      controls.maxDistance = distance * 2.5
+    }
+
+    state.build = (shape) => {
+      const builtWall = measureWall(shape.radiusAt, shape.height)
+      const skin = createWallSkin(builtWall, shape.ribs, SKIN_INSET_MM)
+      const next = {
+        body: createVesselBody(shape.radiusAt, shape.height, shape.ribs),
+        skinFront: skin,
+        skinBack: skin,
+        base: createBaseSkin(builtWall, shape.ribs, Math.min(1, shape.height * 0.02), SKIN_INSET_MM),
+      }
+      const previous = new Set(Object.values(meshes).map((mesh) => mesh.geometry))
+      for (const [name, mesh] of Object.entries(meshes)) mesh.geometry = next[name]
+      for (const geometry of previous) geometry.dispose()
+      const footprint = Math.max(builtWall.baseRadius, 20) * 2.6
+      shadow.scale.set(footprint, footprint, 1)
+      fit(builtWall)
+      state.wall = builtWall
+    }
+
+    const resize = () => {
+      const width = mount.clientWidth
+      const height = mount.clientHeight
+      if (!width || !height) return
+      renderer.setSize(width, height)
+      camera.aspect = width / height
+      camera.updateProjectionMatrix()
+      if (state.wall) fit(state.wall)
+    }
+    const observer = new ResizeObserver(resize)
+    observer.observe(mount)
+    resize()
+
+    // A tap places a slice; a drag only turns the view.
+    let down = null
+    const raycaster = new THREE.Raycaster()
+    const onDown = (event) => {
+      down = [event.clientX, event.clientY]
+    }
+    const onUp = (event) => {
+      if (!down || !onPlaceRef.current) return
+      if (Math.hypot(event.clientX - down[0], event.clientY - down[1]) > 5) return
+      const rect = renderer.domElement.getBoundingClientRect()
+      raycaster.setFromCamera(
+        new THREE.Vector2(
+          ((event.clientX - rect.left) / rect.width) * 2 - 1,
+          -((event.clientY - rect.top) / rect.height) * 2 + 1,
+        ),
+        camera,
+      )
+      const [hit] = raycaster.intersectObjects([meshes.skinFront, meshes.skinBack])
+      if (hit?.uv) onPlaceRef.current(hit.uv.x, hit.uv.y)
+    }
+    renderer.domElement.addEventListener('pointerdown', onDown)
+    renderer.domElement.addEventListener('pointerup', onUp)
+
+    // A mm ruler beside the vessel, following the view as it turns.
+    const drawRuler = () => {
+      const svg = rulerRef.current
+      const shownWall = state.wall
+      if (!svg || !shownWall) return
+      const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0)
+      const offset = right.multiplyScalar(-(shownWall.maxRadius + 14))
+      const toPx = (y) => {
+        const p = new THREE.Vector3(0, y, 0).add(offset).project(camera)
+        return [(p.x * 0.5 + 0.5) * mount.clientWidth, (-p.y * 0.5 + 0.5) * mount.clientHeight]
+      }
+      const [x0, y0] = toPx(0)
+      const [x1, y1] = toPx(shownWall.height)
+      const length = Math.hypot(x1 - x0, y1 - y0)
+      if (length < 50) {
+        svg.innerHTML = ''
+        return
+      }
+      const nx = -(y1 - y0) / length
+      const ny = (x1 - x0) / length
+      const step = shownWall.height > 150 ? 20 : 10
+      let marks = `<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}"/>`
+      for (let mm = 0; mm <= shownWall.height + 0.01; mm += step) {
+        const [x, y] = toPx(mm)
+        const tick = mm % (step * 5) === 0 ? 9 : 5
+        marks += `<line x1="${x}" y1="${y}" x2="${x + nx * tick}" y2="${y + ny * tick}"/>`
+      }
+      marks += `<text x="${x1 + nx * 12}" y="${y1 + 4}" text-anchor="end">${Math.round(shownWall.height)} mm</text>`
+      svg.innerHTML = marks
+    }
+
+    let frame = 0
+    const loop = () => {
+      const tween = state.tween
+      if (tween) {
+        const k = Math.min(1, (performance.now() - tween.start) / MORPH_MS)
+        const e = 1 - 2 ** (-10 * k)
+        state.build({
+          radiusAt: (t) => tween.from.radiusAt(t) + (tween.to.radiusAt(t) - tween.from.radiusAt(t)) * e,
+          height: tween.from.height + (tween.to.height - tween.from.height) * e,
+          ribs: tween.to.ribs,
+        })
+        if (k >= 1) state.tween = null
+      }
       controls.update()
       renderer.render(scene, camera)
-      frameId = requestAnimationFrame(animate)
+      drawRuler()
+      frame = requestAnimationFrame(loop)
     }
-    animate()
+    loop()
 
     return () => {
-      cancelAnimationFrame(frameId)
-      renderer.domElement.removeEventListener('click', handleClick)
+      cancelAnimationFrame(frame)
+      observer.disconnect()
+      renderer.domElement.removeEventListener('pointerdown', onDown)
+      renderer.domElement.removeEventListener('pointerup', onUp)
       controls.dispose()
-      mesh.geometry.dispose()
-      plainMaterial.dispose()
-      texturedMaterial.dispose()
-      texture.dispose()
+      for (const mesh of Object.values(meshes)) {
+        mesh.geometry.dispose()
+        mesh.material.dispose()
+      }
+      wallSkin.texture.dispose()
+      baseSkin.texture.dispose()
       shadow.geometry.dispose()
       shadow.material.map.dispose()
       shadow.material.dispose()
       environment.dispose()
       pmrem.dispose()
       renderer.dispose()
-      mount.removeChild(renderer.domElement)
+      renderer.domElement.remove()
+      sceneRef.current = null
     }
-  }, [width, height])
+  }, [])
+
+  // The form. A named form eases in; sliders and dragging follow directly.
+  const { params, freeform, controlRadii } = vessel
+  useEffect(() => {
+    const state = sceneRef.current
+    if (!state) return
+    const target = { radiusAt: vesselRadiusFunction({ params, freeform, controlRadii }), height: params.height, ribs: params }
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (morph !== lastMorph.current && shownRef.current && !still) {
+      state.tween = { from: shownRef.current, to: target, start: performance.now() }
+    } else {
+      state.tween = null
+      state.build(target)
+    }
+    lastMorph.current = morph
+    shownRef.current = target
+  }, [params, freeform, controlRadii, morph])
 
   useEffect(() => {
-    const mesh = meshRef.current
-    const controls = controlsRef.current
-    if (!mesh || !controls) return
+    const state = sceneRef.current
+    if (!state) return
+    state.glassMat.color.set(glass.swatch)
+    state.glassMat.opacity = glass.clear ? 0.14 : 0.45
+  }, [glass.swatch, glass.clear])
 
-    mesh.geometry.dispose()
-    mesh.geometry = freeform
-      ? createCustomVesselGeometry(controlRadii, params.height, 64, params)
-      : createVesselGeometry(params)
-    controls.target.set(0, params.height / 2, 0)
-
-    // Shadow sized to the base; camera pulled in or out only when the form
-    // would otherwise be cropped or lost, so sliders don't fight the user's
-    // own orbit and zoom.
-    const box = new THREE.Box3().setFromObject(mesh)
-    const footprint = Math.max(box.max.x - box.min.x, box.max.z - box.min.z)
-    shadowRef.current?.scale.set(footprint * 1.25, footprint * 1.25, 1)
-    const camera = cameraRef.current
-    if (camera) {
-      const radius = mesh.geometry.boundingSphere.radius
-      // Fit to the narrower of the two view angles: the canvas is portrait,
-      // so a wide bowl is limited by the horizontal one.
-      const vertical = ((FOV / 2) * Math.PI) / 180
-      const horizontal = Math.atan(Math.tan(vertical) * camera.aspect)
-      const fit = (radius / Math.sin(Math.min(vertical, horizontal))) * 1.08
-      const offset = camera.position.clone().sub(controls.target)
-      const distance = offset.length()
-      if (distance < fit * 0.85 || distance > fit * 2.2) {
-        camera.position.copy(controls.target).add(offset.setLength(fit))
-      }
-    }
-  }, [params, freeform, controlRadii, webglFailed])
-
+  // What's in the glass, painted at real size onto the target form.
+  const { pattern, place, placements, ribsAround } = vessel
   useEffect(() => {
-    const mesh = meshRef.current
-    const canvas = textureCanvasRef.current
-    const texture = textureRef.current
-    if (!mesh || !canvas || !texture) return
-
-    const ctx = canvas.getContext('2d')
-
-    if (reticelloMode) {
-      paintReticelloTexture(ctx, TEXTURE_SIZE, reticelloParams)
-      texture.needsUpdate = true
-
-      // The texture's diamond cells are square in canvas-pixel space, but
-      // LatheGeometry's default UV maps U (circumference) and V (height)
-      // each 0-1 across that same square canvas regardless of the
-      // vessel's actual proportions -- on any vessel where circumference
-      // != height (almost always), that would stretch the cells (and the
-      // "trapped air" dots) into ellipses instead of the circles a real
-      // fused bubble actually leaves. Repeating the texture around the
-      // circumference by the real aspect ratio keeps cells square in
-      // world space instead.
-      const avgRadius = freeform
-        ? controlRadii.reduce((sum, r) => sum + r, 0) / controlRadii.length
-        : (params.baseRadius + params.topRadius) / 2
-      const circumference = 2 * Math.PI * avgRadius
-      texture.wrapT = THREE.RepeatWrapping
-      texture.repeat.set(Math.max(1, circumference / params.height), 1)
-
-      mesh.material = texturedMaterialRef.current
-      return
+    const state = sceneRef.current
+    if (!state) return
+    const wallCtx = state.wallSkin.canvas.getContext('2d')
+    const baseCtx = state.baseSkin.canvas.getContext('2d')
+    if (pattern === 'murrini' && sliceImage) {
+      const slices = place === 'hand' ? { wall: placements, base: [] } : layout
+      paintMurriniSkin(wallCtx, SKIN_SIZE, wall, slices?.wall ?? [], sliceImage, sliceDiameterMm)
+      paintBaseSkin(baseCtx, BASE_SIZE, wall, slices?.base ?? [], sliceImage, sliceDiameterMm)
+    } else if (pattern === 'reticello') {
+      paintReticelloSkin(wallCtx, SKIN_SIZE, wall, { ribsAround, colorA: ribColors.a, colorB: ribColors.b })
+      baseCtx.clearRect(0, 0, BASE_SIZE, BASE_SIZE)
+    } else {
+      wallCtx.clearRect(0, 0, SKIN_SIZE, SKIN_SIZE)
+      baseCtx.clearRect(0, 0, BASE_SIZE, BASE_SIZE)
     }
+    state.wallSkin.texture.needsUpdate = true
+    state.baseSkin.texture.needsUpdate = true
+  }, [wall, layout, sliceImage, sliceDiameterMm, pattern, place, placements, ribsAround, ribColors.a, ribColors.b])
 
-    texture.wrapT = THREE.ClampToEdgeWrapping
-    texture.repeat.set(1, 1)
-
-    if (!manualMode) {
-      mesh.material = plainMaterialRef.current
-      return
-    }
-
-    repaintVesselTexture(ctx, TEXTURE_SIZE, GLASS_COLOR, placements)
-    texture.needsUpdate = true
-    mesh.material = texturedMaterialRef.current
-  }, [
-    manualMode,
-    placements,
-    reticelloMode,
-    reticelloParams,
-    params,
-    freeform,
-    controlRadii,
-    webglFailed,
-  ])
-
-  if (webglFailed) {
-    return <WebGLUnavailable width={width} height={height} />
-  }
+  if (webglFailed) return <WebGLUnavailable width={360} height={420} />
 
   return (
     <div
       ref={mountRef}
-      className="overflow-hidden rounded-lg border border-neutral-800"
-    />
+      className={`absolute inset-0 touch-none ${onPlace ? '[&_canvas]:cursor-crosshair' : ''}`}
+      role="img"
+      aria-label={label}
+    >
+      <svg
+        ref={rulerRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 h-full w-full overflow-visible [&_line]:stroke-faint [&_text]:fill-mute [&_text]:font-mono [&_text]:text-[11px]"
+      />
+    </div>
   )
 }
