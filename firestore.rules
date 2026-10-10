@@ -1,0 +1,18 @@
+rules_version = '2';
+
+// Before The Heat: each saved design belongs to the anonymous user who
+// saved it (ownerId). Only that user can list, open, rename, overwrite or
+// delete it, and nobody can hand a design to someone else.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /designs/{designId} {
+      allow read, delete: if request.auth != null
+        && resource.data.ownerId == request.auth.uid;
+      allow create: if request.auth != null
+        && request.resource.data.ownerId == request.auth.uid;
+      allow update: if request.auth != null
+        && resource.data.ownerId == request.auth.uid
+        && request.resource.data.ownerId == resource.data.ownerId;
+    }
+  }
+}

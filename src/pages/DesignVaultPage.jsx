@@ -68,6 +68,8 @@ function NotConfiguredNotice() {
 
 function SavedDesignRow({ saved, onLoadDesign, onOverwrite, onRename, onDelete }) {
   const [isRenaming, setIsRenaming] = useState(false)
+  // Deleting can't be undone, so it asks once, in the row, without a dialog.
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [nameDraft, setNameDraft] = useState(saved.name)
 
   const commitRename = () => {
@@ -134,13 +136,32 @@ function SavedDesignRow({ saved, onLoadDesign, onOverwrite, onRename, onDelete }
         >
           Overwrite
         </button>
-        <button
-          type="button"
-          onClick={() => onDelete(saved.id)}
-          className="rounded bg-neutral-800 px-3 py-1 text-sm text-red-300 hover:bg-red-950/50"
-        >
-          Delete
-        </button>
+        {confirmingDelete ? (
+          <>
+            <button
+              type="button"
+              onClick={() => onDelete(saved.id)}
+              className="rounded bg-red-900/60 px-3 py-1 text-sm font-semibold text-red-100 hover:bg-red-900"
+            >
+              Delete for good
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirmingDelete(false)}
+              className="rounded bg-neutral-800 px-3 py-1 text-sm text-neutral-300 hover:bg-neutral-700"
+            >
+              Keep it
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setConfirmingDelete(true)}
+            className="rounded bg-neutral-800 px-3 py-1 text-sm text-red-300 hover:bg-red-950/50"
+          >
+            Delete
+          </button>
+        )}
       </div>
     </div>
   )
