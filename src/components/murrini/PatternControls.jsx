@@ -21,16 +21,15 @@ export function PatternControls({ pattern, onChange }) {
     <div className="flex flex-col gap-3 border-b border-line pb-5">
       <h2 className="text-sm font-bold tracking-[0.06em] text-mute uppercase">Pattern Repeat</h2>
 
-      <div className="flex gap-2">
+      <div className="grid auto-cols-fr grid-flow-col rounded-lg bg-raise p-0.5" role="group" aria-label="Repeat">
         {REPEAT_TYPES.map((type) => (
           <button
             key={type}
             type="button"
+            aria-pressed={type === pattern.repeatType}
             onClick={() => chooseRepeat(type)}
-            className={`rounded-md px-3 py-1.5 text-sm capitalize transition-colors ${
-              type === pattern.repeatType
-                ? 'bg-accent text-accent-ink'
-                : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+            className={`min-w-0 rounded-md px-2 py-1.5 text-sm font-semibold capitalize ${
+              type === pattern.repeatType ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
             }`}
           >
             {type}

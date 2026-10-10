@@ -1,68 +1,67 @@
-const CONTROLS = [
-  { key: 'length', label: 'Length', min: 20, max: 400, step: 10 },
-  { key: 'twistDegrees', label: 'Twist', min: -720, max: 720, step: 10 },
-  { key: 'taper', label: 'Taper (%)', min: 0, max: 90, step: 5 },
-]
+import { turnsLabel } from '../../engine/murrini/shopPlan'
+import { Panel, Slider } from './Panel'
+
+// Twist in the same words the plan uses, so Advanced, Simple and the
+// printed sheet all say "half a turn" for the same cane.
+const twistDisplay = (degrees) => (degrees ? `${turnsLabel(degrees)}, ${degrees > 0 ? 'right' : 'left'}` : 'None')
 
 export function ExtrusionControls({ extrusion, onChange }) {
   const setField = (key, value) => onChange({ ...extrusion, [key]: value })
 
   return (
-    <div className="flex flex-col gap-3 border-b border-line pb-5">
-      <h2 className="text-sm font-bold tracking-[0.06em] text-mute uppercase">Rod Extrusion</h2>
-      {CONTROLS.map((control) => (
-        <label
-          key={control.key}
-          className="flex flex-col gap-1 text-sm text-neutral-300"
-        >
-          {control.label}: {extrusion[control.key]}
-          <input
-            type="range"
-            min={control.min}
-            max={control.max}
-            step={control.step}
-            value={extrusion[control.key]}
-            onChange={(event) => setField(control.key, Number(event.target.value))}
-          />
-        </label>
-      ))}
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => setField('sideways', false)}
-          className={`flex-1 rounded-md px-3 py-1.5 text-sm transition-colors ${
-            !extrusion.sideways
-              ? 'bg-accent text-accent-ink'
-              : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
-          }`}
-        >
-          Lengthwise
-        </button>
-        <button
-          type="button"
-          onClick={() => setField('sideways', true)}
-          className={`flex-1 rounded-md px-3 py-1.5 text-sm transition-colors ${
-            extrusion.sideways
-              ? 'bg-accent text-accent-ink'
-              : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
-          }`}
-        >
-          Sideways
-        </button>
+    <Panel title="Rod extrusion">
+      <Slider
+        id="extrusion-twist"
+        label="Twist"
+        value={extrusion.twistDegrees}
+        display={twistDisplay(extrusion.twistDegrees)}
+        min={-720}
+        max={720}
+        step={90}
+        onChange={(value) => setField('twistDegrees', value)}
+      />
+      <Slider
+        id="extrusion-taper"
+        label="Taper"
+        value={extrusion.taper}
+        display={extrusion.taper ? `${extrusion.taper}%` : 'None'}
+        min={0}
+        max={90}
+        step={5}
+        onChange={(value) => setField('taper', value)}
+      />
+      <Slider
+        id="extrusion-length"
+        label="3D view length"
+        value={extrusion.length}
+        display={`${extrusion.length}`}
+        min={20}
+        max={400}
+        step={10}
+        onChange={(value) => setField('length', value)}
+      />
+      <div className="grid grid-cols-2 rounded-lg bg-raise p-0.5" role="group" aria-label="Rod 3D direction">
+        {[
+          { value: false, label: 'Lengthwise' },
+          { value: true, label: 'Sideways' },
+        ].map((option) => (
+          <button
+            key={option.label}
+            type="button"
+            aria-pressed={Boolean(extrusion.sideways) === option.value}
+            onClick={() => setField('sideways', option.value)}
+            className={`min-w-0 rounded-md px-2 py-1.5 text-sm font-semibold ${
+              Boolean(extrusion.sideways) === option.value ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
+            }`}
+          >
+            {option.label}
+          </button>
+        ))}
       </div>
-      <p className="text-sm leading-relaxed text-neutral-400">
-        Twist spirals the whole bundle around its center as it's pulled —
-        a helix along the rod's length, only visible from the side. It
-        only shows up on shapes placed off-center — a single shape
-        sitting dead-center in the pattern has nothing off-axis to
-        spiral, so twisting it looks like nothing happened. Try the
-        Zanfirico tool in the pattern toolbar for a ready-made off-center
-        setup (it's the real technique this twist reproduces). This is
-        different from the Spiral shape, which builds a jellyroll-style
-        spiral into the cross-section itself instead. Taper narrows the
-        rod toward the far end. Sideways flips the pulled rod 90° to run
-        across the view instead of away from it.
+      <p className="text-[0.8rem] leading-relaxed text-mute">
+        Twist spirals off-centre canes along the rod, the way a zanfirico is made; a cane on the centre has nothing
+        to spiral. Taper narrows the far end. View length and direction only change the Rod 3D view.
       </p>
-    </div>
+    </Panel>
   )
 }

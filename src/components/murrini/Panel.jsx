@@ -15,7 +15,7 @@ export function Panel({ title, children, className = '', action = null }) {
 export function Slider({ id, label, value, display, min, max, step = 1, onChange, ...rest }) {
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="flex items-baseline justify-between gap-2 text-sm text-mute">
+      <label htmlFor={id} className="flex flex-wrap items-baseline justify-between gap-x-2 text-sm text-mute">
         {label}
         <output htmlFor={id} className="font-mono text-[0.8rem] text-ink">
           {display ?? value}
