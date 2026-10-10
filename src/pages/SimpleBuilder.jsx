@@ -53,6 +53,7 @@ function colourNote(colorant) {
   if (colorant.id === 'clear') return 'no colour'
   if (colorant.hazard === 'cadmium') return 'toxic'
   if (colorant.hazard === 'radioactive') return 'radioactive'
+  if (colorant.strikes) return 'strikes'
   return colorant.family
 }
 

@@ -12,6 +12,15 @@ export function repeatCount(pattern) {
 }
 
 const fmt = (value) => value.toLocaleString('en', { maximumFractionDigits: 1 })
+
+// Twist as a glassblower says it: "half a turn", "2 full turns".
+export function turnsLabel(twistDegrees) {
+  const turns = Math.abs(twistDegrees) / 360
+  if (!turns) return ''
+  if (turns === 0.5) return 'half a turn'
+  if (turns === 1) return '1 full turn'
+  return Number.isInteger(turns) ? `${turns} full turns` : `${fmt(turns)} turns`
+}
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`
 
 function colourName(element) {
@@ -75,7 +84,7 @@ function describeCane(cluster, techniqueKey, count) {
 //
 // Each step carries a `plate` saying what its thumbnail shows: a single
 // cane, or the rod up to a given casing layer.
-export function buildShopPlan({ elements, pattern, rod, casing }) {
+export function buildShopPlan({ elements, pattern, rod, casing, extrusion }) {
   const steps = []
   let caneTotal = 0
 
@@ -115,10 +124,17 @@ export function buildShopPlan({ elements, pattern, rod, casing }) {
   })
 
   if (steps.length) {
+    // The twist is the whole technique for a zanfirico or any spiral cane:
+    // it has to be in the instruction, not only in the preview.
+    const twist = turnsLabel(extrusion?.twistDegrees ?? 0)
     steps.push({
       key: 'pull',
-      title: `Pull to Ø ${fmt(pulledDiameterMm(rod))} mm`,
-      detail: `${rod.pullRatio} : 1 from a ${rod.gatherDiameterMm} mm × ${rod.gatherLengthMm} mm gather gives about ${fmt(pulledLengthMm(rod) / 1000)} m of cane to slice.`,
+      title: twist
+        ? `Pull to Ø ${fmt(pulledDiameterMm(rod))} mm, twisting ${twist}`
+        : `Pull to Ø ${fmt(pulledDiameterMm(rod))} mm`,
+      detail: `${rod.pullRatio} : 1 from a ${rod.gatherDiameterMm} mm × ${rod.gatherLengthMm} mm gather gives about ${fmt(pulledLengthMm(rod) / 1000)} m of cane to slice.${
+        twist ? ' Keep turning the same way as you pull, so the twist spreads evenly along the cane.' : ''
+      }`,
       colorantIds: [],
       plate: { kind: 'slice', casingUpTo: casing.length - 1 },
     })

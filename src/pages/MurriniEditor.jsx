@@ -15,6 +15,7 @@ import { GLASS_COLOR_INDEX } from '../content/glassColorIndex'
 import { buildCompoundElements, COMPOUND_SHAPE_TYPES } from '../engine/murrini/compoundShapes'
 import { pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
 import { computeShapeReach, SHAPE_TYPES } from '../engine/murrini/shapes'
+import { describePlacement } from '../engine/murrini/placement'
 import { buildShopPlan, shopPlanWarnings, usedColorants } from '../engine/murrini/shopPlan'
 import { useResponsiveCanvasSize } from '../hooks/useResponsiveCanvasSize'
 import { useSliceGeometry } from '../hooks/useSliceGeometry'
@@ -133,8 +134,8 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
     [elements, casing],
   )
   const planSteps = useMemo(
-    () => buildShopPlan({ elements, pattern, rod, casing }),
-    [elements, pattern, rod, casing],
+    () => buildShopPlan({ elements, pattern, rod, casing, extrusion }),
+    [elements, pattern, rod, casing, extrusion],
   )
   const colorantCount = useMemo(() => usedColorants({ elements, casing }).length, [elements, casing])
 
@@ -220,9 +221,24 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
     handlePlace(x, y)
   }
 
+  // Say what a placement does to the plan, rather than letting it change
+  // quietly: a cane inside another becomes part of it, and canes that cut
+  // into each other can't exist in a real bundle.
+  const reportPlacement = (placed) => {
+    const result = describePlacement(elements, placed)
+    if (!result) return setNotice(null)
+    setNotice(
+      result.kind === 'inside'
+        ? `This sits inside ${result.other}, so the plan pulls them as one cane. ⌘Z to undo.`
+        : `This overlaps ${result.other}. Canes in a bundle can only touch: move it apart, or ⌘Z to undo.`,
+    )
+  }
+
   const handlePlace = (x, y) => {
     if (COMPOUND_SHAPE_TYPES[selectedShape]) {
-      addElements(buildCompoundElements(selectedShape, x, y, params, resolveColorTrio()))
+      const specs = buildCompoundElements(selectedShape, x, y, params, resolveColorTrio())
+      addElements(specs)
+      reportPlacement(specs.map((spec) => ({ ...spec, compoundId: spec.compoundId ?? 'new' })))
       // Zanfirico is invisible as anything but a plain casing until it's
       // actually twisted — jump to a sensible twist and the Rod Preview
       // so placing one immediately shows what it's for, instead of
@@ -235,6 +251,7 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
       }
       return
     }
+    reportPlacement([{ shape: selectedShape, x, y, params }])
     if (useCustomColor) {
       addElement(selectedShape, x, y, { color: customColor, params, colorantId: null })
       return

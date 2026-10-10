@@ -4,7 +4,7 @@ import { FieldHeader } from '../components/plan/FieldHeader'
 import { PlanSheet } from '../components/plan/PlanSheet'
 import { ShopChecklist } from '../components/plan/ShopChecklist'
 import { pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
-import { buildShopPlan, shopPlanWarnings, usedColorants } from '../engine/murrini/shopPlan'
+import { buildShopPlan, shopPlanWarnings, turnsLabel, usedColorants } from '../engine/murrini/shopPlan'
 
 const VIEW_KEY = 'before-the-heat:plan-view'
 
@@ -18,8 +18,11 @@ function readView() {
 
 export function PlanPage({ design, onEdit }) {
   const [view, setView] = useState(readView)
-  const { elements, pattern, rod, casing } = design
-  const steps = useMemo(() => buildShopPlan({ elements, pattern, rod, casing }), [elements, pattern, rod, casing])
+  const { elements, pattern, rod, casing, extrusion } = design
+  const steps = useMemo(
+    () => buildShopPlan({ elements, pattern, rod, casing, extrusion }),
+    [elements, pattern, rod, casing, extrusion],
+  )
   const warnings = useMemo(() => shopPlanWarnings({ elements, casing }), [elements, casing])
   const colorants = useMemo(() => usedColorants({ elements, casing }), [elements, casing])
 
@@ -59,6 +62,7 @@ export function PlanPage({ design, onEdit }) {
         <p className="rounded-lg bg-ground px-3 py-2 font-mono text-sm shadow-[0_12px_40px_rgb(0_0_0/0.5)]">
           Ø {rod.gatherDiameterMm} → {pulledDiameterMm(rod).toFixed(1)} mm · {rod.pullRatio} : 1 · ≈{' '}
           {(pulledLengthMm(rod) / 1000).toFixed(1)} m
+          {extrusion.twistDegrees ? ` · ${turnsLabel(extrusion.twistDegrees)}` : ''}
         </p>
       </FieldHeader>
 
@@ -106,7 +110,7 @@ export function PlanPage({ design, onEdit }) {
         {view === 'sheet' ? (
           <PlanSheet design={design} steps={steps} warnings={warnings} colorants={colorants} />
         ) : (
-          <ShopChecklist design={design} steps={steps} />
+          <ShopChecklist design={design} steps={steps} warnings={warnings} />
         )}
       </div>
     </div>
