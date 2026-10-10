@@ -17,7 +17,7 @@ function ToolButton({ shapeKey, active, shortcut, onSelect }) {
       aria-pressed={active}
       onClick={() => onSelect(shapeKey)}
       title={shortcut ? `${label} (${shortcut})` : label}
-      className={`flex min-h-16 flex-col items-center justify-center gap-1.5 rounded-lg border px-1 py-2 text-[0.72rem] leading-tight transition-colors ${
+      className={`flex min-h-16 flex-col items-center justify-center gap-1.5 rounded-lg border px-1 py-2 text-[0.8rem] leading-tight transition-colors ${
         active
           ? 'border-accent bg-raise text-ink'
           : 'border-transparent bg-raise/60 text-mute hover:bg-raise hover:text-ink'

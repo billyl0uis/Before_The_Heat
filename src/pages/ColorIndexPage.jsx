@@ -1,35 +1,31 @@
 import { ColorSwatchCard } from '../components/color-index/ColorSwatchCard'
+import { PageHeader } from '../components/PageHeader'
 import { COE_NOTE, ENCASEMENT_NOTE, GLASS_COLOR_INDEX } from '../content/glassColorIndex'
 
-function NoteCard({ note }) {
+// The two notes that apply to every colour sit above the list as plain
+// reading, not as cards competing with the swatches.
+function Note({ note }) {
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-neutral-800 bg-neutral-900 p-4">
-      <h2 className="text-base font-medium text-neutral-100">{note.title}</h2>
-      <p className="text-base leading-relaxed text-neutral-300">{note.body}</p>
-    </div>
+    <section>
+      <h2 className="text-base font-semibold text-ink">{note.title}</h2>
+      <p className="mt-2 max-w-[62ch] text-base leading-relaxed text-ink-soft">{note.body}</p>
+    </section>
   )
 }
 
 export function ColorIndexPage() {
   return (
-    <div className="flex flex-col items-center gap-6 p-4 sm:p-8">
-      <div className="max-w-2xl text-center">
-        <h1 className="text-2xl font-medium text-neutral-100">Color Index</h1>
-        <p className="mt-1 text-left text-base leading-relaxed text-neutral-400">
-          What each glass color is made of.
-        </p>
+    <>
+      <PageHeader title="Color index" lede="What each glass color is made of, how it behaves at the furnace, and what to watch for." />
+      <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-x-10 gap-y-6 px-4 pb-10 sm:px-8 md:grid-cols-2">
+        <Note note={COE_NOTE} />
+        <Note note={ENCASEMENT_NOTE} />
       </div>
-
-      <div className="grid w-full max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2">
-        <NoteCard note={COE_NOTE} />
-        <NoteCard note={ENCASEMENT_NOTE} />
-      </div>
-
-      <div className="grid w-full max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-4 px-4 sm:grid-cols-2 sm:px-8 lg:grid-cols-3">
         {GLASS_COLOR_INDEX.map((color) => (
           <ColorSwatchCard key={color.id} color={color} />
         ))}
       </div>
-    </div>
+    </>
   )
 }

@@ -12,22 +12,25 @@ export function LearnPage() {
   const [section, setSection] = useState('techniques')
 
   return (
-    <div className="flex flex-col items-center pt-4 sm:pt-8">
-      <div className="flex gap-2">
-        {SECTIONS.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            onClick={() => setSection(item.key)}
-            className={`rounded px-3 py-1.5 text-base transition-colors ${
-              item.key === section
-                ? 'bg-neutral-100 text-neutral-900'
-                : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
-            }`}
-          >
-            {item.label}
-          </button>
-        ))}
+    <div className="flex flex-col pb-16">
+      <div className="border-b border-line bg-panel px-4 py-3 sm:px-8">
+        <div className="mx-auto w-full max-w-5xl">
+          <div className="inline-flex rounded-lg bg-raise p-0.5" role="group" aria-label="Learn section">
+            {SECTIONS.map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                aria-pressed={item.key === section}
+                onClick={() => setSection(item.key)}
+                className={`rounded-md px-4 py-2 text-sm font-semibold ${
+                  item.key === section ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
       {section === 'techniques' ? <TechniqueGuidePage /> : <ColorIndexPage />}
     </div>

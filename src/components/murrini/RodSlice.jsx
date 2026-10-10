@@ -73,13 +73,13 @@ function Readout({ value, label, emphasis = false }) {
   return (
     <div className="sm:min-w-24">
       <p
-        className={`font-mono text-[1.25rem] leading-tight sm:text-[1.6rem] font-semibold tracking-tight ${
+        className={`font-mono text-[1.6rem] leading-tight font-semibold tracking-tight ${
           emphasis ? 'text-accent' : 'text-ink'
         }`}
       >
         {value}
       </p>
-      <p className="text-[0.65rem] tracking-[0.06em] whitespace-nowrap text-mute uppercase sm:text-xs">{label}</p>
+      <p className="text-[0.8rem] tracking-[0.06em] whitespace-nowrap text-mute uppercase">{label}</p>
     </div>
   )
 }

@@ -98,8 +98,8 @@ export function ShopChecklist({ design, steps, warnings = [] }) {
             <span className="text-[4.5rem] leading-none font-extrabold tracking-tight">{current + 1}</span>
             <span className="text-xl font-semibold text-mute">of {steps.length}</span>
           </p>
-          <h3 className="mt-3 text-[1.6rem] leading-tight font-bold tracking-tight text-balance">{item.title}</h3>
-          <p className="mt-2 text-[1.05rem] leading-relaxed text-mute">{item.detail}</p>
+          <h2 className="mt-3 text-[1.6rem] leading-tight font-bold tracking-tight text-balance">{item.title}</h2>
+          <p className="mt-2 text-base leading-relaxed text-mute">{item.detail}</p>
           {item.colorantIds.length > 0 && (
             <ul className="mt-4 flex flex-wrap gap-2">
               {item.colorantIds.map((id) => (

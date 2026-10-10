@@ -43,7 +43,7 @@ export function PlanSheet({ design, steps, warnings, colorants }) {
   return (
     <article className="mx-auto grid w-full max-w-[860px] gap-x-10 gap-y-7 rounded bg-[#fbfbf8] px-6 py-8 text-[#0b0e2e] shadow-[0_30px_80px_rgb(0_0_0/0.5),0_2px_6px_rgb(0_0_0/0.3)] sm:px-12 sm:py-11 md:grid-cols-[17rem_1fr] print:max-w-none print:px-0 print:py-0 print:shadow-none">
       <header className="flex flex-wrap items-end justify-between gap-2 border-b-2 border-[#0b0e2e] pb-3 md:col-span-2">
-        <h2 className="text-[1.7rem] leading-none font-extrabold tracking-tight">Shop plan</h2>
+        <h2 className="text-[1.6rem] leading-none font-extrabold tracking-tight">Shop plan</h2>
         <p className="text-sm text-[#454a72]">Before The Heat · {today}</p>
       </header>
 
@@ -59,7 +59,7 @@ export function PlanSheet({ design, steps, warnings, colorants }) {
         </p>
         <section>
           <h3 className="mb-2 text-xs font-bold tracking-[0.08em] text-[#454a72] uppercase">Pull</h3>
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 font-mono text-[0.95rem] font-semibold">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 font-mono text-base font-semibold">
             <p>
               Ø {rod.gatherDiameterMm} mm
               <span className="block font-sans text-xs font-normal text-[#454a72]">{rod.gatherLengthMm} mm gather</span>

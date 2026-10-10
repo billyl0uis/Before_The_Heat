@@ -45,9 +45,9 @@ export function ColorChart({
               }`}
             >
               <span className="block h-7" style={{ background: colorant.swatch }} />
-              <span className="px-1.5 pt-1 pb-1.5 text-[0.7rem] leading-tight">
+              <span className="px-1.5 pt-1 pb-1.5 text-[0.8rem] leading-tight">
                 {shortName(colorant.name)}
-                <span className={`block font-mono text-[0.65rem] ${flagged ? 'text-red-300' : 'text-mute'}`}>
+                <span className={`block font-mono text-[0.8rem] ${flagged ? 'text-red-300' : 'text-mute'}`}>
                   {noteFor(colorant)}
                 </span>
               </span>
