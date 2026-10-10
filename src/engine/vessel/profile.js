@@ -215,7 +215,8 @@ function revolveSection(section, height, { ribAmplitude = 0, ribCount = 8, ribTw
   for (const point of section) {
     for (let j = 0; j <= radialSegments; j++) {
       const theta = (j / radialSegments) * Math.PI * 2
-      const rib = ribAmplitude * Math.cos(ribCount * theta - twistRadPerT * point.t) * point.ribWeight
+      // ribTwist is how far the ribs turn from base to rim, in degrees.
+      const rib = ribAmplitude * Math.cos(ribCount * (theta - twistRadPerT * point.t)) * point.ribWeight
       const radius = point.r === 0 ? 0 : Math.max(MIN_RADIUS * 0.5, point.r + rib)
       positions.push(Math.sin(theta) * radius, point.y, Math.cos(theta) * radius)
       // Stamps and textures key off height fraction around the outside.
@@ -373,4 +374,86 @@ export function sampleControlRadii(params) {
     radii.push(profile[index].x)
   }
   return radii
+}
+
+// One radius function for the whole vessel, whichever way it was shaped.
+export function vesselRadiusFunction({ params, freeform, controlRadii }) {
+  if (!freeform) return (t) => computeProfileRadius(params, t)
+  const tangents = computeMonotonicTangents(controlRadii)
+  return (t) => Math.max(MIN_RADIUS, hermiteAt(controlRadii, tangents, t * (controlRadii.length - 1)))
+}
+
+export function createVesselBody(radiusAt, height, ribParams, radialSegments = 96) {
+  return revolveSection(computeVesselSection(radiusAt, height), height, ribParams, radialSegments)
+}
+
+function ribOffset({ ribAmplitude = 0, ribCount = 8, ribTwist = 0 }, theta, t) {
+  return ribAmplitude * Math.cos(ribCount * (theta - ((ribTwist * Math.PI) / 180) * t))
+}
+
+function gridGeometry(rows, columns, vertex) {
+  const positions = []
+  const uvs = []
+  const indices = []
+  const stride = columns + 1
+  for (let j = 0; j <= rows; j++) {
+    for (let i = 0; i <= columns; i++) {
+      const { position, uv } = vertex(j, i)
+      positions.push(...position)
+      uvs.push(...uv)
+    }
+  }
+  for (let j = 0; j < rows; j++) {
+    for (let i = 0; i < columns; i++) {
+      const a = j * stride + i
+      const b = a + stride
+      indices.push(a, a + 1, b, b, a + 1, b + 1)
+    }
+  }
+  const geometry = new THREE.BufferGeometry()
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
+  geometry.setIndex(indices)
+  geometry.computeVertexNormals()
+  const normals = geometry.getAttribute('normal')
+  const n = new THREE.Vector3()
+  for (let j = 0; j <= rows; j++) {
+    const first = j * stride
+    const last = first + columns
+    n.fromBufferAttribute(normals, first).add(new THREE.Vector3().fromBufferAttribute(normals, last)).normalize()
+    normals.setXYZ(first, n.x, n.y, n.z)
+    normals.setXYZ(last, n.x, n.y, n.z)
+  }
+  normals.needsUpdate = true
+  return geometry
+}
+
+// The layer murrini or reticello sits in: the outside wall, set just inside
+// the glass, with v measured along the wall's length (pickup.js
+// measureWall) so a pattern painted in mm lands at its real size.
+export function createWallSkin(wall, ribParams, inset, radialSegments = 128) {
+  return gridGeometry(wall.rows, radialSegments, (j, i) => {
+    const t = j / wall.rows
+    const theta = (i / radialSegments) * Math.PI * 2
+    const radius = Math.max(MIN_RADIUS * 0.25, wall.radii[j] + ribOffset(ribParams, theta, t) - inset)
+    return {
+      position: [Math.sin(theta) * radius, t * wall.height, Math.cos(theta) * radius],
+      uv: [i / radialSegments, wall.arc[j] / wall.length],
+    }
+  })
+}
+
+// The same layer across the base, mapped flat: u, v span the base's width.
+export function createBaseSkin(wall, ribParams, y, inset, radialSegments = 128, rings = 16) {
+  return gridGeometry(rings, radialSegments, (j, i) => {
+    const theta = (i / radialSegments) * Math.PI * 2
+    const edge = Math.max(MIN_RADIUS * 0.25, wall.baseRadius + ribOffset(ribParams, theta, 0) - inset)
+    const radius = edge * (j / rings)
+    const x = Math.sin(theta) * radius
+    const z = Math.cos(theta) * radius
+    return {
+      position: [x, y, z],
+      uv: [0.5 + (0.5 * x) / wall.baseRadius, 0.5 + (0.5 * z) / wall.baseRadius],
+    }
+  })
 }

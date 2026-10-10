@@ -1,0 +1,920 @@
+<!doctype html>
+<html lang="en" data-section="vessel">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vessel page preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Reef, the Vessel section palette */
+  --ground:#071433;--panel:#0c1d45;--raise:#132756;--line:#1f3768;
+  --ink:#eef6ff;--ink-soft:#d9e7f7;--mute:#a7bddc;--faint:#8299bb;
+  --accent:#3fb0d0;--accent-ink:#04121f;--accent-2:#e6c23a;
+  --paper:#fbfbf8;--paper-ink:#0b0e2e;--paper-mute:#454a72;--paper-rule:#d9dae6;--paper-cobalt:#1430d8;
+  --font:'Hanken Grotesk',ui-sans-serif,system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:18px;background:var(--ground);color-scheme:dark;scrollbar-color:var(--line) var(--ground)}
+body{background:var(--ground);color:var(--ink);font:400 .875rem/1.625 var(--font);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;min-height:100svh}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:disabled{cursor:not-allowed;opacity:.4}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+::selection{background:var(--accent);color:var(--accent-ink)}
+.mono{font-family:var(--mono)}
+
+/* app bar, as in the app */
+.bar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:24px;height:3.5rem;padding:0 20px;background:var(--panel);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-size:1rem;font-weight:800;letter-spacing:-.01em;white-space:nowrap}
+.tabs{display:flex;height:100%;min-width:0;overflow-x:auto;scrollbar-width:none}
+.tabs button{position:relative;flex:none;padding:0 14px;font-size:.95rem;font-weight:600;color:var(--mute)}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{color:var(--ink)}
+.tabs button[aria-selected="true"]::after{content:"";position:absolute;left:8px;right:8px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:var(--accent)}
+.modes{margin-left:auto;display:inline-flex;background:var(--raise);border-radius:10px;padding:3px}
+.modes button{padding:5px 12px;border-radius:8px;font-size:.8rem;font-weight:700;color:var(--mute)}
+.modes button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.saved{display:flex;align-items:center;gap:8px;color:var(--mute);font-size:.8rem;white-space:nowrap}
+.saved i{width:8px;height:8px;border-radius:50%;background:var(--accent-2)}
+
+/* page: stage + tool rail */
+.page{display:grid;grid-template-columns:minmax(0,1fr) 384px;height:calc(100svh - 3.5rem)}
+.stage{display:flex;flex-direction:column;min-height:0;min-width:0}
+.view{position:relative;flex:1;min-height:0;touch-action:none}
+.view canvas{display:block;width:100%;height:100%}
+.view[data-hand="true"] canvas{cursor:crosshair}
+.stage-head{position:absolute;top:18px;left:24px;right:24px;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 14px;pointer-events:none}
+.stage-head h1{font-size:1.6rem;font-weight:700;letter-spacing:-.025em;line-height:1.25}
+.stage-head .dims{font-family:var(--mono);font-size:.8rem;color:var(--mute)}
+.stage-hint{position:absolute;right:24px;bottom:14px;font-size:.8rem;color:var(--faint);pointer-events:none}
+#ruler{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+#ruler line{stroke:var(--faint);stroke-width:1}
+#ruler text{fill:var(--mute);font:500 11px var(--mono)}
+
+/* the focal readout */
+.readout{border-top:1px solid var(--line);background:var(--panel);padding:16px 24px 18px}
+.readout p.sum{font-size:1rem;line-height:1.5;color:var(--ink-soft);max-width:44rem;text-wrap:pretty}
+.readout b{font-family:var(--mono);font-weight:600;color:var(--ink);font-size:1.05em}
+.pulls{display:flex;gap:4px;margin-top:12px;max-width:44rem}
+.pulls span{position:relative;flex:1;height:10px;border-radius:3px;background:var(--raise);overflow:hidden}
+.pulls span i{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:3px;transition:width .4s var(--ease)}
+.pull-key{display:flex;justify-content:space-between;gap:12px;margin-top:6px;max-width:44rem;font-family:var(--mono);font-size:.75rem;color:var(--faint)}
+.foot{margin-top:8px;font-size:.8rem;color:var(--faint);max-width:44rem}
+
+/* tool rail */
+.rail{overflow-y:auto;background:var(--panel);border-left:1px solid var(--line);padding:22px 22px 48px}
+.rail section+section{margin-top:30px;padding-top:24px;border-top:1px solid var(--line)}
+.rail h2{font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:14px}
+.rail .note{font-size:.8rem;color:var(--mute);margin-top:8px}
+
+.presets{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.presets button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px 6px;border-radius:10px;background:var(--raise);border:1.5px solid transparent;font-size:.75rem;font-weight:600;color:var(--mute);transition:border-color .2s,color .2s}
+.presets button:hover{color:var(--ink)}
+.presets button[aria-pressed="true"]{border-color:var(--accent);color:var(--ink)}
+.presets svg{width:38px;height:38px}
+.presets svg path{fill:var(--line);stroke:var(--ink-soft);stroke-width:1.4}
+.presets button[aria-pressed="true"] svg path{fill:#3fb0d033;stroke:var(--accent)}
+
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px;padding:3px;border-radius:10px;background:var(--raise)}
+.seg button{padding:7px 8px;border-radius:8px;font-size:.875rem;font-weight:600;color:var(--mute);white-space:nowrap}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.seg+.seg,.presets+.seg{margin-top:12px}
+
+.fields{display:flex;flex-direction:column;gap:14px;margin-top:16px;border:0}
+.fields:disabled{opacity:.4}
+.field{display:flex;flex-direction:column;gap:6px}
+.field .row{display:flex;justify-content:space-between;gap:10px;font-size:.875rem;color:var(--ink-soft)}
+.field output{font-family:var(--mono);font-size:.8rem;color:var(--ink);white-space:nowrap}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:20px;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:var(--line)}
+input[type=range]::-moz-range-track{height:4px;border-radius:4px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;margin-top:-6px;border-radius:50%;background:var(--accent);border:2px solid var(--panel)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--accent);border:2px solid var(--panel)}
+input[type=range]:disabled{cursor:not-allowed}
+
+details.more{margin-top:18px;border-radius:10px;background:var(--raise)}
+details.more summary{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;font-weight:600;color:var(--ink-soft);cursor:pointer;list-style:none}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary svg{transition:transform .25s var(--ease)}
+details.more[open] summary svg{transform:rotate(180deg)}
+details.more .fields{margin:0;padding:4px 12px 14px}
+
+.profile{margin-top:14px;display:flex;gap:14px;align-items:flex-start}
+.profile svg{flex:none;width:150px;height:200px;border-radius:10px;background:var(--ground);border:1px solid var(--line);touch-action:none}
+.profile p{font-size:.8rem;color:var(--mute)}
+
+.chips{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.chips button{display:flex;align-items:center;gap:8px;min-height:2.4rem;padding:4px 8px;border-radius:8px;background:var(--raise);border:1.5px solid transparent;text-align:left;font-size:.8rem;line-height:1.2;color:var(--ink-soft)}
+.chips button:hover{border-color:var(--line)}
+.chips button[aria-pressed="true"]{border-color:var(--ink)}
+.chips .sw{flex:none;width:20px;height:20px;border-radius:50%;box-shadow:inset 0 0 0 1px #ffffff4d}
+.chips .badge{margin-left:auto;font-family:var(--mono);font-size:.7rem;font-weight:600;color:var(--accent)}
+
+.cane{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;background:var(--raise);margin-bottom:12px}
+.cane canvas{flex:none;width:52px;height:52px}
+.cane b{display:block;font-size:1rem;font-weight:600}
+.cane span{font-size:.8rem;color:var(--mute)}
+.cane div{min-width:0;flex:1}.cane span{white-space:nowrap}
+.cane a{flex:none;align-self:flex-start;font-size:.8rem;font-weight:600;color:var(--accent);text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px}
+.tools button{padding:8px;border-radius:8px;background:var(--raise);font-weight:600;color:var(--ink-soft)}
+.tools button:not(:disabled):hover{background:var(--line)}
+.ribs{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:3px;border-radius:10px;background:var(--raise);margin:14px 0 8px}
+.ribs button{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;font-size:.8rem;font-weight:600;color:var(--mute);text-align:left}
+.ribs button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.ribs .sw{flex:none;width:16px;height:16px;border-radius:50%;box-shadow:inset 0 0 0 1px #ffffff59}
+
+/* the plan step, on paper as it prints */
+.paper{background:var(--paper);color:var(--paper-ink);border-radius:6px;padding:16px 16px 14px;box-shadow:0 10px 30px -12px #000a}
+.paper .step{display:grid;grid-template-columns:1fr auto;gap:12px}
+.paper h3{font-size:1rem;font-weight:700;letter-spacing:-.01em;line-height:1.3}
+.paper .after{font-family:var(--mono);font-size:.7rem;color:var(--paper-mute);margin-bottom:4px}
+.paper ol{margin-top:10px;padding-left:1.1rem;color:var(--paper-ink);font-size:.8rem;line-height:1.55}
+.paper ol li+li{margin-top:5px}
+.paper ol li::marker{color:var(--paper-cobalt);font-family:var(--mono);font-size:.75rem}
+.paper .num{font-family:var(--mono);font-weight:600}
+.paper svg{width:54px;height:72px}
+.paper svg path{fill:none;stroke:var(--paper-ink);stroke-width:1.2}
+.paper .empty{color:var(--paper-mute);font-size:.8rem}
+
+@media (max-width:1023px){
+  .page{display:block;height:auto}
+  .stage{position:sticky;top:3.5rem;z-index:10;height:58svh;background:var(--ground);border-bottom:1px solid var(--line)}
+  .stage-head{top:12px;left:16px;right:16px}
+  .stage-head h1{font-size:1.25rem}
+  .stage-head .wide{display:none}
+  .stage-hint{right:16px;bottom:8px}
+  .readout{padding:10px 16px 12px}
+  .readout p.sum{font-size:.875rem}
+  .pulls{margin-top:8px}.pulls span{height:7px}
+  .pull-key,.foot{display:none}
+  .rail{border-left:0;padding:20px 16px 64px}
+}
+@media (max-width:640px){
+  .bar{gap:12px;padding:0 12px}
+  .brand span,.saved,.modes{display:none}
+  .tabs button{padding:0 9px;font-size:.85rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<header class="bar">
+  <div class="brand">
+    <svg width="26" height="26" viewBox="-13 -13 26 26" aria-hidden="true"><circle r="12" fill="var(--accent)"/><circle r="9.6" fill="var(--ground)"/><g fill="var(--accent-2)"><ellipse cy="-5" rx="1.9" ry="3"/><ellipse cy="-5" rx="1.9" ry="3" transform="rotate(60)"/><ellipse cy="-5" rx="1.9" ry="3" transform="rotate(120)"/><ellipse cy="-5" rx="1.9" ry="3" transform="rotate(180)"/><ellipse cy="-5" rx="1.9" ry="3" transform="rotate(240)"/><ellipse cy="-5" rx="1.9" ry="3" transform="rotate(300)"/></g><circle r="2" fill="var(--accent)"/></svg>
+    <span>Before The Heat</span>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" aria-selected="false">Murrini</button>
+    <button role="tab" aria-selected="true">Vessel</button>
+    <button role="tab" aria-selected="false">Plan</button>
+    <button role="tab" aria-selected="false">Learn</button>
+    <button role="tab" aria-selected="false">Saved</button>
+  </nav>
+  <div class="modes" role="group" aria-label="Mode"><button aria-pressed="false">Simple</button><button aria-pressed="true">Advanced</button></div>
+  <p class="saved"><i></i>Saved in this browser</p>
+</header>
+
+<div class="page">
+  <section class="stage" aria-label="Vessel">
+    <div class="view" id="view">
+      <div class="stage-head"><h1 id="formName">Tumbler</h1><p class="dims" id="dims"></p></div>
+      <svg id="ruler" aria-hidden="true"></svg>
+      <p class="stage-hint" id="hint">Drag to turn · scroll to zoom</p>
+    </div>
+    <div class="readout" aria-live="polite">
+      <p class="sum" id="sum"></p>
+      <div class="pulls" id="pulls"></div>
+      <div class="pull-key" id="pullKey"></div>
+      <p class="foot" id="foot"></p>
+    </div>
+  </section>
+
+  <aside class="rail" aria-label="Vessel tools">
+    <section aria-labelledby="h-form">
+      <h2 id="h-form">Form</h2>
+      <div class="presets" id="presets" role="group" aria-label="Starting forms"></div>
+      <div class="seg" role="group" aria-label="How to shape it">
+        <button id="modeParam" aria-pressed="true">Sliders</button>
+        <button id="modeFree" aria-pressed="false">Draw the outline</button>
+      </div>
+      <div class="profile" id="profile" hidden>
+        <svg id="profileSvg" viewBox="0 0 150 200" aria-label="Vessel outline, drag the points"></svg>
+        <p>Drag the points to change the width at each height. Height stays on its slider.</p>
+      </div>
+      <div class="fields" id="heightField"></div>
+      <fieldset class="fields" id="shapeFields"></fieldset>
+      <details class="more">
+        <summary>Ripples and optic ribs <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+        <div class="fields" id="surfaceFields"></div>
+      </details>
+    </section>
+
+    <section aria-labelledby="h-glass">
+      <h2 id="h-glass">Glass</h2>
+      <div class="chips" id="glassChips" role="group" aria-label="Body glass"></div>
+      <p class="note">The gather your pattern goes onto. Transparent colours only, so the pattern still shows.</p>
+    </section>
+
+    <section aria-labelledby="h-pattern">
+      <h2 id="h-pattern">Pattern</h2>
+      <div class="seg" role="group" aria-label="Pattern">
+        <button data-pattern="none" aria-pressed="false">None</button>
+        <button data-pattern="murrini" aria-pressed="true">Murrini</button>
+        <button data-pattern="reticello" aria-pressed="false">Reticello</button>
+      </div>
+      <div id="murriniPanel" style="margin-top:14px">
+        <div class="cane">
+          <canvas id="caneThumb" width="104" height="104" aria-hidden="true"></canvas>
+          <div><b>Flower</b><span class="mono">Ø 8 mm · 1.6 m a pull</span></div>
+          <a href="#" onclick="return false">Edit</a>
+        </div>
+        <div class="seg" role="group" aria-label="How slices go on">
+          <button data-place="fill" aria-pressed="true">Cover the piece</button>
+          <button data-place="hand" aria-pressed="false">Place by hand</button>
+        </div>
+        <div class="fields" id="sliceFields"></div>
+        <div id="handTools" hidden>
+          <div class="tools"><button id="undoBtn">Undo</button><button id="clearBtn">Clear</button></div>
+          <p class="note">Tap the vessel to place a slice. Each one is drawn at its real size.</p>
+        </div>
+      </div>
+      <div id="reticelloPanel" hidden style="margin-top:14px">
+        <div class="fields" id="retFields" style="margin-top:0"></div>
+        <div class="ribs" role="group" aria-label="Rib to colour" id="ribToggle"></div>
+        <div class="chips" id="ribChips"></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="h-plan" id="planSection">
+      <h2 id="h-plan">In your plan</h2>
+      <div class="paper" id="paper"></div>
+    </section>
+  </aside>
+</div>
+
+<script type="module">
+import * as THREE from 'three'
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+
+// ---- data -------------------------------------------------------------
+const CANE = { name: 'Flower', d: 8, pullMm: 1600 } // 32 mm gather pulled 4 : 1
+const KERF = 1 // mm lost per saw cut
+const WALL = 3.5
+const PRESETS = {
+  tumbler: { label: 'Tumbler', params: { height: 130, baseRadius: 48, topRadius: 50, bulge: 0, sphereBlend: 0 } },
+  bowl: { label: 'Bowl', params: { height: 70, baseRadius: 14, topRadius: 95, bulge: -5, sphereBlend: 0.4 } },
+  vase: { label: 'Vase', params: { height: 220, baseRadius: 30, topRadius: 35, bulge: 40, sphereBlend: 0 } },
+  pot: { label: 'Pot', params: { height: 150, baseRadius: 45, topRadius: 28, bulge: 35, sphereBlend: 0 } },
+  plate: { label: 'Plate', params: { height: 25, baseRadius: 4, topRadius: 95, bulge: 0, sphereBlend: 0.1 } },
+}
+const SURFACE_DEFAULTS = { waveAmplitude: 0, waveFrequency: 8, ribAmplitude: 0, ribCount: 8, ribTwist: 0 }
+const GLASS = [
+  { id: 'clear', name: 'Clear', swatch: '#dcebf0', clear: true },
+  { id: 'cobalt-blue', name: 'Cobalt Blue', swatch: '#1e3a8a' },
+  { id: 'copper-turquoise', name: 'Copper Turquoise', swatch: '#0d9488' },
+  { id: 'sulfur-carbon-amber', name: 'Amber', swatch: '#92400e' },
+  { id: 'erbium-pink', name: 'Erbium Rose Pink', swatch: '#f9a8d4' },
+  { id: 'praseodymium-green', name: 'Praseodymium Green', swatch: '#86efac' },
+]
+const RIB_COLOURS = [
+  { id: 'opal-white', name: 'Opal White', swatch: '#f5f5f4' },
+  { id: 'cobalt-blue', name: 'Cobalt Blue', swatch: '#1e3a8a' },
+  { id: 'gold-ruby', name: 'Gold Ruby', swatch: '#be123c' },
+  { id: 'copper-turquoise', name: 'Copper Turquoise', swatch: '#0d9488' },
+  { id: 'cadmium-yellow', name: 'Cadmium Yellow', swatch: '#eab308' },
+  { id: 'black-glass', name: 'Black', swatch: '#18181b' },
+]
+
+const state = {
+  preset: 'tumbler', edited: false,
+  params: { ...PRESETS.tumbler.params, ...SURFACE_DEFAULTS },
+  freeform: false, control: [],
+  glass: 'clear',
+  pattern: 'murrini', place: 'fill', thickness: 5, placed: [],
+  ribsAround: 16, ribA: 'opal-white', ribB: 'cobalt-blue', ribTarget: 'a',
+}
+let shown = { ...state.params } // what's drawn; eases toward state.params on a preset change
+
+// ---- profile (same maths as engine/vessel/profile.js) ------------------
+function paramRadius(p, t) {
+  const taper = p.baseRadius + (p.topRadius - p.baseRadius) * t
+  const parabola = p.bulge * Math.sin(Math.PI * t)
+  const sphere = p.sphereBlend * Math.max(p.baseRadius, p.topRadius) * Math.sqrt(Math.max(0, 1 - (2 * t - 1) ** 2))
+  const ripple = p.waveAmplitude * Math.sin(p.waveFrequency * t * Math.PI * 2)
+  return Math.max(2, taper + parabola + sphere + ripple)
+}
+function controlRadius(ctrl, t) {
+  const n = ctrl.length - 1, x = t * n, i = Math.min(n - 1, Math.floor(x)), f = x - i
+  const p0 = ctrl[Math.max(0, i - 1)], p1 = ctrl[i], p2 = ctrl[i + 1], p3 = ctrl[Math.min(n, i + 2)]
+  return 0.5 * (2 * p1 + (-p0 + p2) * f + (2 * p0 - 5 * p1 + 4 * p2 - p3) * f * f + (-p0 + 3 * p1 - 3 * p2 + p3) * f * f * f)
+}
+function radiusAt(t) {
+  if (state.freeform) {
+    const ripple = shown.waveAmplitude * Math.sin(shown.waveFrequency * t * Math.PI * 2)
+    return Math.max(2, controlRadius(state.control, t) + ripple)
+  }
+  return paramRadius(shown, t)
+}
+const ribAt = (t, theta) =>
+  shown.ribAmplitude * (0.5 + 0.5 * Math.cos(shown.ribCount * theta + (shown.ribTwist * Math.PI / 180) * t * shown.ribCount))
+
+const ROWS = 80, COLS = 144
+function measureForm() {
+  const H = shown.height, ss = [0]
+  let prev = radiusAt(0), maxR = prev
+  for (let j = 1; j <= ROWS; j++) {
+    const r = radiusAt(j / ROWS)
+    ss.push(ss[j - 1] + Math.hypot(r - prev, H / ROWS))
+    prev = r; maxR = Math.max(maxR, r)
+  }
+  const S = ss[ROWS]
+  let sumR = 0
+  for (let j = 0; j <= ROWS; j++) sumR += radiusAt(j / ROWS)
+  return { H, ss, S, maxR, meanR: sumR / (ROWS + 1), R0: radiusAt(0), R1: radiusAt(1) }
+}
+function tAtS(form, s) {
+  const { ss } = form
+  let j = 0
+  while (j < ROWS - 1 && ss[j + 1] < s) j++
+  const f = (s - ss[j]) / Math.max(1e-6, ss[j + 1] - ss[j])
+  return (j + Math.min(1, Math.max(0, f))) / ROWS
+}
+
+// ---- three.js scene -----------------------------------------------------
+const view = document.getElementById('view')
+const renderer = new THREE.WebGLRenderer({ antialias: true })
+renderer.setPixelRatio(Math.min(2, devicePixelRatio))
+renderer.toneMapping = THREE.ACESFilmicToneMapping
+view.prepend(renderer.domElement)
+renderer.domElement.setAttribute('aria-label', 'Vessel preview. Drag to turn it.')
+renderer.domElement.setAttribute('role', 'img')
+
+const scene = new THREE.Scene()
+scene.background = new THREE.Color('#071433')
+const camera = new THREE.PerspectiveCamera(30, 1, 1, 6000)
+const controls = new OrbitControls(camera, renderer.domElement)
+controls.enableDamping = true
+controls.enablePan = false
+controls.maxPolarAngle = Math.PI * 0.64
+
+// A painted studio: a dark sweep with two tall softboxes and a top light, so
+// clear glass has edges and highlights to read by.
+function studio() {
+  const c = document.createElement('canvas'); c.width = 1024; c.height = 512
+  const g = c.getContext('2d')
+  const sky = g.createLinearGradient(0, 0, 0, 512)
+  sky.addColorStop(0, '#3a5a8c'); sky.addColorStop(0.45, '#0f2148'); sky.addColorStop(1, '#040a1a')
+  g.fillStyle = sky; g.fillRect(0, 0, 1024, 512)
+  g.filter = 'blur(18px)'
+  g.fillStyle = '#ffffff'; g.fillRect(170, 120, 70, 230)
+  g.fillStyle = '#cfe9ff'; g.fillRect(640, 150, 46, 200)
+  g.fillStyle = '#ffffffcc'; g.beginPath(); g.ellipse(512, 20, 300, 40, 0, 0, Math.PI * 2); g.fill()
+  const t = new THREE.CanvasTexture(c)
+  t.mapping = THREE.EquirectangularReflectionMapping
+  t.colorSpace = THREE.SRGBColorSpace
+  return t
+}
+const pmrem = new THREE.PMREMGenerator(renderer)
+scene.environment = pmrem.fromEquirectangular(studio()).texture
+const key = new THREE.DirectionalLight(0xffffff, 1.1); key.position.set(300, 600, 500); scene.add(key)
+scene.add(new THREE.AmbientLight(0x8fb3ff, 0.25))
+
+// soft contact shadow
+const shadowTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 256
+  const g = c.getContext('2d'), gr = g.createRadialGradient(128, 128, 0, 128, 128, 128)
+  gr.addColorStop(0, 'rgba(0,0,0,.6)'); gr.addColorStop(.55, 'rgba(0,0,0,.25)'); gr.addColorStop(1, 'rgba(0,0,0,0)')
+  g.fillStyle = gr; g.fillRect(0, 0, 256, 256)
+  return new THREE.CanvasTexture(c)
+})()
+const shadow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false }))
+shadow.rotation.x = -Math.PI / 2; shadow.position.y = -0.2; scene.add(shadow)
+
+// Glass: see-through face-on, denser at grazing angles, the way a real
+// wall reads (you look through more glass at its edges).
+function glassMaterial(side) {
+  const m = new THREE.MeshPhysicalMaterial({
+    roughness: 0.05, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.04,
+    transparent: true, depthWrite: false, side, envMapIntensity: 1.3,
+  })
+  m.onBeforeCompile = (shader) => {
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <dithering_fragment>',
+      `#include <dithering_fragment>
+       float facing = abs(dot(normalize(vViewPosition), normal));
+       gl_FragColor.a = mix(gl_FragColor.a, 1.0, pow(1.0 - facing, 3.0) * 0.8);`,
+    )
+  }
+  return m
+}
+const outerMat = glassMaterial(THREE.FrontSide)
+const innerMat = glassMaterial(THREE.BackSide)
+const lipMat = glassMaterial(THREE.DoubleSide)
+
+const TEX = 2048
+const skinCanvas = document.createElement('canvas'); skinCanvas.width = skinCanvas.height = TEX
+const baseCanvas = document.createElement('canvas'); baseCanvas.width = baseCanvas.height = 1024
+const skinTex = new THREE.CanvasTexture(skinCanvas)
+const baseTex = new THREE.CanvasTexture(baseCanvas)
+for (const t of [skinTex, baseTex]) {
+  t.colorSpace = THREE.SRGBColorSpace
+  t.anisotropy = renderer.capabilities.getMaxAnisotropy()
+}
+skinTex.wrapS = THREE.RepeatWrapping
+const skinMat = new THREE.MeshPhysicalMaterial({ map: skinTex, alphaTest: 0.5, roughness: 0.35, side: THREE.DoubleSide })
+const baseSkinMat = new THREE.MeshPhysicalMaterial({ map: baseTex, alphaTest: 0.5, roughness: 0.35, side: THREE.DoubleSide })
+
+const vessel = new THREE.Group(); scene.add(vessel)
+let skinMesh = null
+
+function gridGeometry(rows, cols, pos, uv) {
+  const P = [], U = [], I = []
+  for (let j = 0; j <= rows; j++) for (let i = 0; i <= cols; i++) { P.push(...pos(j, i)); U.push(...uv(j, i)) }
+  for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+    const a = j * (cols + 1) + i, b = a + cols + 1
+    I.push(a, a + 1, b, a + 1, b + 1, b)
+  }
+  const geo = new THREE.BufferGeometry()
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3))
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2))
+  geo.setIndex(I)
+  geo.computeVertexNormals()
+  // the wrap seam: average the duplicated first and last columns
+  const n = geo.attributes.normal
+  for (let j = 0; j <= rows; j++) {
+    const a = j * (cols + 1), b = a + cols
+    const x = n.getX(a) + n.getX(b), y = n.getY(a) + n.getY(b), z = n.getZ(a) + n.getZ(b), l = Math.hypot(x, y, z) || 1
+    n.setXYZ(a, x / l, y / l, z / l); n.setXYZ(b, x / l, y / l, z / l)
+  }
+  return geo
+}
+const wallPoint = (form, j, i, offset) => {
+  const t = j / ROWS, th = (i / COLS) * Math.PI * 2
+  const r = Math.max(0.6, radiusAt(t) + ribAt(t, th) + offset)
+  return [r * Math.sin(th), t * form.H, r * Math.cos(th)]
+}
+function disc(form, y, offset, rings = 14) {
+  return gridGeometry(rings, COLS,
+    (j, i) => {
+      const th = (i / COLS) * Math.PI * 2, r = Math.max(0.6, radiusAt(0) + ribAt(0, th) + offset) * (j / rings)
+      return [r * Math.sin(th), y, r * Math.cos(th)]
+    },
+    (j, i) => {
+      const th = (i / COLS) * Math.PI * 2, f = (j / rings) * (Math.max(0.6, radiusAt(0) + ribAt(0, th) + offset) / form.R0)
+      return [0.5 + 0.5 * f * Math.sin(th), 0.5 + 0.5 * f * Math.cos(th)]
+    })
+}
+
+function buildVessel(form) {
+  for (const child of [...vessel.children]) { child.geometry.dispose(); vessel.remove(child) }
+  const uvWall = (j, i) => [i / COLS, form.ss[j] / form.S]
+  const add = (geo, mat, order) => { const m = new THREE.Mesh(geo, mat); m.renderOrder = order; vessel.add(m); return m }
+  add(gridGeometry(ROWS, COLS, (j, i) => wallPoint(form, j, i, -WALL), uvWall), innerMat, 1)
+  add(disc(form, WALL * 1.3, -WALL), innerMat, 1)
+  skinMesh = add(gridGeometry(ROWS, COLS, (j, i) => wallPoint(form, j, i, -1.1), uvWall), skinMat, 2)
+  add(disc(form, 1.1, -1.1), baseSkinMat, 2)
+  add(gridGeometry(ROWS, COLS, (j, i) => wallPoint(form, j, i, 0), uvWall), outerMat, 3)
+  add(disc(form, 0, 0), lipMat, 3)
+  add(gridGeometry(1, COLS, (j, i) => wallPoint(form, ROWS, i, j ? -WALL : 0), () => [0, 0]), lipMat, 3)
+  const foot = Math.max(form.R0, 20) * 2.6
+  shadow.scale.set(foot, foot, 1)
+}
+
+// ---- slices and reticello, painted at true size ------------------------
+function sliceImage() {
+  const c = document.createElement('canvas'); c.width = c.height = 160
+  const g = c.getContext('2d'); g.translate(80, 80)
+  g.fillStyle = '#e6eef0'; g.beginPath(); g.arc(0, 0, 79, 0, Math.PI * 2); g.fill() // clear casing
+  g.fillStyle = '#1e3a8a'; g.beginPath(); g.arc(0, 0, 70, 0, Math.PI * 2); g.fill()
+  g.fillStyle = '#f5f5f4'
+  for (let k = 0; k < 6; k++) { g.save(); g.rotate((k * Math.PI) / 3); g.beginPath(); g.ellipse(0, -38, 15, 25, 0, 0, Math.PI * 2); g.fill(); g.restore() }
+  g.fillStyle = '#be123c'; g.beginPath(); g.arc(0, 0, 15, 0, Math.PI * 2); g.fill()
+  return c
+}
+const SLICE = sliceImage()
+{
+  const t = document.getElementById('caneThumb').getContext('2d')
+  t.drawImage(SLICE, 0, 0, 104, 104)
+}
+
+function drawWrapped(g, x, y, rx, ry) {
+  for (const dx of [-TEX, 0, TEX]) {
+    if (x + dx + rx < 0 || x + dx - rx > TEX) continue
+    g.drawImage(SLICE, x + dx - rx, y - ry, rx * 2, ry * 2)
+  }
+}
+function slicePixel(form, u, v) {
+  const s = v * form.S, r = radiusAt(tAtS(form, s)), C = 2 * Math.PI * r
+  return { x: u * TEX, y: (1 - v) * TEX, rx: (CANE.d * 0.48 / C) * TEX, ry: (CANE.d * 0.48 / form.S) * TEX }
+}
+
+function paintMurrini(form) {
+  const g = skinCanvas.getContext('2d'), b = baseCanvas.getContext('2d')
+  g.clearRect(0, 0, TEX, TEX); b.clearRect(0, 0, 1024, 1024)
+  const d = CANE.d
+  if (state.place === 'hand') {
+    for (const p of state.placed) { const q = slicePixel(form, p.u, p.v); drawWrapped(g, q.x, q.y, q.rx, q.ry) }
+    return state.placed.length
+  }
+  let count = 0
+  // Wall: rows a slice apart in hex packing, each as many slices as fit
+  // round the circumference at that height.
+  const rowGap = (d * Math.sqrt(3)) / 2
+  for (let s = d / 2, k = 0; s + d / 2 <= form.S + 1e-6; s += rowGap, k++) {
+    const r = radiusAt(tAtS(form, s)), C = 2 * Math.PI * r, n = Math.floor(C / d)
+    if (n < 1) continue
+    const v = s / form.S
+    for (let i = 0; i < n; i++) {
+      const q = slicePixel(form, (i + (k % 2 ? 0.5 : 0)) / n, v)
+      drawWrapped(g, q.x, q.y, q.rx, q.ry)
+    }
+    count += n
+  }
+  // Base: a centre slice, then rings outward.
+  const scale = 512 / form.R0
+  const put = (x, y) => b.drawImage(SLICE, 512 + x * scale - d * 0.48 * scale, 512 + y * scale - d * 0.48 * scale, d * 0.96 * scale, d * 0.96 * scale)
+  if (d / 2 <= form.R0) { put(0, 0); count++ }
+  for (let ring = 1; ring * d + d / 2 <= form.R0; ring++) {
+    const rad = ring * d, n = Math.floor((2 * Math.PI * rad) / d)
+    for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; put(rad * Math.cos(a), rad * Math.sin(a)) }
+    count += n
+  }
+  return count
+}
+
+function paintReticello(form) {
+  const g = skinCanvas.getContext('2d')
+  g.clearRect(0, 0, TEX, TEX); baseCanvas.getContext('2d').clearRect(0, 0, 1024, 1024)
+  const N = state.ribsAround / 2
+  const C = 2 * Math.PI * form.meanR
+  const T = (form.S * Math.tan((40 * Math.PI) / 180)) / C // drift round the piece, in turns, rim to base
+  const w = Math.max(3, (1.2 / C) * TEX)
+  const colours = { a: RIB_COLOURS.find((c) => c.id === state.ribA).swatch, b: RIB_COLOURS.find((c) => c.id === state.ribB).swatch }
+  const span = Math.ceil(T) + 1
+  for (const [sign, col] of [[1, colours.a], [-1, colours.b]]) {
+    for (let i = 0; i < N; i++) for (let o = -span; o <= span; o++) {
+      const u0 = i / N + o
+      // Every thread wraps round whole, so there's no seam at u = 0.
+      g.lineCap = 'round'
+      g.strokeStyle = col; g.lineWidth = w
+      g.beginPath(); g.moveTo(u0 * TEX, TEX); g.lineTo((u0 + sign * T) * TEX, 0); g.stroke()
+      g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = w * 0.3
+      g.beginPath(); g.moveTo(u0 * TEX, TEX); g.lineTo((u0 + sign * T) * TEX, 0); g.stroke()
+    }
+  }
+  // The air bubble trapped at every crossing: what makes it reticello.
+  g.fillStyle = 'rgba(235,245,255,.85)'
+  const br = Math.max(3, (0.9 / C) * TEX)
+  for (let k = 0; ; k++) {
+    const v = k / (2 * T * N)
+    if (v > 1) break
+    for (let i = 0; i < N; i++) {
+      let x = ((i / N + T * v) % 1) * TEX
+      for (const dx of [-TEX, 0, TEX]) { g.beginPath(); g.ellipse(x + dx, (1 - v) * TEX, br, br * (C / form.S) * 0.9, 0, 0, Math.PI * 2); g.fill() }
+    }
+  }
+  return 0
+}
+
+// ---- words --------------------------------------------------------------
+const fmt = (n, dp = 0) => Number(n.toFixed(dp)).toLocaleString('en-GB')
+const metres = (mmv) => fmt(mmv / 1000, mmv < 1000 ? 2 : 1)
+const round5 = (n) => Math.round(n / 5) * 5
+function turnsLabel(deg) {
+  if (!deg) return 'Straight'
+  const t = Math.abs(deg) / 360
+  const words = { 0.25: 'a quarter turn', 0.5: 'half a turn', 0.75: 'three quarters of a turn', 1: '1 full turn' }
+  const frac = { 0.25: '¼', 0.5: '½', 0.75: '¾' }
+  const whole = Math.floor(t), rest = +(t - whole).toFixed(2)
+  const base = words[t] ?? `${whole || ''}${frac[rest] ?? ''} turns`
+  return `${base}, ${deg > 0 ? 'right' : 'left'}`
+}
+function formName() {
+  if (state.freeform) return 'Your outline'
+  const label = PRESETS[state.preset]?.label ?? 'Custom'
+  return state.edited ? `${label}, adjusted` : label
+}
+function silhouettePath(radiusFn, H, maxR, w, h, pad = 3) {
+  const sx = (w / 2 - pad) / maxR, sy = (h - pad * 2) / H, pts = []
+  for (let j = 0; j <= 24; j++) { const t = j / 24; pts.push([w / 2 + radiusFn(t) * sx, h - pad - t * H * sy]) }
+  const left = pts.map(([x, y]) => [w - x, y]).reverse()
+  return 'M' + [...left, ...pts].map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' L') + ' Z'
+}
+
+// ---- readout + plan step -----------------------------------------------
+function renderReadout(form, count) {
+  const sum = document.getElementById('sum'), pulls = document.getElementById('pulls')
+  const key = document.getElementById('pullKey'), foot = document.getElementById('foot')
+  pulls.innerHTML = ''; key.textContent = ''; foot.textContent = ''
+  const paper = document.getElementById('paper')
+  const outline = `<svg viewBox="0 0 54 72" aria-hidden="true"><path d="${silhouettePath(radiusAt, form.H, Math.max(form.maxR, form.H * 0.36), 54, 72)}"/></svg>`
+
+  if (state.pattern === 'none') {
+    sum.textContent = 'Plain glass. Choose Murrini to see how many slices this form takes.'
+    paper.innerHTML = '<p class="empty">Nothing to add yet. With a murrini pattern, a pick-up step goes here, after the pull.</p>'
+    return
+  }
+  if (state.pattern === 'reticello') {
+    sum.innerHTML = `Reticello, <b>${state.ribsAround / 2}</b> rib canes each way. This is a preview for now; reticello gets its own steps in the plan later.`
+    paper.innerHTML = '<p class="empty">Reticello isn’t added to the plan yet.</p>'
+    return
+  }
+  if (state.place === 'hand' && count === 0) {
+    sum.textContent = 'Tap the vessel to place a slice. Each one is drawn at its real size.'
+    paper.innerHTML = '<p class="empty">Place some slices and the pick-up step appears here.</p>'
+    return
+  }
+  const caneMm = count * (state.thickness + KERF), n = Math.ceil(caneMm / CANE.pullMm)
+  const upTo = state.place === 'fill' ? 'Up to ' : ''
+  sum.innerHTML = `${upTo}<b>${fmt(count)}</b> slices of your Ø ${CANE.d} mm cane, ${fmt(state.thickness, 1)} mm thick. That’s <b>${metres(caneMm)} m</b> of cane: <b>${n} ${n === 1 ? 'pull' : 'pulls'}</b> of 1.6 m.`
+  if (n <= 16) {
+    for (let i = 0; i < n; i++) {
+      const used = Math.min(1, (caneMm - i * CANE.pullMm) / CANE.pullMm)
+      pulls.insertAdjacentHTML('beforeend', `<span title="Pull ${i + 1}"><i style="width:${(used * 100).toFixed(1)}%"></i></span>`)
+    }
+    key.innerHTML = `<span>each bar is one 1.6 m pull</span><span>${fmt(n * CANE.pullMm / 1000 - caneMm / 1000, 2)} m spare</span>`
+  }
+  if (state.place === 'fill') foot.textContent = 'Up to, because blowing out after the pick-up stretches the slices, so the real piece takes fewer. Counted with 1 mm lost per saw cut.'
+
+  const patchW = round5(2 * Math.PI * form.meanR), patchH = round5(form.S + form.R0)
+  const rim = fmt(form.R1 * 2)
+  paper.innerHTML = `
+    <div class="step"><div>
+      <p class="after">after “Pull”</p>
+      <h3>Pick up onto the gather</h3>
+    </div>${outline}</div>
+    <ol>
+      <li>Slice the Ø ${CANE.d} mm cane into <span class="num">${fmt(state.thickness, 1)} mm</span> discs: ${upTo ? 'up to ' : ''}<span class="num">${fmt(count)}</span> of them, about <span class="num">${metres(caneMm)} m</span> of cane, so <span class="num">${n}</span> ${n === 1 ? 'pull' : 'pulls'}.</li>
+      <li>${state.place === 'fill'
+        ? `Lay them edge to edge on a kiln shelf in a patch about <span class="num">${patchW} × ${patchH} mm</span>: the wall unrolled, with enough at one end to close over the base.`
+        : `Lay them on a kiln shelf where you placed them, spaced the same way.`} Heat them through.</li>
+      <li>Roll the gather across to pick them up, then blow out to the ${formName().toLowerCase()}: <span class="num">${fmt(form.H)} mm</span> tall, Ø <span class="num">${rim} mm</span> rim.</li>
+    </ol>`
+}
+
+// ---- controls -----------------------------------------------------------
+const $ = (id) => document.getElementById(id)
+function field({ id, label, min, max, step, get, set, show }) {
+  const wrap = document.createElement('label'); wrap.className = 'field'
+  wrap.innerHTML = `<span class="row"><span>${label}</span><output id="${id}-out"></output></span><input id="${id}" type="range" min="${min}" max="${max}" step="${step}">`
+  const input = wrap.querySelector('input'), out = wrap.querySelector('output')
+  const sync = () => { input.value = get(); out.textContent = show(get()) }
+  input.addEventListener('input', () => { set(Number(input.value)); out.textContent = show(get()); onChange() })
+  syncers.push(sync)
+  return wrap
+}
+const syncers = []
+const formParam = (key) => ({
+  get: () => state.params[key],
+  set: (v) => { state.params[key] = v; shown[key] = v; state.edited = true },
+})
+const mm = (v) => `${fmt(v)} mm`
+const dia = (v) => `Ø ${fmt(v * 2)} mm`
+
+$('heightField').append(field({ id: 'height', label: 'Height', min: 20, max: 320, step: 5, ...formParam('height'), show: mm }))
+$('shapeFields').append(
+  field({ id: 'base', label: 'Base', min: 4, max: 100, step: 1, ...formParam('baseRadius'), show: dia }),
+  field({ id: 'rim', label: 'Rim', min: 5, max: 100, step: 1, ...formParam('topRadius'), show: dia }),
+  field({ id: 'belly', label: 'Belly or waist', min: -60, max: 60, step: 1, ...formParam('bulge'),
+    show: (v) => (v === 0 ? 'Straight' : `${v > 0 ? '+' : '−'}${fmt(Math.abs(v * 2))} mm Ø`) }),
+  field({ id: 'round', label: 'Roundness', min: 0, max: 1, step: 0.05, ...formParam('sphereBlend'), show: (v) => `${fmt(v * 100)}%` }),
+)
+$('surfaceFields').append(
+  field({ id: 'ripD', label: 'Ripple depth', min: 0, max: 15, step: 0.5, ...formParam('waveAmplitude'), show: (v) => (v ? `${fmt(v, 1)} mm` : 'None') }),
+  field({ id: 'ripN', label: 'Ripples, base to rim', min: 1, max: 24, step: 1, ...formParam('waveFrequency'), show: (v) => fmt(v) }),
+  field({ id: 'ribD', label: 'Optic rib depth', min: 0, max: 12, step: 0.5, ...formParam('ribAmplitude'), show: (v) => (v ? `${fmt(v, 1)} mm` : 'None') }),
+  field({ id: 'ribN', label: 'Ribs around', min: 3, max: 24, step: 1, ...formParam('ribCount'), show: (v) => fmt(v) }),
+  field({ id: 'ribT', label: 'Rib twist', min: -720, max: 720, step: 90, ...formParam('ribTwist'), show: turnsLabel }),
+)
+$('sliceFields').append(field({
+  id: 'thick', label: 'Slice thickness', min: 3, max: 8, step: 0.5,
+  get: () => state.thickness, set: (v) => { state.thickness = v }, show: (v) => `${fmt(v, 1)} mm`,
+}))
+$('retFields').append(field({
+  id: 'ribsAround', label: 'Rib canes around', min: 8, max: 32, step: 2,
+  get: () => state.ribsAround, set: (v) => { state.ribsAround = v }, show: (v) => `${v / 2} + ${v / 2}`,
+}))
+
+// presets with their real silhouettes
+for (const [id, preset] of Object.entries(PRESETS)) {
+  const p = { ...preset.params, ...SURFACE_DEFAULTS }
+  const maxR = Math.max(...Array.from({ length: 25 }, (_, j) => paramRadius(p, j / 24)), p.height * 0.5)
+  const b = document.createElement('button')
+  b.dataset.preset = id
+  b.innerHTML = `<svg viewBox="0 0 38 38" aria-hidden="true"><path d="${silhouettePath((t) => paramRadius(p, t), p.height, maxR, 38, 38)}"/></svg>${preset.label}`
+  b.addEventListener('click', () => applyPreset(id))
+  $('presets').append(b)
+}
+
+for (const g of GLASS) {
+  const b = document.createElement('button'); b.dataset.glass = g.id
+  b.innerHTML = `<span class="sw" style="background:${g.swatch}${g.clear ? ';background:linear-gradient(135deg,#dcebf0 0 45%,#9fb7c2 100%)' : ''}"></span>${g.name}`
+  b.addEventListener('click', () => { state.glass = g.id; onChange() })
+  $('glassChips').append(b)
+}
+
+function renderRibPicker() {
+  $('ribToggle').innerHTML = ''
+  for (const key of ['a', 'b']) {
+    const c = RIB_COLOURS.find((x) => x.id === state[key === 'a' ? 'ribA' : 'ribB'])
+    const b = document.createElement('button')
+    b.setAttribute('aria-pressed', String(state.ribTarget === key))
+    b.innerHTML = `<span class="sw" style="background:${c.swatch}"></span>Rib ${key.toUpperCase()}: ${c.name}`
+    b.addEventListener('click', () => { state.ribTarget = key; onChange() })
+    $('ribToggle').append(b)
+  }
+  $('ribChips').innerHTML = ''
+  for (const c of RIB_COLOURS) {
+    const current = state[state.ribTarget === 'a' ? 'ribA' : 'ribB']
+    const badges = [c.id === state.ribA && 'A', c.id === state.ribB && 'B'].filter(Boolean).join('+')
+    const b = document.createElement('button')
+    b.setAttribute('aria-pressed', String(current === c.id))
+    b.innerHTML = `<span class="sw" style="background:${c.swatch}"></span>${c.name}${badges ? `<span class="badge">${badges}</span>` : ''}`
+    b.addEventListener('click', () => { state[state.ribTarget === 'a' ? 'ribA' : 'ribB'] = c.id; onChange() })
+    $('ribChips').append(b)
+  }
+}
+
+document.querySelectorAll('[data-pattern]').forEach((b) => b.addEventListener('click', () => { state.pattern = b.dataset.pattern; onChange() }))
+document.querySelectorAll('[data-place]').forEach((b) => b.addEventListener('click', () => { state.place = b.dataset.place; onChange() }))
+$('undoBtn').addEventListener('click', () => { state.placed.pop(); onChange() })
+$('clearBtn').addEventListener('click', () => { state.placed = []; onChange() })
+$('modeParam').addEventListener('click', () => { state.freeform = false; onChange() })
+$('modeFree').addEventListener('click', () => {
+  if (!state.freeform) state.control = Array.from({ length: 7 }, (_, k) => paramRadius(shown, k / 6))
+  state.freeform = true; onChange()
+})
+
+// free-form outline
+const PROFILE_MAX = 160
+function renderProfile() {
+  const svg = $('profileSvg'), W = 150, Hh = 200, ax = 14
+  const x = (r) => ax + (r / PROFILE_MAX) * (W - ax - 8)
+  let d = ''
+  for (let j = 0; j <= 40; j++) { const t = j / 40; d += `${j ? 'L' : 'M'}${x(radiusAt(t)).toFixed(1)},${(Hh - 8 - t * (Hh - 16)).toFixed(1)}` }
+  svg.innerHTML = `<line x1="${ax}" y1="0" x2="${ax}" y2="${Hh}" stroke="var(--line)" stroke-dasharray="3 3"/>
+    <path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2"/>` +
+    state.control.map((r, k) => `<circle data-k="${k}" cx="${x(r)}" cy="${Hh - 8 - (k / 6) * (Hh - 16)}" r="7" fill="var(--accent-2)" stroke="var(--ground)" stroke-width="2" style="cursor:ew-resize"/>`).join('')
+}
+$('profileSvg').addEventListener('pointerdown', (e) => {
+  const k = e.target.dataset?.k
+  if (k === undefined) return
+  const svg = $('profileSvg'); svg.setPointerCapture(e.pointerId)
+  const move = (ev) => {
+    const rect = svg.getBoundingClientRect(), lx = ((ev.clientX - rect.left) / rect.width) * 150
+    state.control[+k] = Math.max(3, Math.min(PROFILE_MAX, ((lx - 14) / (150 - 14 - 8)) * PROFILE_MAX))
+    onChange()
+  }
+  const up = () => { svg.removeEventListener('pointermove', move); svg.removeEventListener('pointerup', up) }
+  svg.addEventListener('pointermove', move); svg.addEventListener('pointerup', up)
+})
+
+// place by hand: a tap, not a drag
+let down = null
+renderer.domElement.addEventListener('pointerdown', (e) => { down = [e.clientX, e.clientY] })
+renderer.domElement.addEventListener('pointerup', (e) => {
+  if (!down || state.pattern !== 'murrini' || state.place !== 'hand' || !skinMesh) return
+  if (Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5) return
+  const rect = renderer.domElement.getBoundingClientRect()
+  const ndc = new THREE.Vector2(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1)
+  const ray = new THREE.Raycaster(); ray.setFromCamera(ndc, camera)
+  const hit = ray.intersectObject(skinMesh)[0]
+  if (hit?.uv) { state.placed.push({ u: hit.uv.x, v: hit.uv.y }); onChange() }
+})
+
+// ---- update loop ----------------------------------------------------------
+let tween = null
+function applyPreset(id) {
+  state.preset = id; state.edited = false; state.freeform = false
+  const target = { ...state.params, ...PRESETS[id].params }
+  state.params = target
+  const from = { ...shown }, start = performance.now()
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches
+  tween = still ? null : { from, target, start }
+  if (still) shown = { ...target }
+  refit = true
+  onChange()
+}
+
+let dirty = true, refit = true
+function onChange() { dirty = true }
+
+function syncUi(form) {
+  syncers.forEach((s) => s())
+  $('formName').textContent = formName()
+  $('dims').innerHTML = `${fmt(form.H)} mm tall · Ø ${fmt(form.R1 * 2)} mm rim<span class="wide"> · Ø ${fmt(form.maxR * 2)} mm at the widest</span>`
+  document.querySelectorAll('[data-preset]').forEach((b) => b.setAttribute('aria-pressed', String(!state.freeform && b.dataset.preset === state.preset)))
+  document.querySelectorAll('[data-glass]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.glass === state.glass)))
+  document.querySelectorAll('[data-pattern]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.pattern === state.pattern)))
+  document.querySelectorAll('[data-place]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.place === state.place)))
+  $('modeParam').setAttribute('aria-pressed', String(!state.freeform))
+  $('modeFree').setAttribute('aria-pressed', String(state.freeform))
+  $('profile').hidden = !state.freeform
+  $('shapeFields').disabled = state.freeform
+  $('murriniPanel').hidden = state.pattern !== 'murrini'
+  $('reticelloPanel').hidden = state.pattern !== 'reticello'
+  $('handTools').hidden = state.place !== 'hand'
+  $('undoBtn').disabled = $('clearBtn').disabled = state.placed.length === 0
+  view.dataset.hand = String(state.pattern === 'murrini' && state.place === 'hand')
+  if (state.freeform) renderProfile()
+  renderRibPicker()
+  const coarse = matchMedia('(pointer: coarse)').matches
+  $('hint').textContent = view.dataset.hand === 'true'
+    ? (coarse ? 'Tap to place · drag to turn · pinch to zoom' : 'Click to place · drag to turn · scroll to zoom')
+    : (coarse ? 'Drag to turn · pinch to zoom' : 'Drag to turn · scroll to zoom')
+}
+
+function update() {
+  if (tween) {
+    const k = Math.min(1, (performance.now() - tween.start) / 520), e = 1 - Math.pow(2, -10 * k)
+    for (const key of Object.keys(tween.target)) shown[key] = tween.from[key] + (tween.target[key] - tween.from[key]) * e
+    if (k >= 1) { shown = { ...tween.target }; tween = null }
+    dirty = true
+  }
+  if (!dirty) return
+  dirty = false
+  const form = measureForm()
+  buildVessel(form)
+  const g = GLASS.find((x) => x.id === state.glass)
+  for (const m of [outerMat, innerMat, lipMat]) { m.color.set(g.swatch); m.opacity = g.clear ? 0.14 : 0.45 }
+  innerMat.opacity *= 0.7
+  if (refit) fit(form)
+  lastForm = form
+  // Repaint the slices once the form settles, not on every frame of the
+  // ease between presets: the old pattern stretches along meanwhile.
+  if (tween) return
+  refit = false
+  const count = state.pattern === 'murrini' ? paintMurrini(form) : state.pattern === 'reticello' ? paintReticello(form) : (skinCanvas.getContext('2d').clearRect(0, 0, TEX, TEX), baseCanvas.getContext('2d').clearRect(0, 0, 1024, 1024), 0)
+  skinTex.needsUpdate = baseTex.needsUpdate = true
+  syncUi(form)
+  renderReadout(form, count)
+}
+let lastForm = null
+
+function fit(form) {
+  // Fit the height to the view's height and the width to its width,
+  // leaving room for the title above and the ruler beside it.
+  const tan = Math.tan((camera.fov * Math.PI) / 360)
+  const dist = Math.max((form.H * (camera.aspect < 1 ? 0.95 : 0.78)) / tan, (form.maxR * 1.7) / (tan * camera.aspect))
+  const dir = camera.position.clone().sub(controls.target)
+  if (dir.lengthSq() < 1) dir.set(0, 0.34, 1)
+  dir.normalize()
+  controls.target.set(0, form.H * 0.5, 0)
+  camera.position.copy(controls.target).addScaledVector(dir, dist)
+  controls.minDistance = dist * 0.35; controls.maxDistance = dist * 2.5
+}
+
+// mm ruler beside the vessel, following the view
+function drawRuler() {
+  const svg = $('ruler')
+  if (!lastForm) return
+  const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0)
+  const off = right.multiplyScalar(-(lastForm.maxR + 14))
+  const toPx = (y) => {
+    const p = new THREE.Vector3(0, y, 0).add(off).project(camera)
+    return [(p.x * 0.5 + 0.5) * view.clientWidth, (-p.y * 0.5 + 0.5) * view.clientHeight]
+  }
+  const [x0, y0] = toPx(0), [x1, y1] = toPx(lastForm.H)
+  const len = Math.hypot(x1 - x0, y1 - y0)
+  if (len < 50) { svg.innerHTML = ''; return }
+  const nx = -(y1 - y0) / len, ny = (x1 - x0) / len // tick direction
+  let out = `<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}"/>`
+  const step = lastForm.H > 150 ? 20 : 10
+  for (let mmv = 0; mmv <= lastForm.H + 0.01; mmv += step) {
+    const [x, y] = toPx(mmv), big = mmv % (step * 5) === 0
+    out += `<line x1="${x}" y1="${y}" x2="${x + nx * (big ? 9 : 5)}" y2="${y + ny * (big ? 9 : 5)}"/>`
+  }
+  out += `<text x="${x1 + nx * 12}" y="${y1 + 4}" text-anchor="end">${fmt(lastForm.H)} mm</text>`
+  svg.innerHTML = out
+}
+
+function resize() {
+  const w = view.clientWidth, h = view.clientHeight
+  renderer.setSize(w, h, false)
+  camera.aspect = w / h; camera.updateProjectionMatrix()
+  refit = true; dirty = true
+}
+new ResizeObserver(resize).observe(view)
+
+function frame() {
+  update()
+  controls.update()
+  renderer.render(scene, camera)
+  drawRuler()
+  requestAnimationFrame(frame)
+}
+resize()
+camera.position.set(0, 160, 420)
+frame()
+</script>
+</body>
+</html>

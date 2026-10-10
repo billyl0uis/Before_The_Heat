@@ -5,6 +5,7 @@ import { PlanSheet } from '../components/plan/PlanSheet'
 import { ShopChecklist } from '../components/plan/ShopChecklist'
 import { pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
 import { buildShopPlan, shopPlanWarnings, turnsLabel, usedColorants } from '../engine/murrini/shopPlan'
+import { planPickup } from '../engine/vessel/pickup'
 
 const VIEW_KEY = 'before-the-heat:plan-view'
 
@@ -16,13 +17,15 @@ function readView() {
   }
 }
 
-export function PlanPage({ design, onEdit }) {
+export function PlanPage({ design, vessel, onEdit }) {
   const [view, setView] = useState(readView)
   const { elements, pattern, rod, casing, extrusion } = design
-  const steps = useMemo(
-    () => buildShopPlan({ elements, pattern, rod, casing, extrusion }),
-    [elements, pattern, rod, casing, extrusion],
-  )
+  // A murrini pick-up chosen on the Vessel page ends the plan.
+  const pickup = useMemo(() => planPickup(vessel, design), [vessel, design])
+  const steps = useMemo(() => {
+    const cane = buildShopPlan({ elements, pattern, rod, casing, extrusion })
+    return pickup && cane.length ? [...cane, pickup.step] : cane
+  }, [elements, pattern, rod, casing, extrusion, pickup])
   const warnings = useMemo(() => shopPlanWarnings({ elements, casing }), [elements, casing])
   const colorants = useMemo(() => usedColorants({ elements, casing }), [elements, casing])
 

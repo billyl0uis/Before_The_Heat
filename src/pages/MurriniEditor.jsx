@@ -86,7 +86,7 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
 
   const [colorantId, setColorantId] = useState(GLASS_COLOR_INDEX[0].id)
   const [useCustomColor, setUseCustomColor] = useState(false)
-  const [customColor, setCustomColor] = useState('#c084fc')
+  const [customColor, setCustomColor] = useState('#f2762e')
   // The second color a compound tool (Jellyroll, Pinwheel, Zanfirico)
   // uses — null means "pick one automatically" (see resolveColorTrio).
   const [accentColorantId, setAccentColorantId] = useState(null)
