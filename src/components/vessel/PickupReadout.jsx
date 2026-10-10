@@ -1,4 +1,4 @@
-import { metres, SAW_KERF_MM } from '../../engine/vessel/pickup'
+import { metres, pickupTotals, SAW_KERF_MM } from '../../engine/vessel/pickup'
 
 const fmt = (value, digits = 1) => value.toLocaleString('en', { maximumFractionDigits: digits })
 const Num = ({ children }) => <b className="font-mono text-[1.05em] font-semibold text-ink">{children}</b>
@@ -61,6 +61,15 @@ export function PickupReadout({ vessel, pickup, hasDesign }) {
             <span>{metres(pickup.totals.spareMm)} m spare</span>
           </p>
         </>
+      )}
+      {pickup && !pickup.byHand && pickup.totals.pulls > 3 && (
+        <p className="mt-2 max-w-[44rem] text-[0.8rem] text-ink-soft">
+          That’s a lot of cane. Thinner slices use less
+          {vessel.thicknessMm > 3 &&
+            ` (at 3 mm it’s ${pickupTotals({ count: pickup.count, thicknessMm: 3, pullLengthMm: pickup.pullLengthMm }).pulls} pulls)`}
+          , a longer gather gives more cane per pull, and blowing out further stretches each slice so the piece
+          takes fewer.
+        </p>
       )}
       {pickup && !pickup.byHand && (
         <p className="mt-2 max-w-[44rem] text-[0.8rem] text-faint max-lg:hidden">

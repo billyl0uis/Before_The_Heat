@@ -130,7 +130,7 @@ export function PlanSheet({ design, steps, warnings, colorants }) {
       </section>
       <section className="grid gap-6 border-t-2 border-[#0b0e2e] pt-4 text-sm leading-relaxed md:col-span-2 md:grid-cols-2">
         <div>
-          <p className="font-bold text-[#1f6b3a]">Colours used</p>
+          <p className="font-bold text-[#1f6b3a]">Colors used</p>
           <p>
             {colorants.map((colorant) => colorant.name).join(', ') || 'None yet'}. This plan doesn't assume
             a COE: use rods from one compatible system and pull a test strip first.

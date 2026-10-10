@@ -6,11 +6,12 @@ import { VesselCanvas } from '../components/vessel/VesselCanvas'
 import { VesselControls } from '../components/vessel/VesselControls'
 import { GLASS_COLOR_INDEX } from '../content/glassColorIndex'
 import { findColorant, pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
+import { turnsLabel } from '../engine/murrini/shopPlan'
 import { renderSlicePlate } from '../engine/murrini/slicePlate'
 import { measureWall, metres, murriniLayout, planPickup, planReticello, vesselName } from '../engine/vessel/pickup'
 import { vesselRadiusFunction } from '../engine/vessel/profile'
 
-// The gather under the pattern. Transparent colours only, so the pattern
+// The gather under the pattern. Transparent colors only, so the pattern
 // still shows through.
 const BODY_GLASS = ['clear', 'cobalt-blue', 'copper-turquoise', 'sulfur-carbon-amber', 'erbium-pink', 'praseodymium-green']
 const CLEAR_SWATCH = '#dcebf0'
@@ -136,7 +137,7 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
             })}
           </div>
           <p className="mt-2 text-[0.8rem] leading-relaxed text-mute">
-            The gather your pattern goes onto. Transparent colours only, so the pattern still shows.
+            The gather your pattern goes onto. Transparent colors only, so the pattern still shows.
           </p>
         </RailSection>
 
@@ -171,6 +172,12 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
                     Edit
                   </button>
                 </div>
+                {design.extrusion?.twistDegrees ? (
+                  <p className="rounded-[10px] border border-line px-3 py-2.5 text-[0.8rem] leading-relaxed text-ink-soft">
+                    Your cane is twisted {turnsLabel(design.extrusion.twistDegrees)}. Murrini are thin slices cut across
+                    it, so the twist won’t show: each slice is your pattern, just turned a little.
+                  </p>
+                ) : null}
                 <Segmented
                   label="How slices go on"
                   value={vessel.place}
@@ -237,7 +244,7 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
               />
               {/* Pick which rib you're colouring, then a named colour: works by
                   tap and keyboard alike. */}
-              <div className="grid grid-cols-2 gap-[3px] rounded-[10px] bg-raise p-[3px]" role="group" aria-label="Rib to colour">
+              <div className="grid grid-cols-2 gap-[3px] rounded-[10px] bg-raise p-[3px]" role="group" aria-label="Rib to color">
                 {[
                   { key: 'a', label: 'Rib A', id: vessel.ribA },
                   { key: 'b', label: 'Rib B', id: vessel.ribB },

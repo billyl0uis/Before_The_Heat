@@ -21,7 +21,7 @@ import { useResponsiveCanvasSize } from '../hooks/useResponsiveCanvasSize'
 import { useSliceGeometry } from '../hooks/useSliceGeometry'
 
 const STORE_KEY = 'before-the-heat:simple'
-const STEPS = ['Recipe', 'Colours', 'Size', 'Plan']
+const STEPS = ['Recipe', 'Colors', 'Size', 'Plan']
 const TWISTS = [
   { degrees: 0, label: 'None' },
   { degrees: 180, label: '½ turn' },
@@ -71,7 +71,7 @@ const fmt = (value) => value.toLocaleString('en', { maximumFractionDigits: 1 })
 const shortName = (name) => name.split(' / ')[0].replace(/ \(.*\)$/, '')
 
 function colourNote(colorant) {
-  if (colorant.id === 'clear') return 'no colour'
+  if (colorant.id === 'clear') return 'no color'
   if (colorant.hazard === 'cadmium') return 'toxic'
   if (colorant.hazard === 'radioactive') return 'radioactive'
   if (colorant.strikes) return 'strikes'
@@ -324,10 +324,10 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
           {step === 1 && (
             <>
               <h1 className="text-[1.6rem] leading-tight font-extrabold tracking-tight">
-                Choose the colours
+                Choose the colors
               </h1>
               <p className="mt-1.5 text-mute">
-                One colour for each part of the {recipe.name.toLowerCase()}. Tap a part to change it.
+                One color for each part of the {recipe.name.toLowerCase()}. Tap a part to change it.
               </p>
               <div className="mt-5 flex flex-col gap-2.5">
                 {Object.entries(recipe.slots).map(([key, slot]) => {
