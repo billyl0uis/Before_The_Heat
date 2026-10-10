@@ -28,34 +28,39 @@ function buildDesignPayload(design) {
 function NotConfiguredNotice() {
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-3 rounded-lg border border-neutral-800 bg-neutral-900 p-6">
-      <h2 className="text-base font-medium text-neutral-100">
-        Firebase isn't configured yet
-      </h2>
+      <h2 className="text-base font-semibold text-neutral-100">Saving named designs isn't switched on here</h2>
       <p className="text-base leading-relaxed text-neutral-400">
-        The Design Vault needs a real Firebase project (Firestore + Auth)
-        to save and load designs. This app never crashes without one — it
-        just skips initialization and shows this message instead.
+        The design you're working on is still kept in this browser as you go, so it will be here next time you
+        open Before The Heat on this device. What isn't available on this copy of the app is saving several
+        designs by name to come back to.
       </p>
-      <ol className="flex list-decimal flex-col gap-1 pl-5 text-base text-neutral-400">
-        <li>
-          Create a project at{' '}
-          <a
-            href="https://console.firebase.google.com/"
-            target="_blank"
-            rel="noreferrer"
-            className="text-purple-400 hover:underline"
-          >
-            console.firebase.google.com
-          </a>
-          , then enable Firestore and Anonymous Authentication.
-        </li>
-        <li>
-          Copy <code className="rounded bg-neutral-800 px-1">.env.example</code>{' '}
-          to <code className="rounded bg-neutral-800 px-1">.env.local</code>{' '}
-          and fill in your project's web app config values.
-        </li>
-        <li>Restart the dev server so the new env vars are picked up.</li>
-      </ol>
+      <p className="text-base leading-relaxed text-neutral-400">
+        To keep a design for good, open its plan and print it or save it as a PDF.
+      </p>
+      {import.meta.env.DEV && (
+        <details className="text-sm text-neutral-400">
+          <summary className="cursor-pointer font-semibold text-neutral-300">Setting this up (developers)</summary>
+          <ol className="mt-2 flex list-decimal flex-col gap-1 pl-5">
+            <li>
+              Create a Firebase project at{' '}
+              <a
+                href="https://console.firebase.google.com/"
+                target="_blank"
+                rel="noreferrer"
+                className="text-accent underline underline-offset-[3px]"
+              >
+                console.firebase.google.com
+              </a>{' '}
+              with Firestore and Anonymous Authentication on.
+            </li>
+            <li>
+              Copy <code className="rounded bg-neutral-800 px-1">.env.example</code> to{' '}
+              <code className="rounded bg-neutral-800 px-1">.env.local</code> and fill in the web app config.
+            </li>
+            <li>Restart the dev server.</li>
+          </ol>
+        </details>
+      )}
     </div>
   )
 }
@@ -168,9 +173,9 @@ export function DesignVaultPage({ design, onLoadDesign }) {
   return (
     <div className="flex flex-col items-center gap-6 p-4 sm:p-8">
       <div className="max-w-xl text-center">
-        <h1 className="text-2xl font-medium text-neutral-100">Design Vault</h1>
+        <h1 className="text-2xl font-semibold text-neutral-100">Saved designs</h1>
         <p className="mt-1 text-left text-base leading-relaxed text-neutral-400">
-          Save the pattern you're working on and load it again later.
+          Save the design you're working on by name, and open it again later.
         </p>
       </div>
 
@@ -193,7 +198,7 @@ export function DesignVaultPage({ design, onLoadDesign }) {
             <button
               type="submit"
               disabled={!user || !designName.trim() || status === 'saving'}
-              className="rounded bg-accent px-4 py-1.5 text-base text-accent-ink transition-colors hover:bg-purple-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded bg-accent px-4 py-1.5 text-base text-accent-ink transition-[filter] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {status === 'saving' ? 'Saving…' : 'Save current design'}
             </button>
@@ -207,7 +212,7 @@ export function DesignVaultPage({ design, onLoadDesign }) {
 
           <div className="flex flex-col gap-2">
             {savedDesigns.length === 0 ? (
-              <p className="text-base leading-relaxed text-neutral-400">No saved designs yet.</p>
+              <p className="text-base leading-relaxed text-neutral-400">Nothing saved yet. Name the design you’re working on above to save it.</p>
             ) : (
               savedDesigns.map((saved) => (
                 <SavedDesignRow

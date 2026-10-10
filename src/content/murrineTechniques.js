@@ -8,7 +8,7 @@ export const MURRINI_TECHNIQUES = {
   circle: {
     title: 'Simple Cane',
     summary:
-      'A single gather of colored glass, pulled straight into a round rod. No mold or second color involved — the plainest cane to make and the easiest to bundle with others.',
+      'A single gather of colored glass, pulled straight into a round rod. No mold or second color involved: the plainest cane to make and the easiest to bundle with others.',
     steps: [
       'Gather molten glass of one color onto the pipe or punty.',
       'Reheat and pull the gather lengthwise into a long, even rod.',
@@ -18,17 +18,17 @@ export const MURRINI_TECHNIQUES = {
   ring: {
     title: 'Casing (Overlay)',
     summary:
-      "A contrasting color is gathered over a base color before pulling, so the cane shows a colored ring around a solid core when sliced. The app draws this ring hollow for clarity — in real glass the center stays filled with the core color, it's not an empty hole.",
+      "A contrasting color is gathered over a base color before pulling, so the cane shows a colored ring around a solid core when sliced. The app draws this ring hollow for clarity; in real glass the center stays filled with the core color, it's not an empty hole.",
     steps: [
       'Gather the base/core color first.',
       'Dip that gather into a pot of the casing color, coating it evenly.',
-      'Reheat and pull the cased gather into a rod — the casing stays as an outer layer the whole length.',
+      'Reheat and pull the cased gather into a rod. The casing stays as an outer layer the whole length.',
     ],
   },
   marver: {
     title: 'Marvering (Flat Panels)',
     summary:
-      "For a small number of flat sides — a square or hexagonal cane — no mold is needed. The gather is shaped by hand against the marver, a flat steel (historically marble) table, pressing one facet at a time.",
+      "For a small number of flat sides, such as a square or hexagonal cane, no mold is needed. The gather is shaped by hand against the marver, a flat steel (historically marble) table, pressing one facet at a time.",
     steps: [
       'Gather the glass and reheat it to working temperature.',
       'Press and roll the gather against the flat marver table to flatten one side.',
@@ -39,17 +39,17 @@ export const MURRINI_TECHNIQUES = {
   opticMold: {
     title: 'Optic / Facet Mold',
     summary:
-      'For more facets than can be pressed by hand, the gather goes into a ribbed metal mold instead — a cavity lined with flat panels. Pressing the gather into it imprints every facet in one motion, evenly, which would be impractical to marver one side at a time.',
+      'For more facets than can be pressed by hand, the gather goes into a ribbed metal mold instead: a cavity lined with flat panels. Pressing the gather into it imprints every facet in one motion, evenly, which would be impractical to marver one side at a time.',
     steps: [
       'Gather the glass and reheat it to working temperature.',
       'Lower the gather into an optic mold with flat internal panels and press it against the mold walls.',
-      'Remove the faceted gather and pull it into a rod — the facets hold along the whole length.',
+      'Remove the faceted gather and pull it into a rod. The facets hold along the whole length.',
     ],
   },
   star: {
     title: 'Star / Chevron Mold',
     summary:
-      "The chevron (or rosetta/star) bead technique, documented back to 15th-century Murano: 4-7 layers of alternating color are built up in a star-shaped mold, each new casing pressed into the mold again so it keeps the star outline. The whole layered bundle is then drawn out from both ends at once (a rod on each side, pulled apart), not stretched from a single point like the other canes here — that two-sided pull is what keeps the nested star pattern centered and even along the whole length.",
+      "The chevron (or rosetta/star) bead technique, documented back to 15th-century Murano: 4-7 layers of alternating color are built up in a star-shaped mold, each new casing pressed into the mold again so it keeps the star outline. The whole layered bundle is then drawn out from both ends at once (a rod on each side, pulled apart), not stretched from a single point like the other canes here. That two-sided pull is what keeps the nested star pattern centered and even along the whole length.",
     steps: [
       'Press a gather into a star-shaped mold so its cross-section becomes star-shaped.',
       'Case that star with a contrasting color, then press into the star mold again so the new layer keeps the star outline.',
@@ -60,40 +60,40 @@ export const MURRINI_TECHNIQUES = {
   spiral: {
     title: 'Jellyroll (Rolled Spiral)',
     summary:
-      "A genuinely different technique from twist/zanfirico (which spirals along a rod's length, visible from the side) — this spiral is built into the cross-section itself, visible when you slice straight across. A striped strip of alternating colors is wound into a coil from the center outward, like a jellyroll, so every slice shows the same nested spiral. Real jellyroll canes are typically cased in another color afterward, same as any other cane core.",
+      "A genuinely different technique from twist/zanfirico (which spirals along a rod's length, visible from the side); this spiral is built into the cross-section itself, visible when you slice straight across. A striped strip of alternating colors is wound into a coil from the center outward, like a jellyroll, so every slice shows the same nested spiral. Real jellyroll canes are typically cased in another color afterward, same as any other cane core.",
     steps: [
       'Lay out a thin strip of glass with alternating color bands (stringers, or a striped sheet).',
-      "Starting from one end, wind the strip into a tight coil, building it out from the center — the app's two interleaved spirals (offset by half a turn) stand in for the alternating stripe.",
+      "Starting from one end, wind the strip into a tight coil, building it out from the center. The app's two interleaved spirals (offset by half a turn) stand in for the alternating stripe.",
       'Heat the coiled strip until it fuses into a single solid disc with a spiral cross-section.',
-      'Pick the fused coil up on a punty, case it in another color if wanted, and pull it into a rod — the spiral holds all the way down the length.',
+      'Pick the fused coil up on a punty, case it in another color if wanted, and pull it into a rod. The spiral holds all the way down the length.',
     ],
   },
   jellyroll: {
     title: 'Jellyroll, Cased',
     summary:
-      'A jellyroll coil built first (see Jellyroll (Rolled Spiral) for that step), then cased in another color afterward — real jellyroll canes are typically encased the same way any other cane core would be, which protects the coiled pattern through the rest of the working process.',
+      'A jellyroll coil built first (see Jellyroll (Rolled Spiral) for that step), then cased in another color afterward. Real jellyroll canes are typically encased the same way any other cane core would be, which protects the coiled pattern through the rest of the working process.',
     steps: [
-      "Lay out a thin strip of glass with alternating color bands and wind it into a tight coil from the center outward — the app's two interleaved spirals stand in for the alternating stripe.",
+      "Lay out a thin strip of glass with alternating color bands and wind it into a tight coil from the center outward. The app's two interleaved spirals stand in for the alternating stripe.",
       'Heat the coiled strip until it fuses into a single solid disc with a spiral cross-section.',
       'Gather the casing color over the fused coil, coating it evenly.',
-      'Reheat and pull the cased gather into a rod — the casing stays as an outer layer the whole length, with the spiral visible in the core.',
+      'Reheat and pull the cased gather into a rod. The casing stays as an outer layer the whole length, with the spiral visible in the core.',
     ],
   },
   pinwheel: {
     title: 'Pinwheel Cane',
     summary:
-      'Alternating colored wedges — like slices of a pie — bundled side by side around a center point, then twisted as the whole bundle is drawn out. The straight wedge seams curve into a swirling pinwheel pattern as the twist works its way through the pull; more twist (or a longer pull) curves the blades further.',
+      'Alternating colored wedges, like slices of a pie, bundled side by side around a center point, then twisted as the whole bundle is drawn out. The straight wedge seams curve into a swirling pinwheel pattern as the twist works its way through the pull; more twist (or a longer pull) curves the blades further.',
     steps: [
       'Pull each wedge-shaped color as its own simple cane, cut to matching lengths.',
       'Pack the wedges together around a center point, alternating colors, so the cross-section looks like a pie sliced into equal wedges.',
-      "Fuse the bundle with a reheat, then twist it as it's drawn out from both ends — the twist is what curves the straight wedge seams into the pinwheel's characteristic swirl.",
-      'Slice the cooled rod crosswise — every slice shows the same curved pinwheel pattern.',
+      "Fuse the bundle with a reheat, then twist it as it's drawn out from both ends. The twist is what curves the straight wedge seams into the pinwheel's characteristic swirl.",
+      'Slice the cooled rod crosswise: every slice shows the same curved pinwheel pattern.',
     ],
   },
   line: {
     title: 'Stringer',
     summary:
-      "A thin, separately pulled thread of glass. Unlike the shapes above, a stringer usually isn't sliced into murrini cross-sections — it's trailed or wound directly onto a piece for fine linework, though it can also ride along inside a bundled cane as a thin accent.",
+      "A thin, separately pulled thread of glass. Unlike the shapes above, a stringer usually isn't sliced into murrini cross-sections: it's trailed or wound directly onto a piece for fine linework, though it can also ride along inside a bundled cane as a thin accent.",
     steps: [
       'Gather a small amount of glass on a punty.',
       'Reheat and pull it into a long, thin, even thread while still soft.',
@@ -103,100 +103,100 @@ export const MURRINI_TECHNIQUES = {
   embeddedThread: {
     title: 'Embedded Thread',
     summary:
-      "A thin thread trailed into a gather at one spot, then covered back over — an accent color sitting inside the glass at one point, not sheeting all the way around it the way a full casing does, and not a full ring of threads the way the Zanfirico tool builds. On its own it's just an inclusion; twist the bundle while pulling (the Rod Extrusion twist) and that off-center thread spirals into a visible helix.",
+      "A thin thread trailed into a gather at one spot, then covered back over: an accent color sitting inside the glass at one point, not sheeting all the way around it the way a full casing does, and not a full ring of threads the way the Zanfirico tool builds. On its own it's just an inclusion; twist the bundle while pulling (the Rod Extrusion twist) and that off-center thread spirals into a visible helix.",
     steps: [
       'Gather the base color first.',
       'Trail a thin thread of the accent color onto one spot on the gather and marver it in so it fuses with the surface.',
       'Reheat and gather a thin layer of the base color back over it, re-covering the thread.',
-      'Pull into a rod — twisting as you pull spirals the embedded thread into a helix; pulling straight keeps it as one visible seam along the length instead.',
+      'Pull into a rod. Twisting as you pull spirals the embedded thread into a helix; pulling straight keeps it as one visible seam along the length instead.',
     ],
   },
   zanfirico: {
     title: 'Zanfirico (Twisted Latticino)',
     summary:
-      "Real zanfirico/filigrana a retorti canes use several thin threads laid evenly around a core cylinder's circumference — not just one, and packed edge-to-edge touching their neighbors, not loosely scattered — then a layer of clear glass is gathered over the whole threaded core to lock the threads in place before anything is twisted. Only then is the cased bundle twisted as it's pulled, turning the straight parallel threads into the classic corkscrew lattice.",
+      "Real zanfirico/filigrana a retorti canes use several thin threads laid evenly around a core cylinder's circumference (not just one, and packed edge to edge, touching their neighbors, not loosely scattered). Then a layer of clear glass is gathered over the whole threaded core to lock the threads in place before anything is twisted. Only then is the cased bundle twisted as it's pulled, turning the straight parallel threads into the classic corkscrew lattice.",
     steps: [
       'Gather the core color onto a punty (often clear, but any color works).',
       "Lay several thin threads of the accent color evenly spaced around the core's circumference and marver them in so they fuse to the surface.",
       'Gather a layer of clear glass over the whole threaded core, locking the threads in place under a smooth outer surface.',
-      "Reheat and pull the cased bundle into a rod while twisting it — the twist is what turns the straight parallel threads into a corkscrew lattice; pulling without twisting keeps them running straight instead.",
+      "Reheat and pull the cased bundle into a rod while twisting it. The twist is what turns the straight parallel threads into a corkscrew lattice; pulling without twisting keeps them running straight instead.",
     ],
   },
   multiCasing: {
     title: 'Double/Triple Casing',
     summary:
-      "Real cane construction doesn't stop at one casing — a second (or third) contrasting color can be gathered over a core that's already been cased once, before anything is pulled. Glass-cane design software like VirtualGlass models casings as an ordered list for exactly this reason: each layer is its own color and thickness, stacked in build order. Slicing the finished cane shows every shell nested around the core, one inside the next.",
+      "Real cane construction doesn't stop at one casing: a second (or third) contrasting color can be gathered over a core that's already been cased once, before anything is pulled. Glass-cane design software like VirtualGlass models casings as an ordered list for exactly this reason: each layer is its own color and thickness, stacked in build order. Slicing the finished cane shows every shell nested around the core, one inside the next.",
     steps: [
       'Gather the base/core color first.',
       'Dip that gather into the first casing color, coating it evenly, and reheat.',
       'Dip the once-cased gather into a second casing color (and a third, if wanted), reheating between each dip so it stays workable.',
-      'Pull the fully layered gather into a rod — every casing stays as its own concentric shell the whole length.',
+      'Pull the fully layered gather into a rod. Every casing stays as its own concentric shell the whole length.',
     ],
   },
   tripod: {
     title: 'Tripod Bundle',
     summary:
-      "A center cane surrounded by a ring of three more canes, all the same diameter, packed so every cane touches its neighbors — not just three canes alone with no center. Glass-cane design software (VirtualGlass) models Tripod and Cross as the same underlying template (a center plus one or more rings of canes), differing only in how many canes wrap each ring — three here. A second ring can be added further out for a denser bundle.",
+      "A center cane surrounded by a ring of three more canes, all the same diameter, packed so every cane touches its neighbors, not just three canes alone with no center. Glass-cane design software (VirtualGlass) models Tripod and Cross as the same underlying template (a center plus one or more rings of canes), differing only in how many canes wrap each ring: three here. A second ring can be added further out for a denser bundle.",
     steps: [
       'Pull a center cane and three (or more, in a second ring) outer canes, all matching diameter.',
       'Pack the outer canes around the center one so each touches its neighbors, forming a tight ring.',
       'Fuse the bundle with a reheat, then draw it out from both ends into one smaller-diameter composite rod.',
-      'Slice the cooled rod crosswise — every slice shows the same ringed arrangement.',
+      'Slice the cooled rod crosswise: every slice shows the same ringed arrangement.',
     ],
   },
   cross: {
     title: 'Cross Bundle',
     summary:
-      'A center cane surrounded by a ring of four more canes at north, south, east, and west, so the fused bundle reads as a plus-shaped cross in cross-section. Cross and star motifs are a recognized family of historical Venetian murrini patterns, and glass-cane design software (VirtualGlass) models this as the same template as Tripod — a center plus one or more rings — just with four canes per ring instead of three.',
+      'A center cane surrounded by a ring of four more canes at north, south, east, and west, so the fused bundle reads as a plus-shaped cross in cross-section. Cross and star motifs are a recognized family of historical Venetian murrini patterns, and glass-cane design software (VirtualGlass) models this as the same template as Tripod (a center plus one or more rings), just with four canes per ring instead of three.',
     steps: [
       'Pull a center cane and four (or more, in a second ring) outer canes, all matching diameter.',
       'Pack the outer canes against the center one at the four compass points, so the group forms a plus/cross shape.',
       'Fuse the bundle with a reheat, then draw it out from both ends into one smaller-diameter composite rod.',
-      'Slice the cooled rod crosswise — every slice shows the same cross-shaped arrangement.',
+      'Slice the cooled rod crosswise: every slice shows the same cross-shaped arrangement.',
     ],
   },
   row: {
     title: 'Row Bundle',
     summary:
-      "Several already-pulled canes packed edge-to-edge in a straight line rather than a radial cluster, then fused and drawn out as one new rod. A genuinely different real arrangement from Tripod/Cross's rings, not just a cosmetic variant — glass-cane design software (VirtualGlass) catalogs it as its own named template (\"Horizontal Line\").",
+      "Several already-pulled canes packed edge-to-edge in a straight line rather than a radial cluster, then fused and drawn out as one new rod. A genuinely different real arrangement from Tripod/Cross's rings, not just a cosmetic variant. Glass-cane design software (VirtualGlass) catalogs it as its own named template (\"Horizontal Line\").",
     steps: [
       'Pull each cane in the row to matching diameter.',
       'Line the canes up edge-to-edge in a single row, alternating colors as wanted.',
       'Fuse the row with a reheat, then draw it out from both ends into one smaller-diameter composite rod.',
-      'Slice the cooled rod crosswise — every slice shows the same linear stripe arrangement.',
+      'Slice the cooled rod crosswise: every slice shows the same linear stripe arrangement.',
     ],
   },
   grid: {
     title: 'Square Grid Bundle',
     summary:
-      'A square grid of already-pulled canes — every row and column the same count — fused and drawn out as one new composite rod, reading as a checkerboard in cross-section. Glass-cane design software (VirtualGlass) catalogs this as its own named template ("Square of Circles"), distinct from a radial bundle like Tripod/Cross or a single line like the Row Bundle.',
+      'A square grid of already-pulled canes, every row and column the same count, fused and drawn out as one new composite rod, reading as a checkerboard in cross-section. Glass-cane design software (VirtualGlass) catalogs this as its own named template ("Square of Circles"), distinct from a radial bundle like Tripod/Cross or a single line like the Row Bundle.',
     steps: [
       'Pull every cane in the grid to matching diameter.',
       'Arrange the canes in a square grid, alternating colors in a checkerboard pattern.',
       'Fuse the grid with a reheat, then draw it out from both ends into one smaller-diameter composite rod.',
-      'Slice the cooled rod crosswise — every slice shows the same grid arrangement.',
+      'Slice the cooled rod crosswise: every slice shows the same grid arrangement.',
     ],
   },
   frame: {
     title: 'Surrounding Square Bundle',
     summary:
-      'A square center cane framed by a ring of small round canes evenly spaced along its perimeter, fused and drawn out as one new composite rod. Genuinely different from a radial ring like Tripod/Cross (framing a POINT) or a uniform checkerboard like the Cane Grid (all one shape) — here a square cane is framed by round ones. Glass-cane design software (VirtualGlass) catalogs this as its own named template ("Surrounding Square").',
+      'A square center cane framed by a ring of small round canes evenly spaced along its perimeter, fused and drawn out as one new composite rod. Genuinely different from a radial ring like Tripod/Cross (framing a POINT) or a uniform checkerboard like the Cane Grid (all one shape): here a square cane is framed by round ones. Glass-cane design software (VirtualGlass) catalogs this as its own named template ("Surrounding Square").',
     steps: [
       'Marver the center cane into a square cross-section (see Marvering) and pull the small round frame canes to matching diameter.',
       "Pack the round canes evenly along all four sides of the square cane's perimeter, each touching its neighbors.",
       'Fuse the bundle with a reheat, then draw it out from both ends into one smaller-diameter composite rod.',
-      'Slice the cooled rod crosswise — every slice shows the same framed-square arrangement.',
+      'Slice the cooled rod crosswise: every slice shows the same framed-square arrangement.',
     ],
   },
   bundle: {
     title: 'Bundling Canes',
     summary:
-      "When multiple shapes sit apart from each other — not nested inside one another — each one represents an already-pulled cane (simple, cased, faceted, or chevron) gathered alongside the others and fused into one new composite rod. This is how real complex murrini cross-sections — flower canes, mosaic canes — are actually built: separate canes packed side by side and redrawn as one, not a single pull. (A smaller shape nested inside a larger one is a different technique — see Casing or Embedded Thread.)",
+      "When multiple shapes sit apart from each other, not nested inside one another, each one represents an already-pulled cane (simple, cased, faceted, or chevron) gathered alongside the others and fused into one new composite rod. This is how real complex murrini cross-sections (flower canes, mosaic canes) are actually built: separate canes packed side by side and redrawn as one, not a single pull. (A smaller shape nested inside a larger one is a different technique: see Casing or Embedded Thread.)",
     steps: [
-      'Pull each individual cane first, as its own technique — simple, cased, faceted, or chevron.',
+      'Pull each individual cane first, as its own technique: simple, cased, faceted, or chevron.',
       'Cut the finished canes to matching lengths and pack them together in a bundle, often around a central cane or side by side.',
       'Fuse the bundle by reheating it as a unit, then draw the whole bundle out from both ends into one new, smaller-diameter composite rod.',
-      'Slice the cooled composite rod crosswise to reveal the full pattern in every slice — this final cut is the murrini technique proper.',
+      'Slice the cooled composite rod crosswise to reveal the full pattern in every slice. This final cut is the murrini technique proper.',
     ],
   },
 }

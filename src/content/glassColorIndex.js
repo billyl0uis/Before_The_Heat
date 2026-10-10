@@ -29,7 +29,7 @@ export const GLASS_COLOR_INDEX = [
     caution: null,
     hazard: null,
     notes:
-      'One of the strongest colorants in glass — tiny amounts produce deep blue. Cobalt glasses need more energy to melt and cool noticeably faster than most colors; at high saturation they work stiff, which is why some suppliers blend in extra flux specifically to soften cobalt\'s working range.',
+      'One of the strongest colorants in glass: tiny amounts produce deep blue. Cobalt glasses need more energy to melt and cool noticeably faster than most colors; at high saturation they work stiff, which is why some suppliers blend in extra flux specifically to soften cobalt\'s working range.',
   },
   {
     id: 'copper-turquoise',
@@ -42,7 +42,7 @@ export const GLASS_COLOR_INDEX = [
     caution: null,
     hazard: null,
     notes:
-      'Copper gives a blue-green/turquoise color under normal oxidizing furnace conditions — the everyday result of working with copper.',
+      'Copper gives a blue-green/turquoise color under normal oxidizing furnace conditions, the everyday result of working with copper.',
   },
   {
     id: 'copper-red',
@@ -55,7 +55,7 @@ export const GLASS_COLOR_INDEX = [
     caution: null,
     hazard: null,
     notes:
-      'The same copper that gives turquoise under normal conditions instead gives a deep red — "copper ruby," historically used as a cheaper substitute for gold ruby — under a reducing furnace atmosphere with careful heat treatment. Same colorant, opposite result, purely from atmosphere control, which makes it a genuine strike/redox-sensitive color rather than a fixed tint.',
+      'The same copper that gives turquoise under normal conditions instead gives a deep red ("copper ruby," historically used as a cheaper substitute for gold ruby) under a reducing furnace atmosphere with careful heat treatment. Same colorant, opposite result, purely from atmosphere control, which makes it a genuine strike/redox-sensitive color rather than a fixed tint.',
   },
   {
     id: 'gold-ruby',
@@ -68,7 +68,7 @@ export const GLASS_COLOR_INDEX = [
     caution: null,
     hazard: null,
     notes:
-      "Color comes from gold metal nanoparticles suspended in the glass, not a simple dissolved tint — particle size sets the hue, with smaller particles (~60nm) reading red and larger ones shifting toward purple, then blue. Historically one of the most expensive colorants used in glass, which is part of why cranberry glass reads as a luxury color.",
+      "Color comes from gold metal nanoparticles suspended in the glass, not a simple dissolved tint. Particle size sets the hue, with smaller particles (~60nm) reading red and larger ones shifting toward purple, then blue. Historically one of the most expensive colorants used in glass, which is part of why cranberry glass reads as a luxury color.",
   },
   {
     id: 'cadmium-selenium-red',
@@ -79,10 +79,10 @@ export const GLASS_COLOR_INDEX = [
     strikes: true,
     devitrifies: false,
     caution:
-      'Cadmium is toxic in powder or vapor form. The risk is mainly dust from grinding, cutting, or cold-working this color, not the solid glass itself — use ventilation and avoid dry-grinding without dust control.',
+      'Cadmium is toxic in powder or vapor form. The risk is mainly dust from grinding, cutting, or cold-working this color, not the solid glass itself. Use ventilation and avoid dry-grinding without dust control.',
     hazard: 'cadmium',
     notes:
-      "A genuine striking color: it can come straight out of the furnace looking pale or nearly colorless, and only develops its full red/orange when reheated near the softening point and held there — cool it too fast and the color never shows. Widely reported by glassworkers as one of the touchier color families to work.",
+      "A genuine striking color: it can come straight out of the furnace looking pale or nearly colorless, and only develops its full red/orange when reheated near the softening point and held there; cool it too fast and the color never shows. Widely reported by glassworkers as one of the touchier color families to work.",
   },
   {
     id: 'cadmium-yellow',
@@ -93,10 +93,10 @@ export const GLASS_COLOR_INDEX = [
     strikes: false,
     devitrifies: false,
     caution:
-      'Cadmium sulfide is toxic by inhalation, particularly as dust or vapor. Same handling precautions as the cadmium/selenium reds — ventilation, no dry-grinding.',
+      'Cadmium sulfide is toxic by inhalation, particularly as dust or vapor. Same handling precautions as the cadmium/selenium reds: ventilation, and no dry-grinding.',
     hazard: 'cadmium',
     notes:
-      "The plain-sulfide sibling of the cadmium/selenium reds — cadmium sulfide alone gives a straightforward yellow without needing selenium in the mix, and without the same strike-to-develop behavior the red/orange blends have.",
+      "The plain-sulfide sibling of the cadmium/selenium reds. Cadmium sulfide alone gives a straightforward yellow without needing selenium in the mix, and without the same strike-to-develop behavior the red/orange blends have.",
   },
   {
     id: 'manganese-purple',
@@ -109,7 +109,7 @@ export const GLASS_COLOR_INDEX = [
     caution: null,
     hazard: null,
     notes:
-      'Same element does double duty: enough manganese gives a purple/violet glass, but small amounts are also used as a decolorizer to cancel out the green tint that iron impurities cause in "clear" glass. Some specific commercial purples are documented as notably prone to devitrification with repeated flame exposure — this varies by manufacturer, not by manganese content alone.',
+      'Same element does double duty: enough manganese gives a purple/violet glass, but small amounts are also used as a decolorizer to cancel out the green tint that iron impurities cause in "clear" glass. Some specific commercial purples are documented as notably prone to devitrification with repeated flame exposure. This varies by manufacturer, not by manganese content alone.',
   },
   {
     id: 'chromium-green',
@@ -122,7 +122,7 @@ export const GLASS_COLOR_INDEX = [
     caution: null,
     hazard: null,
     notes:
-      'A very strong colorant — small amounts give a clear, dark green; push the concentration higher and it goes nearly black.',
+      'A very strong colorant: small amounts give a clear, dark green; push the concentration higher and it goes nearly black.',
   },
   {
     id: 'iron-blue-green',
@@ -135,7 +135,7 @@ export const GLASS_COLOR_INDEX = [
     caution: null,
     hazard: null,
     notes:
-      'Iron in the ferrous (Fe²⁺) state reads blue-green. Which oxidation state you get depends on the furnace atmosphere during working, not just the batch recipe — the same base glass can swing toward this or its ferric sibling.',
+      'Iron in the ferrous (Fe²⁺) state reads blue-green. Which oxidation state you get depends on the furnace atmosphere during working, not just the batch recipe. The same base glass can swing toward this or its ferric sibling.',
   },
   {
     id: 'iron-yellow-green',
@@ -161,7 +161,7 @@ export const GLASS_COLOR_INDEX = [
     caution: null,
     hazard: null,
     notes:
-      "Classic bottle-glass amber isn't iron alone — it's a specific chromophore formed when iron and sulfide sulfur combine under a reducing (carbon-added) melt. Different chemistry from the plain iron entries above even though the visual family (brown/amber) can look similar.",
+      "Classic bottle-glass amber isn't iron alone: it's a specific chromophore formed when iron and sulfide sulfur combine under a reducing (carbon-added) melt. Different chemistry from the plain iron entries above even though the visual family (brown/amber) can look similar.",
   },
   {
     id: 'nickel-violet',
@@ -174,7 +174,7 @@ export const GLASS_COLOR_INDEX = [
     caution: null,
     hazard: null,
     notes:
-      'A strong colorant whose result depends heavily on the base glass: in a potash-based glass it reads violet/blue-violet, in a soda-lime base (the common furnace glass) it tends toward brown or gray instead. Same oxide, different outcome, because of what it\'s melted into — not a fixed color the way some other colorants are.',
+      'A strong colorant whose result depends heavily on the base glass: in a potash-based glass it reads violet/blue-violet, in a soda-lime base (the common furnace glass) it tends toward brown or gray instead. Same oxide, different outcome, because of what it\'s melted into, not a fixed color the way some other colorants are.',
   },
   {
     id: 'opal-white',
@@ -187,7 +187,7 @@ export const GLASS_COLOR_INDEX = [
     caution: null,
     hazard: null,
     notes:
-      "Not a tint — an opacifier. It works by growing microscopic crystals in the glass that scatter light instead of transmitting it, which is what makes it opaque rather than colored. Opal and opaque whites are commonly documented as the colors most prone to devitrification (a whitish, rough, crazed surface) after too much time in the flame — worth planning shorter reheats around.",
+      "Not a tint but an opacifier. It works by growing microscopic crystals in the glass that scatter light instead of transmitting it, which is what makes it opaque rather than colored. Opal and opaque whites are commonly documented as the colors most prone to devitrification (a whitish, rough, crazed surface) after too much time in the flame, so plan shorter reheats around it.",
   },
   {
     id: 'silver-stain-yellow',
@@ -200,7 +200,7 @@ export const GLASS_COLOR_INDEX = [
     caution: null,
     hazard: null,
     notes:
-      "Different mechanism from every other entry here: it isn't mixed into the melt at all. Silver nitrate is painted onto the surface and fired at a comparatively low temperature (roughly 550-560°C), where it diffuses into the glass surface and becomes part of its structure — the technique that's actually the origin of the term \"stained glass.\" A longer or repeated firing deepens pale yellow toward a richer orange.",
+      "Different mechanism from every other entry here: it isn't mixed into the melt at all. Silver nitrate is painted onto the surface and fired at a comparatively low temperature (roughly 550-560°C), where it diffuses into the glass surface and becomes part of its structure. That's the technique that's actually the origin of the term \"stained glass.\" A longer or repeated firing deepens pale yellow toward a richer orange.",
   },
   {
     id: 'neodymium-violet',
@@ -213,7 +213,7 @@ export const GLASS_COLOR_INDEX = [
     caution: null,
     hazard: null,
     notes:
-      'A rare-earth colorant, weaker than the traditional transition-metal colorants above, so it takes a higher percentage to show color. Reads as pale violet in normal light but shifts noticeably blue under fluorescent lighting — a genuine color-shifting effect, not a trick of the swatch.',
+      'A rare-earth colorant, weaker than the traditional transition-metal colorants above, so it takes a higher percentage to show color. Reads as pale violet in normal light but shifts noticeably blue under fluorescent lighting: a genuine color-shifting effect, not a trick of the swatch.',
   },
   {
     id: 'praseodymium-green',
@@ -226,7 +226,7 @@ export const GLASS_COLOR_INDEX = [
     caution: null,
     hazard: null,
     notes:
-      "Another rare-earth colorant, giving a soft pastel green on its own — combined with other materials it can also produce a notably clean, pure yellow. Like neodymium, it's a weaker colorant than the transition metals, so it stays pastel rather than saturated.",
+      "Another rare-earth colorant, giving a soft pastel green on its own; combined with other materials it can also produce a notably clean, pure yellow. Like neodymium, it's a weaker colorant than the transition metals, so it stays pastel rather than saturated.",
   },
   {
     id: 'erbium-pink',
@@ -252,7 +252,7 @@ export const GLASS_COLOR_INDEX = [
     caution: null,
     hazard: null,
     notes:
-      "True black isn't one colorant — it's a documented multi-oxide recipe, most commonly manganese dioxide, chromium oxide, and cobalt oxide together (an iron/manganese/cobalt combination is also used). Each of those three shows up elsewhere in this index on its own; stacked together in the right ratio, they push the glass past any single hue into black.",
+      "True black isn't one colorant: it's a documented multi-oxide recipe, most commonly manganese dioxide, chromium oxide, and cobalt oxide together (an iron/manganese/cobalt combination is also used). Each of those three shows up elsewhere in this index on its own; stacked together in the right ratio, they push the glass past any single hue into black.",
   },
   {
     id: 'uranium-vaseline',
@@ -263,19 +263,19 @@ export const GLASS_COLOR_INDEX = [
     strikes: false,
     devitrifies: false,
     caution:
-      'Contains a radioactive element. Uncommon in modern studio practice for that reason — listed here for chemistry completeness, not as a recommended working color.',
+      'Contains a radioactive element. Uncommon in modern studio practice for that reason, and listed here for chemistry completeness, not as a recommended working color.',
     hazard: 'radioactive',
     notes:
-      'Famous for glowing green under UV/blacklight because of its uranium content. This is historic "vaseline glass" — rarely sourced by studios today given the regulatory hurdles around a radioactive colorant.',
+      'Famous for glowing green under UV/blacklight because of its uranium content. This is historic "vaseline glass", rarely sourced by studios today given the regulatory hurdles around a radioactive colorant.',
   },
 ]
 
 export const COE_NOTE = {
   title: 'Why every color also needs to physically match',
-  body: "Chemistry sets a glass's color; physics decides whether it can actually be combined with other colors. Every glass has a Coefficient of Expansion (COE) — how much it expands when heated and contracts when it cools, in parts per million per °C. If two colors in the same piece have different COEs, they pull against each other as the whole thing cools after being worked, building up internal stress. That stress shows up as cracking, sometimes immediately and sometimes weeks later, and it happens regardless of how well the colors chemically get along. This is a separate axis from what's covered above — a compatible COE match doesn't guarantee a nice color combination, and a great color combination is worthless if the COEs don't match. Common named systems include COE 104 (soft/lampworking glass — long working time, most color variety), COE 96 and COE 90 (fusing systems), and COE 33 (borosilicate, high-temperature). The specific number for any given colored rod depends on its manufacturer's formulation, not the colorant family alone — this app doesn't assign COE numbers per color for that reason, and neither should you without checking the actual supplier data for the glass in hand.",
+  body: "Chemistry sets a glass's color; physics decides whether it can actually be combined with other colors. Every glass has a Coefficient of Expansion (COE): how much it expands when heated and contracts when it cools, in parts per million per °C. If two colors in the same piece have different COEs, they pull against each other as the whole thing cools after being worked, building up internal stress. That stress shows up as cracking, sometimes immediately and sometimes weeks later, and it happens regardless of how well the colors chemically get along. This is a separate axis from what's covered above: a compatible COE match doesn't guarantee a nice color combination, and a great color combination is worthless if the COEs don't match. Common named systems include COE 104 (soft lampworking glass, with long working time and the most color variety), COE 96 and COE 90 (fusing systems), and COE 33 (borosilicate, high-temperature). The specific number for any given colored rod depends on its manufacturer's formulation, not the colorant family alone, so this app doesn't assign COE numbers per color for that reason, and neither should you without checking the actual supplier data for the glass in hand.",
 }
 
 export const ENCASEMENT_NOTE = {
   title: 'Does a murrino need a clear casing layer?',
-  body: "Often yes, for two documented reasons — not just convention. First, encasing a cane in clear glass protects a striking color's pattern through the repeated reheating and handling a pull requires; striking colors (like the cadmium and copper-red entries above) specifically need that controlled reheat to develop, so shielding the pattern during it matters. Second, some colors — notably opal whites and certain commercial purples — are documented as prone to devitrification with repeated flame exposure; a clear casing cuts down how much direct flame time that color sees. Not every color needs it, and encasement always changes a cane's size and proportions, so it's a real design tradeoff, not a free win.",
+  body: "Often yes, for two documented reasons, not just convention. First, encasing a cane in clear glass protects a striking color's pattern through the repeated reheating and handling a pull requires; striking colors (like the cadmium and copper-red entries above) specifically need that controlled reheat to develop, so shielding the pattern during it matters. Second, some colors (notably opal whites and certain commercial purples) are documented as prone to devitrification with repeated flame exposure; a clear casing cuts down how much direct flame time that color sees. Not every color needs it, and encasement always changes a cane's size and proportions, so it's a real design tradeoff, not a free win.",
 }
