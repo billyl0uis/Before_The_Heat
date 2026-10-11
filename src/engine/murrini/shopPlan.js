@@ -1,7 +1,7 @@
 import { computeBuildPlan, MURRINI_TECHNIQUES } from '../../content/murrineTechniques'
 import { COMPOUND_SHAPE_TYPES } from './compoundShapes'
 import { checkColorCompatibility } from './colorCompatibility'
-import { findColorant, mmPerWorldUnit, pulledDiameterMm, pulledLengthMm } from './rod'
+import { findColorant, mmPerWorldUnit, pulledDiameterMm, pulledLengthMm, twistPitchMm } from './rod'
 import { computeShapeReach, SHAPE_TYPES } from './shapes'
 
 // How many copies of the drawn base cell the repeat produces.
@@ -25,6 +25,11 @@ export function turnsLabel(twistDegrees) {
   const whole = Math.floor(turns)
   const part = { 0.25: '¼', 0.5: '½', 0.75: '¾' }[turns - whole]
   return part && whole ? `${whole}${part} turns` : `${fmt(turns)} turns`
+}
+// The cane's twist as a rate you can measure on the cane itself.
+export function twistLabel(rod, twistDegrees) {
+  if (!twistDegrees) return ''
+  return `a turn every ${fmt(twistPitchMm(rod, twistDegrees))}\u00a0mm`
 }
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`
 
@@ -129,6 +134,77 @@ function bundleComponents(cluster, pattern, rod) {
   })
 }
 
+// Single compound canes (Zanfirico, Jellyroll, Pinwheel) are built from
+// parts before they're pulled. The plan lists the parts and how they go
+// together, read from the same geometry the editor drew.
+function compoundCaneSteps(cluster, copies, rod) {
+  const type = cluster[0].compoundType
+  const mmPerUnit = mmPerWorldUnit(rod)
+  const times = copies > 1 ? ` (make ${copies})` : ''
+  const ids = (elements) => [...new Set(elements.map((e) => e.colorantId).filter(Boolean))]
+
+  if (type === 'zanfirico') {
+    const casing = cluster.find((e) => (e.opacity ?? 1) < 1)
+    const rest = cluster.filter((e) => e !== casing)
+    const cx = rest.reduce((sum, e) => sum + e.x, 0) / rest.length
+    const cy = rest.reduce((sum, e) => sum + e.y, 0) / rest.length
+    const core = rest.reduce((best, e) => (Math.hypot(e.x - cx, e.y - cy) < Math.hypot(best.x - cx, best.y - cy) ? e : best))
+    const threads = rest.filter((e) => e !== core)
+    const n = threads.length
+    const steps = [
+      {
+        title: `Pull ${copies} ${colourName(core)} core cane${copies === 1 ? '' : 's'}, ${sizePhrase(core, mmPerUnit)}`,
+        detail: 'The core the threads sit round.',
+        colorantIds: ids([core]),
+        elements: [core],
+      },
+      {
+        title: `Pull ${n * copies} ${colourName(threads[0])} thread canes, ${sizePhrase(threads[0], mmPerUnit)}`,
+        detail: `All the same size: ${n} for each zanfirico, touching each other and the core.`,
+        colorantIds: ids(threads),
+        elements: [threads[0]],
+      },
+    ]
+    steps.push({
+      title: `Lay the ${n} threads round the core and case in ${casing ? colourName(casing) : 'clear'}${
+        casing ? `, ${sizePhrase(casing, mmPerUnit)}` : ''
+      }${times}`,
+      detail: 'Threads touching all the way round. The casing locks them in place before the twist.',
+      colorantIds: ids(casing ? [casing] : []),
+      elements: cluster,
+    })
+    return steps
+  }
+
+  if (type === 'jellyroll') {
+    const casing = cluster.find((e) => e.shape === 'circle')
+    const [a, b] = cluster.filter((e) => e.shape === 'spiral')
+    return [
+      {
+        title: `Roll a ${colourName(a)} and ${colourName(b)} jellyroll${casing ? `, cased in ${colourName(casing)}` : ''}${times}`,
+        detail: `Lay a flat strip of ${colourName(a)} on one of ${colourName(b)}, roll them up tightly from one end into a coil${
+          casing ? `, then case the coil in ${colourName(casing)}, ${sizePhrase(casing, mmPerUnit)}` : ''
+        }.`,
+        colorantIds: ids(cluster),
+        elements: cluster,
+      },
+    ]
+  }
+
+  if (type === 'pinwheel') {
+    const colours = [...new Set(cluster.map(colourName))]
+    return [
+      {
+        title: `Bundle ${cluster.length} ${colours.join(' and ')} wedges into a pinwheel${times}`,
+        detail: `Alternate the ${colours.join(' and ')} wedges round a centre and fuse them. Twist as you pull, so the straight wedges curve.`,
+        colorantIds: ids(cluster),
+        elements: cluster,
+      },
+    ]
+  }
+  return null
+}
+
 // The whole design as the ordered steps you'd actually work through at the
 // furnace: pull each cane, bundle them, case inside → out, then pull down.
 // Everything is read back from the design; there are no timings, because
@@ -161,6 +237,19 @@ export function buildShopPlan({ elements, pattern, rod, casing, extrusion }) {
     const count = copiesOf(step.elements, pattern)
     caneTotal += count
     looseCanes += count
+    const parts = step.elements[0].compoundType ? compoundCaneSteps(step.elements, count, rod) : null
+    if (parts) {
+      for (const part of parts) {
+        steps.push({
+          key: `cane-${steps.length}`,
+          title: part.title,
+          detail: part.detail,
+          colorantIds: part.colorantIds,
+          plate: { kind: 'cane', elements: part.elements },
+        })
+      }
+      continue
+    }
     const { title, detail } = describeCane(step.elements, step.techniqueKey, count, rod)
     steps.push({
       key: `cane-${steps.length}`,
@@ -189,7 +278,7 @@ export function buildShopPlan({ elements, pattern, rod, casing, extrusion }) {
     steps.push({
       key: `case-${index}`,
       title: `Case in\u00a0${colorant?.name.split(' / ')[0] ?? 'glass'}, ${fmt(layer.thicknessMm)}\u00a0mm`,
-      detail: index === 0 ? 'The first layer, straight over the bundle.' : `Over layer ${index}.`,
+      detail: index === 0 ? `The first layer, straight over the ${caneTotal > 1 ? 'bundle' : 'cane'}.` : `Over layer ${index}.`,
       colorantIds: colorant && colorant.id !== 'clear' ? [colorant.id] : [],
       plate: { kind: 'slice', casingUpTo: index },
     })
@@ -198,14 +287,18 @@ export function buildShopPlan({ elements, pattern, rod, casing, extrusion }) {
   if (steps.length) {
     // The twist is the whole technique for a zanfirico or any spiral cane:
     // it has to be in the instruction, not only in the preview.
-    const twist = turnsLabel(extrusion?.twistDegrees ?? 0)
+    const twistDegrees = extrusion?.twistDegrees ?? 0
+    const twist = twistLabel(rod, twistDegrees)
+    const totalTurns = twistDegrees ? Math.round(pulledLengthMm(rod) / twistPitchMm(rod, twistDegrees)) : 0
     steps.push({
       key: 'pull',
       title: twist
         ? `Pull to Ø ${fmt(pulledDiameterMm(rod))} mm, twisting ${twist}`
         : `Pull to Ø ${fmt(pulledDiameterMm(rod))} mm`,
       detail: `${rod.pullRatio} : 1 from a ${rod.gatherDiameterMm} mm × ${rod.gatherLengthMm} mm gather gives about ${fmt(pulledLengthMm(rod) / 1000)} m of cane to slice.${
-        twist ? ' Keep turning the same way as you pull, so the twist spreads evenly along the cane.' : ''
+        twist
+          ? ` That's about ${totalTurns} turns over the whole pull: keep turning the same way as you walk it out, so the twist stays even.`
+          : ''
       }`,
       colorantIds: [],
       plate: { kind: 'slice', casingUpTo: casing.length - 1 },

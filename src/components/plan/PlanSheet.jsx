@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { findColorant, pulledDiameterMm, pulledLengthMm } from '../../engine/murrini/rod'
-import { turnsLabel } from '../../engine/murrini/shopPlan'
+import { twistLabel } from '../../engine/murrini/shopPlan'
 import { renderSlicePlate } from '../../engine/murrini/slicePlate'
 import { Icon } from '../icons'
 import { StepPlate } from './StepPlate'
@@ -121,7 +121,7 @@ export function PlanSheet({ design, steps, warnings, colorants, reticello = null
           </div>
           {design.extrusion?.twistDegrees ? (
             <p className="mt-2 text-sm">
-              <span className="font-semibold">Twist:</span> {turnsLabel(design.extrusion.twistDegrees)}, the
+              <span className="font-semibold">Twist:</span> {twistLabel(rod, design.extrusion.twistDegrees)} of pulled cane, the
               same way throughout the pull
             </p>
           ) : null}

@@ -12,7 +12,7 @@ import {
   RECIPE_ORDER,
   RECIPES,
 } from '../engine/murrini/recipes'
-import { CLEAR_GLASS, DEFAULT_ROD, findColorant, pulledLengthMm } from '../engine/murrini/rod'
+import { CLEAR_GLASS, DEFAULT_ROD, findColorant, pulledLengthMm, twistPitchMm } from '../engine/murrini/rod'
 import { CURRENT_SCHEMA_VERSION } from '../engine/murrini/migrate'
 import { computeRepeatedElements } from '../engine/murrini/pattern'
 import { buildShopPlan } from '../engine/murrini/shopPlan'
@@ -24,9 +24,9 @@ const STORE_KEY = 'before-the-heat:simple'
 const STEPS = ['Recipe', 'Colors', 'Size', 'Plan']
 const TWISTS = [
   { degrees: 0, label: 'None' },
-  { degrees: 180, label: '½ turn' },
-  { degrees: 360, label: '1 turn' },
-  { degrees: 720, label: '2 turns' },
+  { degrees: 180, label: 'Loose' },
+  { degrees: 360, label: 'Medium' },
+  { degrees: 720, label: 'Tight' },
 ]
 const MIN_GATHER = 12
 const MAX_GATHER = 60
@@ -94,6 +94,9 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
     colours: stored?.colours ?? {},
     finishedMm: stored?.finishedMm ?? DEFAULT_ROD.gatherDiameterMm / DEFAULT_ROD.pullRatio,
     ratio: stored?.ratio ?? DEFAULT_ROD.pullRatio,
+    // Without this a reload forgot the twist you'd picked, and the next
+    // color change rebuilt the cane untwisted.
+    twist: stored?.twist ?? {},
   }))
 
   // Is the current design still the one Simple mode made? If it was changed
@@ -222,7 +225,7 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
         </div>
         <p className="text-sm text-mute max-lg:hidden">
           {view === 'cane'
-            ? 'Side view of the pulled cane · length not to scale'
+            ? 'Side view of the pulled cane · a short stretch, twist to scale'
             : customised
               ? 'Your edited design'
               : `${recipe.name}, drawn to scale`}
@@ -470,13 +473,19 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
                           }`}
                         >
                           {option.label}
+                          {option.degrees ? (
+                            <span className="block font-mono text-[0.8rem] font-normal opacity-80">
+                              {Math.round(twistPitchMm(design.rod, option.degrees))} mm
+                            </span>
+                          ) : null}
                         </button>
                       )
                     })}
                   </div>
                   <p className="text-sm text-mute">
                     Twisting the cane as it's pulled winds anything off-centre into a spiral, like a
-                    zanfirico. See it with <span className="font-semibold text-ink">Cane</span> above the slice.
+                    zanfirico. The number is how far along the pulled cane one full turn takes. See it with{' '}
+                    <span className="font-semibold text-ink">Cane</span> above the slice.
                   </p>
                 </div>
               </div>

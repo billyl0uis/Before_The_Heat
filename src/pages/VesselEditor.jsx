@@ -6,7 +6,7 @@ import { VesselCanvas } from '../components/vessel/VesselCanvas'
 import { VesselControls } from '../components/vessel/VesselControls'
 import { GLASS_COLOR_INDEX } from '../content/glassColorIndex'
 import { findColorant, pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
-import { turnsLabel } from '../engine/murrini/shopPlan'
+import { twistLabel } from '../engine/murrini/shopPlan'
 import { renderSlicePlate } from '../engine/murrini/slicePlate'
 import { measureWall, metres, murriniLayout, planPickup, planReticello, vesselName } from '../engine/vessel/pickup'
 import { vesselRadiusFunction } from '../engine/vessel/profile'
@@ -176,7 +176,7 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
                 </div>
                 {design.extrusion?.twistDegrees ? (
                   <p className="rounded-[10px] border border-line px-3 py-2.5 text-[0.8rem] leading-relaxed text-ink-soft">
-                    Your cane is twisted {turnsLabel(design.extrusion.twistDegrees)}. Murrini are thin slices cut across
+                    Your cane is twisted, {twistLabel(design.rod, design.extrusion.twistDegrees)}. Murrini are thin slices cut across
                     it, so the twist won’t show: each slice is your pattern, just turned a little.
                   </p>
                 ) : null}

@@ -72,3 +72,15 @@ export function pulledDiameterMm(rod) {
 export function pulledLengthMm(rod) {
   return rod.gatherLengthMm * rod.pullRatio * rod.pullRatio
 }
+
+// Twist is shown, and planned, as the Cane view draws it: the whole twist
+// across a stretch of pulled cane this many diameters long. That makes it
+// a pitch you can check with a ruler on the real cane: one full turn
+// every N mm. Published sources give no standard rate (it's set by how
+// fast the punties turn against the walk), so the preview is the spec.
+export const TWIST_SECTION_DIAMETERS = 3.2
+
+export function twistPitchMm(rod, twistDegrees) {
+  const turns = Math.abs(twistDegrees) / 360
+  return turns ? (TWIST_SECTION_DIAMETERS * pulledDiameterMm(rod)) / turns : Infinity
+}

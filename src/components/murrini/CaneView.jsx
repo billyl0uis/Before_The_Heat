@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { createExtrudedElementGeometry } from '../../engine/murrini/extrude'
-import { casingRings, findColorant, ROD_WORLD_RADIUS } from '../../engine/murrini/rod'
+import { casingRings, findColorant, ROD_WORLD_RADIUS, TWIST_SECTION_DIAMETERS } from '../../engine/murrini/rod'
 import { SHAPE_TYPES } from '../../engine/murrini/shapes'
 import { createStudioEnvironment } from '../three/studio'
 import { WebGLUnavailable } from '../WebGLUnavailable'
@@ -10,7 +10,7 @@ import { WebGLUnavailable } from '../WebGLUnavailable'
 // few millimetres across and over a metre long; this shows a short,
 // honest-looking stretch so the outside pattern and the cut end read
 // together. The caption says the length isn't to scale.
-const SECTION_DIAMETERS = 3.2
+const SECTION_DIAMETERS = TWIST_SECTION_DIAMETERS
 const FOV = 28
 
 // How see-through each glass reads from the side: clear casing lets the
