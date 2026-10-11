@@ -1,3 +1,4 @@
+import { mmPerWorldUnit } from '../../engine/murrini/rod'
 import { GLASS_COLOR_INDEX } from '../../content/glassColorIndex'
 import { COMPOUND_SHAPE_ORDER, COMPOUND_SHAPE_TYPES } from '../../engine/murrini/compoundShapes'
 import { SHAPE_ORDER, SHAPE_TYPES } from '../../engine/murrini/shapes'
@@ -7,6 +8,14 @@ import { TOOL_KEYS } from './toolKeys'
 
 function shapeDefinition(key) {
   return SHAPE_TYPES[key] ?? COMPOUND_SHAPE_TYPES[key]
+}
+
+// Sizes are drawn in the slice's own units; shown in mm at the current
+// gather, the same true scale as the tick ring around the slice.
+const LENGTH_KEYS = new Set(['radius', 'caneRadius', 'coreRadius', 'innerRadius', 'outerRadius', 'width', 'height', 'size', 'extent', 'length', 'thickness', 'radialOffset'])
+function sizeDisplay(key, value, rod) {
+  if (!rod || !LENGTH_KEYS.has(key)) return undefined
+  return `${(value * mmPerWorldUnit(rod)).toLocaleString('en', { maximumFractionDigits: 1 })} mm`
 }
 
 function ToolButton({ shapeKey, active, shortcut, onSelect }) {
@@ -30,6 +39,7 @@ function ToolButton({ shapeKey, active, shortcut, onSelect }) {
 }
 
 export function ToolRail({
+  rod,
   selectedShape,
   onSelectShape,
   params,
@@ -97,7 +107,7 @@ export function ToolRail({
             onClick={onToggleSelectMode}
             disabled={!canSelect}
             title={canSelect ? 'Select a placed shape (Esc to exit)' : 'Turn repeat off to select a shape'}
-            className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+            className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold transition-colors max-sm:min-h-[44px] disabled:cursor-not-allowed disabled:opacity-40 ${
               selectMode ? 'bg-accent text-accent-ink' : 'bg-raise text-mute hover:text-ink'
             }`}
           >
@@ -115,6 +125,7 @@ export function ToolRail({
                   id={`edit-${control.key}`}
                   label={control.label}
                   value={selectedElement.params[control.key]}
+                  display={sizeDisplay(control.key, selectedElement.params[control.key], rod)}
                   min={control.min}
                   max={control.max}
                   step={control.step}
@@ -147,6 +158,7 @@ export function ToolRail({
                 id={`tool-${control.key}`}
                 label={control.label}
                 value={params[control.key]}
+                display={sizeDisplay(control.key, params[control.key], rod)}
                 min={control.min}
                 max={control.max}
                 step={control.step}
@@ -194,7 +206,7 @@ export function ToolRail({
           onClick={onUndo}
           disabled={!canUndo}
           title="Undo (⌘Z)"
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-md bg-raise py-2 text-sm text-ink disabled:opacity-40"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-md bg-raise py-2 text-sm text-ink max-sm:min-h-[44px] disabled:opacity-40"
         >
           <Icon name="undo" size={16} /> Undo
         </button>
@@ -203,7 +215,7 @@ export function ToolRail({
           onClick={onRedo}
           disabled={!canRedo}
           title="Redo (⇧⌘Z)"
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-md bg-raise py-2 text-sm text-ink disabled:opacity-40"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-md bg-raise py-2 text-sm text-ink max-sm:min-h-[44px] disabled:opacity-40"
         >
           <Icon name="redo" size={16} /> Redo
         </button>

@@ -5,6 +5,7 @@ import { PlanSheet } from '../components/plan/PlanSheet'
 import { ShopChecklist } from '../components/plan/ShopChecklist'
 import { pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
 import { buildShopPlan, shopPlanWarnings, twistLabel, usedColorants } from '../engine/murrini/shopPlan'
+import { designSignature, RECIPES } from '../engine/murrini/recipes'
 import { planPickup, planReticello } from '../engine/vessel/pickup'
 
 const VIEW_KEY = 'before-the-heat:plan-view'
@@ -17,7 +18,21 @@ function readView() {
   }
 }
 
-export function PlanPage({ design, vessel, onEdit, onEditVessel }) {
+// What the sheet is for, in a line you could write on a jar of cane: the
+// recipe's name while the design is still Simple's, then the finished Ø.
+function planTitle(design, reticello) {
+  if (reticello) return `Reticello ${reticello.form.replace(/^the /, '').replace('your form', 'vessel')}`
+  let name = 'Your murrine'
+  try {
+    const simple = JSON.parse(window.localStorage.getItem('before-the-heat:simple'))
+    if (simple?.signature === designSignature(design) && RECIPES[simple.recipe]) name = `${RECIPES[simple.recipe].name} murrine`
+  } catch {
+    // Keep the plain name.
+  }
+  return `${name} · Ø ${pulledDiameterMm(design.rod).toLocaleString('en', { maximumFractionDigits: 1 })} mm`
+}
+
+export function PlanPage({ design, vessel, onEdit, onEditVessel, onCanePlan }) {
   const [view, setView] = useState(readView)
   const { elements, pattern, rod, casing, extrusion } = design
   // A murrini pick-up chosen on the Vessel page ends the plan.
@@ -31,11 +46,15 @@ export function PlanPage({ design, vessel, onEdit, onEditVessel }) {
     // The pull is where the work happens, so the number of pulls the
     // vessel needs is said there too, not only in the pick-up step.
     const pulls = pickup.totals.pulls
-    const withPulls = cane.map((step) =>
-      step.key === 'pull' && pulls > 1
-        ? { ...step, detail: `${step.detail} The vessel pick-up needs ${pulls} of these: build and pull this cane ${pulls} times.` }
-        : step,
-    )
+    const withPulls = cane.map((step) => {
+      if (pulls < 2) return step
+      if (step.key === 'pull') {
+        return { ...step, detail: `${step.detail} The vessel pick-up needs ${pulls} of these: build and pull this cane ${pulls} times.` }
+      }
+      // Every part is needed once per build, so say the total too.
+      if (step.count) return { ...step, detail: `${step.detail} For the vessel: ${step.count * pulls} in all, across ${pulls} builds.` }
+      return step
+    })
     return [...withPulls, pickup.step]
   }, [elements, pattern, rod, casing, extrusion, pickup, reticello])
   // Colors and warnings come from whatever the plan actually uses.
@@ -119,7 +138,7 @@ export function PlanPage({ design, vessel, onEdit, onEditVessel }) {
               type="button"
               aria-pressed={view === option.key}
               onClick={() => choose(option.key)}
-              className={`rounded-md px-2.5 py-2 text-sm font-semibold whitespace-nowrap sm:px-4 ${
+              className={`rounded-md px-2.5 py-2 text-sm font-semibold whitespace-nowrap max-sm:min-h-[44px] sm:px-4 ${
                 view === option.key ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
               }`}
             >
@@ -130,10 +149,19 @@ export function PlanPage({ design, vessel, onEdit, onEditVessel }) {
         <button
           type="button"
           onClick={reticello ? onEditVessel : onEdit}
-          className="rounded-lg px-2 py-2 text-sm font-semibold whitespace-nowrap text-mute hover:text-ink sm:px-3"
+          className="rounded-lg px-2 py-2 text-sm font-semibold whitespace-nowrap text-mute hover:text-ink max-sm:min-h-[44px] sm:px-3"
         >
           Edit<span className="max-sm:hidden"> {reticello ? 'vessel' : 'design'}</span>
         </button>
+        {reticello && onCanePlan && (
+          <button
+            type="button"
+            onClick={onCanePlan}
+            className="rounded-lg px-2 py-2 text-sm font-semibold whitespace-nowrap text-accent underline underline-offset-[3px] max-sm:min-h-[44px] sm:px-3"
+          >
+            Show the cane plan
+          </button>
+        )}
         {view === 'sheet' && (
           <button
             type="button"
@@ -149,7 +177,15 @@ export function PlanPage({ design, vessel, onEdit, onEditVessel }) {
 
       <div className="px-4 py-8 sm:px-8 sm:py-10 print:p-0">
         {view === 'sheet' ? (
-          <PlanSheet design={design} steps={steps} warnings={warnings} colorants={colorants} reticello={reticello} />
+          <PlanSheet
+            design={design}
+            steps={steps}
+            warnings={warnings}
+            colorants={colorants}
+            reticello={reticello}
+            pickup={reticello ? null : pickup}
+            title={planTitle(design, reticello)}
+          />
         ) : (
           <ShopChecklist design={design} steps={steps} warnings={warnings} finish={finish} />
         )}

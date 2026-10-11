@@ -144,7 +144,7 @@ function App() {
         <button
           type="button"
           onClick={() => goTo('about')}
-          className="flex shrink-0 items-center gap-2.5 font-extrabold tracking-tight"
+          className="flex shrink-0 items-center gap-2.5 font-extrabold tracking-tight max-sm:min-h-[44px] max-sm:min-w-[44px] max-sm:justify-center"
           aria-label="Before The Heat, about this project"
         >
           <Mark />
@@ -193,7 +193,7 @@ function App() {
           {activeTab === 'vessel' && (
             <VesselEditor design={design} vesselState={vesselState} onEditDesign={() => goTo('murrini')} />
           )}
-          {activeTab === 'plan' && <PlanPage design={design} vessel={vesselState.vessel} onEdit={() => goTo('murrini')} onEditVessel={() => goTo('vessel')} />}
+          {activeTab === 'plan' && <PlanPage design={design} vessel={vesselState.vessel} onEdit={() => goTo('murrini')} onEditVessel={() => goTo('vessel')} onCanePlan={() => vesselState.update({ pattern: 'none' })} />}
           {activeTab === 'learn' && <LearnPage />}
           {activeTab === 'about' && <AboutPage />}
           {activeTab === 'vault' && (

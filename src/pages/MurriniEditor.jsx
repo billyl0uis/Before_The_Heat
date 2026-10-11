@@ -308,6 +308,7 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
         aria-label="Tools"
       >
         <ToolRail
+          rod={rod}
           selectedShape={selectedShape}
           onSelectShape={handleSelectShape}
           params={params}

@@ -58,7 +58,7 @@ export function checkColorCompatibility(elements) {
       id: 'coe-reminder',
       severity: 'info',
       title: 'Confirm physical compatibility before making this for real',
-      body: `This design combines ${used.length} real colorants (${nameList(used)}). Their Coefficient of Expansion (COE) depends on each manufacturer's specific formulation, not the colorant family — this app can't verify it from the chemistry alone. Check your supplier's compatibility data, or run a compatibility test strip, before committing a real piece to the furnace.`,
+      body: `This design combines ${used.length} real colorants (${nameList(used)}). Their Coefficient of Expansion (COE) depends on each manufacturer's specific formulation, not the colorant family, so this app can't verify it from the chemistry alone. Check your supplier's compatibility data, or run a compatibility test strip, before committing a real piece to the furnace.`,
     })
   }
 

@@ -178,6 +178,7 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
     <div className="grid grid-cols-[minmax(0,1fr)] lg:h-[calc(100svh-3.5rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
       <section
         aria-label="Your murrine"
+        data-sticky-preview
         className="max-lg:sticky max-lg:top-14 max-lg:z-10 flex flex-col items-center justify-center gap-2 border-b border-line bg-ground px-4 py-3 lg:order-2 lg:border-b-0 lg:py-6"
       >
         <div className="flex w-full max-w-[460px] items-center justify-between gap-2">
@@ -201,7 +202,14 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
           </div>
           <ModeSwitch mode="simple" onChange={onMode} className="sm:hidden" />
         </div>
-        <div ref={containerRef} className="flex w-full max-w-[min(460px,calc(100svh-15rem))] justify-center max-lg:max-w-[min(190px,22svh)]">
+        <div
+          ref={containerRef}
+          className={`flex w-full max-w-[min(460px,calc(100svh-15rem))] justify-center ${
+            // While choosing colors and size on a phone, the preview gives up
+            // room to the choices; it's full size again for recipe and plan.
+            step === 1 || step === 2 ? 'max-lg:max-w-[min(120px,15svh)]' : 'max-lg:max-w-[min(190px,22svh)]'
+          }`}
+        >
           {view === 'slice' ? (
             <RodSlice
               canvas={design.canvas}
@@ -211,6 +219,9 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
               onPlace={() => {}}
               preview={NO_PREVIEW}
               size={size.width}
+              // Picking colors doesn't change the numbers, so on a phone they
+              // step aside to give the choices room.
+              readoutsClassName={step === 1 ? 'max-lg:hidden' : ''}
             />
           ) : (
             <CaneView
@@ -343,7 +354,17 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
                         type="button"
                         aria-expanded={open}
                         disabled={customised}
-                        onClick={() => setOpenSlot(open ? null : key)}
+                        onClick={(event) => {
+                          setOpenSlot(open ? null : key)
+                          // On a phone, bring the slot up under the pinned preview so
+                          // its name stays in view while you pick.
+                          const head = event.currentTarget
+                          if (open || window.innerWidth >= 1024) return
+                          requestAnimationFrame(() => {
+                            const pinned = document.querySelector('[data-sticky-preview]')?.offsetHeight ?? 0
+                            window.scrollBy({ top: head.getBoundingClientRect().top - 56 - pinned - 8 })
+                          })
+                        }}
                         className="flex w-full items-center gap-3.5 px-3.5 py-3 text-left disabled:opacity-50"
                       >
                         <span
@@ -379,9 +400,9 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
                                 className="h-5 w-5 shrink-0 rounded-full shadow-[inset_0_0_0_1px_rgb(255_255_255/0.25)]"
                                 style={{ background: colorant.swatch }}
                               />
-                              <span>
+                              <span className="min-w-0 [overflow-wrap:anywhere]">
                                 {shortName(colorant.name)}
-                                <span className={`block text-xs ${colorant.hazard ? 'text-red-300' : 'text-faint'}`}>
+                                <span className={`block text-[0.8rem] ${colorant.hazard ? 'text-red-300' : 'text-faint'}`}>
                                   {colourNote(colorant)}
                                 </span>
                               </span>

@@ -68,8 +68,40 @@ function ReticelloSide({ reticello, design }) {
   )
 }
 
+// Hand-placed slices on the wall unrolled flat, base at the bottom, so
+// they can be laid out on the kiln shelf the same way.
+function PlacementMap({ map, sliceDiameterMm }) {
+  const width = 320
+  const height = Math.max(60, Math.min(260, (map.heightMm / map.widthMm) * width))
+  const scale = width / map.widthMm
+  return (
+    <section className="md:col-span-2 break-inside-avoid">
+      <h3 className="mb-2 text-xs font-bold tracking-[0.08em] text-[#454a72] uppercase">Placement map</h3>
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        className="w-full max-w-md rounded border border-[#d9dae6]"
+        role="img"
+        aria-label={`${map.placements.length} slices on the vessel wall, unrolled flat`}
+      >
+        {map.placements.map((p, i) => (
+          <circle
+            key={i}
+            cx={p.u * width}
+            cy={(1 - p.v) * height}
+            r={Math.max(1.5, (sliceDiameterMm / 2) * scale)}
+            fill="#1430d8"
+          />
+        ))}
+      </svg>
+      <p className="mt-1 text-xs text-[#454a72]">
+        The wall unrolled: about {Math.round(map.widthMm)} × {Math.round(map.heightMm)} mm, base at the bottom.
+      </p>
+    </section>
+  )
+}
+
 // The printable shop plan: paper-white, Primary-navy ink, one page.
-export function PlanSheet({ design, steps, warnings, colorants, reticello = null }) {
+export function PlanSheet({ design, steps, warnings, colorants, reticello = null, pickup = null, title = 'Shop plan' }) {
   const { rod, casing } = design
   const plate = useMemo(
     () =>
@@ -87,8 +119,8 @@ export function PlanSheet({ design, steps, warnings, colorants, reticello = null
   return (
     <article className="mx-auto grid w-full max-w-[860px] gap-x-10 gap-y-7 rounded bg-[#fbfbf8] px-6 py-8 text-[#0b0e2e] shadow-[0_30px_80px_rgb(0_0_0/0.5),0_2px_6px_rgb(0_0_0/0.3)] sm:px-12 sm:py-11 md:grid-cols-[17rem_1fr] print:max-w-none print:px-0 print:py-0 print:shadow-none">
       <header className="flex flex-wrap items-end justify-between gap-2 border-b-2 border-[#0b0e2e] pb-3 md:col-span-2">
-        <h2 className="text-[1.6rem] leading-none font-extrabold tracking-tight">Shop plan</h2>
-        <p className="text-sm text-[#454a72]">Before The Heat · {today}</p>
+        <h2 className="text-[1.6rem] leading-none font-extrabold tracking-tight">{title}</h2>
+        <p className="text-sm text-[#454a72]">Shop plan · Before The Heat · {today}</p>
       </header>
 
       {reticello ? (
@@ -176,6 +208,7 @@ export function PlanSheet({ design, steps, warnings, colorants, reticello = null
           ))}
         </ol>
       </section>
+      {pickup?.map && <PlacementMap map={pickup.map} sliceDiameterMm={pickup.sliceDiameterMm} />}
       <section className="grid gap-6 border-t-2 border-[#0b0e2e] pt-4 text-sm leading-relaxed md:col-span-2 md:grid-cols-2">
         <div>
           <p className="font-bold text-[#1f6b3a]">Colors used</p>
@@ -198,6 +231,13 @@ export function PlanSheet({ design, steps, warnings, colorants, reticello = null
             <p>Nothing flagged in the documented colorant properties.</p>
           )}
         </div>
+      </section>
+      <section className="md:col-span-2 break-inside-avoid">
+        <h3 className="mb-1 text-xs font-bold tracking-[0.08em] text-[#454a72] uppercase">Notes</h3>
+        {/* Ruled lines to write on at the bench. */}
+        {[0, 1, 2, 3].map((line) => (
+          <div key={line} className="h-8 border-b border-[#d9dae6]" />
+        ))}
       </section>
     </article>
   )

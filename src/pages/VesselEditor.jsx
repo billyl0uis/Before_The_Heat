@@ -79,7 +79,7 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
     <div className="grid lg:h-[calc(100svh-3.5rem)] lg:grid-cols-[minmax(0,1fr)_384px]">
       <section
         aria-label="Vessel"
-        className="flex min-h-0 min-w-0 flex-col bg-ground max-lg:sticky max-lg:top-14 max-lg:z-10 max-lg:h-[58svh] max-lg:border-b max-lg:border-line"
+        className="flex min-h-0 min-w-0 flex-col bg-ground max-lg:sticky max-lg:top-14 max-lg:z-10 max-lg:h-[44svh] max-lg:border-b max-lg:border-line"
       >
         <div className="relative min-h-0 flex-1">
           <VesselCanvas
@@ -235,6 +235,10 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
 
           {vessel.pattern === 'reticello' && (
             <div className="mt-3.5 flex flex-col gap-3">
+              <p className="rounded-[10px] border border-line px-3 py-2.5 text-[0.8rem] leading-relaxed text-ink-soft">
+                While Reticello is chosen, your plan is the reticello, not your cane. Choose None or Murrini to get the
+                cane plan back.
+              </p>
               <RangeField
                 label="Rib canes around"
                 value={vessel.ribsAround}
@@ -256,7 +260,7 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
                     type="button"
                     aria-pressed={ribTarget === rib.key}
                     onClick={() => setRibTarget(rib.key)}
-                    className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[0.8rem] font-semibold ${
+                    className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[0.8rem] font-semibold max-sm:min-h-[44px] ${
                       ribTarget === rib.key ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
                     }`}
                   >

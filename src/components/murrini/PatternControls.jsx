@@ -28,7 +28,7 @@ export function PatternControls({ pattern, onChange }) {
             type="button"
             aria-pressed={type === pattern.repeatType}
             onClick={() => chooseRepeat(type)}
-            className={`min-w-0 rounded-md px-2 py-1.5 text-sm font-semibold capitalize ${
+            className={`min-w-0 rounded-md px-2 py-1.5 text-sm font-semibold capitalize max-sm:min-h-[44px] ${
               type === pattern.repeatType ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
             }`}
           >
