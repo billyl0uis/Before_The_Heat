@@ -51,7 +51,7 @@ export function ExtrusionControls({ extrusion, rod, onChange }) {
             type="button"
             aria-pressed={Boolean(extrusion.sideways) === option.value}
             onClick={() => setField('sideways', option.value)}
-            className={`min-w-0 rounded-md px-2 py-1.5 text-sm font-semibold ${
+            className={`min-w-0 rounded-md px-2 py-1.5 text-sm font-semibold max-sm:min-h-[44px] ${
               Boolean(extrusion.sideways) === option.value ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
             }`}
           >

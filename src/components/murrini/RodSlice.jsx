@@ -45,7 +45,7 @@ function TickRing({ canvasSize, gatherDiameterMm }) {
   )
 }
 
-export function RodSlice({ canvas, elements, slice, rod, onPlace, preview, size }) {
+export function RodSlice({ canvas, elements, slice, rod, onPlace, preview, size, readoutsClassName = '' }) {
   return (
     <figure className="flex flex-col items-center gap-2 lg:gap-4">
       <div className="relative" style={{ width: size, height: size }}>
@@ -60,7 +60,7 @@ export function RodSlice({ canvas, elements, slice, rod, onPlace, preview, size 
         />
         <TickRing canvasSize={canvas.width} gatherDiameterMm={rod.gatherDiameterMm} />
       </div>
-      <figcaption className="flex gap-4 text-center sm:gap-8">
+      <figcaption className={`flex gap-4 text-center sm:gap-8 ${readoutsClassName}`}>
         <Readout value={`${rod.gatherDiameterMm}`} label="gather Ø mm" />
         <Readout value={`${rod.pullRatio}:1`} label="pull ratio" />
         <Readout value={fmt(pulledDiameterMm(rod))} label="pulled Ø mm" emphasis />

@@ -97,7 +97,7 @@ export function ToolRail({
             onClick={onToggleSelectMode}
             disabled={!canSelect}
             title={canSelect ? 'Select a placed shape (Esc to exit)' : 'Turn repeat off to select a shape'}
-            className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+            className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold transition-colors max-sm:min-h-[44px] disabled:cursor-not-allowed disabled:opacity-40 ${
               selectMode ? 'bg-accent text-accent-ink' : 'bg-raise text-mute hover:text-ink'
             }`}
           >
@@ -194,7 +194,7 @@ export function ToolRail({
           onClick={onUndo}
           disabled={!canUndo}
           title="Undo (⌘Z)"
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-md bg-raise py-2 text-sm text-ink disabled:opacity-40"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-md bg-raise py-2 text-sm text-ink max-sm:min-h-[44px] disabled:opacity-40"
         >
           <Icon name="undo" size={16} /> Undo
         </button>
@@ -203,7 +203,7 @@ export function ToolRail({
           onClick={onRedo}
           disabled={!canRedo}
           title="Redo (⇧⌘Z)"
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-md bg-raise py-2 text-sm text-ink disabled:opacity-40"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-md bg-raise py-2 text-sm text-ink max-sm:min-h-[44px] disabled:opacity-40"
         >
           <Icon name="redo" size={16} /> Redo
         </button>

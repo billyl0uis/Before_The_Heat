@@ -119,7 +119,7 @@ export function PlanPage({ design, vessel, onEdit, onEditVessel }) {
               type="button"
               aria-pressed={view === option.key}
               onClick={() => choose(option.key)}
-              className={`rounded-md px-2.5 py-2 text-sm font-semibold whitespace-nowrap sm:px-4 ${
+              className={`rounded-md px-2.5 py-2 text-sm font-semibold whitespace-nowrap max-sm:min-h-[44px] sm:px-4 ${
                 view === option.key ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
               }`}
             >
@@ -130,7 +130,7 @@ export function PlanPage({ design, vessel, onEdit, onEditVessel }) {
         <button
           type="button"
           onClick={reticello ? onEditVessel : onEdit}
-          className="rounded-lg px-2 py-2 text-sm font-semibold whitespace-nowrap text-mute hover:text-ink sm:px-3"
+          className="rounded-lg px-2 py-2 text-sm font-semibold whitespace-nowrap text-mute hover:text-ink max-sm:min-h-[44px] sm:px-3"
         >
           Edit<span className="max-sm:hidden"> {reticello ? 'vessel' : 'design'}</span>
         </button>

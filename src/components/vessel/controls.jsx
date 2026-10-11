@@ -14,7 +14,7 @@ export function Segmented({ label, options, value, onChange, className = '' }) {
           aria-pressed={value === option.value}
           disabled={option.disabled}
           onClick={() => onChange(option.value)}
-          className={`rounded-lg px-2 py-[7px] text-sm font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+          className={`rounded-lg px-2 py-[7px] text-sm font-semibold whitespace-nowrap transition-colors max-sm:min-h-[44px] disabled:cursor-not-allowed disabled:opacity-40 ${
             value === option.value ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
           }`}
         >

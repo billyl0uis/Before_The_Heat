@@ -144,7 +144,7 @@ function App() {
         <button
           type="button"
           onClick={() => goTo('about')}
-          className="flex shrink-0 items-center gap-2.5 font-extrabold tracking-tight"
+          className="flex shrink-0 items-center gap-2.5 font-extrabold tracking-tight max-sm:min-h-[44px] max-sm:min-w-[44px] max-sm:justify-center"
           aria-label="Before The Heat, about this project"
         >
           <Mark />
