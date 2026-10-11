@@ -140,7 +140,7 @@ export function planPickup(vessel, design) {
       detail: lines.join(' '),
       lines,
       colorantIds: [],
-      plate: { kind: 'vessel', outline, height: wall.height },
+      plate: vesselPlate,
     },
   }
 }
@@ -171,15 +171,56 @@ export function planReticello(vessel) {
     `Lay the ${a} canes side by side on a kiln shelf, heat them, pick them up and close them into a cylinder, then twist it one way as you blow it into a cup. Do the same with the ${b} canes, twisting the other way.`,
     `Blow one cup inside the other until they meet, so the threads cross and trap a bubble in each diamond. Then blow out to ${formPhrase(vessel)}: ${fmt(wall.height, 0)} mm tall, Ø ${fmt(wall.rimRadius * 2, 0)} mm at the rim.`,
   ]
+  const form = formPhrase(vessel)
+  const rib = (id, name) => ({
+    key: `rib-${id}`,
+    title: `Pull ${perSide} ${name} rib canes, ${lengthMm} mm long`,
+    detail: `Usually a single ${name} thread cased in clear (vetro a fili), all the same thickness: enough to lay side by side right round your first cup. ${lengthMm} mm is the wall's length, ${fmt(wall.length, 0)} mm, plus a little to work with.`,
+    colorantIds: findColorant(id) ? [id] : [],
+    plate: { kind: 'rib', colorantId: id },
+  })
+  const vesselPlate = { kind: 'vessel', outline, height: wall.height }
+  const steps = [
+    rib(vessel.ribA, a),
+    rib(vessel.ribB, b),
+    {
+      key: 'cup-a',
+      title: `Make the ${a} cup, twisting one way`,
+      detail: `Lay the ${a} canes side by side on a kiln shelf and heat them. Pick them up, close them into a cylinder, and twist it one way as you blow it into a cup.`,
+      colorantIds: findColorant(vessel.ribA) ? [vessel.ribA] : [],
+      plate: { kind: 'rib', colorantId: vessel.ribA },
+    },
+    {
+      key: 'cup-b',
+      title: `Make the ${b} cup, twisting the other way`,
+      detail: `The same with the ${b} canes, twisting the opposite way, so the two sets of threads will cross.`,
+      colorantIds: findColorant(vessel.ribB) ? [vessel.ribB] : [],
+      plate: { kind: 'rib', colorantId: vessel.ribB },
+    },
+    {
+      key: 'nest',
+      title: 'Blow one cup inside the other',
+      detail: `Inflate the inner cup until the two meet: the threads cross and trap a bubble in each diamond. Then blow out to ${form}: ${fmt(wall.height, 0)} mm tall, Ø ${fmt(wall.rimRadius * 2, 0)} mm at the rim.`,
+      colorantIds: [],
+      plate: vesselPlate,
+    },
+  ]
   return {
+    perSide,
+    names: [a, b],
+    colorantIds: [vessel.ribA, vessel.ribB].filter((id) => findColorant(id)),
+    form,
+    wall,
+    outline,
+    steps,
     step: {
       key: 'reticello',
-      after: 'its own step, separate from the cane',
+      after: 'the whole plan, from the Vessel tab',
       title: `Make the reticello: ${perSide} + ${perSide} rib canes`,
       detail: lines.join(' '),
       lines,
       colorantIds: [vessel.ribA, vessel.ribB].filter((id) => findColorant(id)),
-      plate: { kind: 'vessel', outline, height: wall.height },
+      plate: vesselPlate,
     },
   }
 }

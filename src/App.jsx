@@ -193,7 +193,7 @@ function App() {
           {activeTab === 'vessel' && (
             <VesselEditor design={design} vesselState={vesselState} onEditDesign={() => goTo('murrini')} />
           )}
-          {activeTab === 'plan' && <PlanPage design={design} vessel={vesselState.vessel} onEdit={() => goTo('murrini')} />}
+          {activeTab === 'plan' && <PlanPage design={design} vessel={vesselState.vessel} onEdit={() => goTo('murrini')} onEditVessel={() => goTo('vessel')} />}
           {activeTab === 'learn' && <LearnPage />}
           {activeTab === 'about' && <AboutPage />}
           {activeTab === 'vault' && (

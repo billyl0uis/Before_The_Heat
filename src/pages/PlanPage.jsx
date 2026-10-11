@@ -17,7 +17,7 @@ function readView() {
   }
 }
 
-export function PlanPage({ design, vessel, onEdit }) {
+export function PlanPage({ design, vessel, onEdit, onEditVessel }) {
   const [view, setView] = useState(readView)
   const { elements, pattern, rod, casing, extrusion } = design
   // A murrini pick-up chosen on the Vessel page ends the plan.
@@ -25,7 +25,8 @@ export function PlanPage({ design, vessel, onEdit }) {
   const reticello = useMemo(() => planReticello(vessel), [vessel])
   const steps = useMemo(() => {
     const cane = buildShopPlan({ elements, pattern, rod, casing, extrusion })
-    if (reticello && cane.length) return [...cane, reticello.step]
+    // Reticello doesn't use the cane at all: the plan is the reticello.
+    if (reticello) return reticello.steps
     if (!pickup || !cane.length) return cane
     // The pull is where the work happens, so the number of pulls the
     // vessel needs is said there too, not only in the pick-up step.
@@ -37,8 +38,16 @@ export function PlanPage({ design, vessel, onEdit }) {
     )
     return [...withPulls, pickup.step]
   }, [elements, pattern, rod, casing, extrusion, pickup, reticello])
-  const warnings = useMemo(() => shopPlanWarnings({ elements, casing }), [elements, casing])
-  const colorants = useMemo(() => usedColorants({ elements, casing }), [elements, casing])
+  // Colors and warnings come from whatever the plan actually uses.
+  const used = useMemo(
+    () => (reticello ? { elements: reticello.colorantIds.map((colorantId) => ({ colorantId })), casing: [] } : { elements, casing }),
+    [reticello, elements, casing],
+  )
+  const warnings = useMemo(() => shopPlanWarnings(used), [used])
+  const colorants = useMemo(() => usedColorants(used), [used])
+  const finish = reticello || pickup
+    ? { title: 'Before you start', line: 'Into the annealer, then check the piece against the plan.' }
+    : { title: 'Before you slice the whole cane', line: 'Slice the cane and check a piece against the plan.' }
 
   const choose = (next) => {
     setView(next)
@@ -77,16 +86,22 @@ export function PlanPage({ design, vessel, onEdit }) {
             view === 'checklist' ? 'text-[1.6rem] max-sm:py-2' : 'text-[clamp(1.8rem,4.6vw,3.4rem)]'
           }`}
         >
-          Ready to pull
+          {reticello ? 'Ready for the reticello' : 'Ready to pull'}
         </h1>
         <p
           className={`rounded-lg bg-ground px-3 py-2 font-mono text-sm shadow-[0_12px_40px_rgb(0_0_0/0.5)] ${
             view === 'checklist' ? 'max-sm:hidden' : ''
           }`}
         >
-          Ø {rod.gatherDiameterMm} → {pulledDiameterMm(rod).toFixed(1)} mm · {rod.pullRatio} : 1 · ≈{' '}
-          {(pulledLengthMm(rod) / 1000).toFixed(1)} m
-          {extrusion.twistDegrees ? ` · ${turnsLabel(extrusion.twistDegrees)}` : ''}
+          {reticello ? (
+            `${reticello.perSide} + ${reticello.perSide} rib canes · ${reticello.form} · from the Vessel tab`
+          ) : (
+            <>
+              Ø {rod.gatherDiameterMm} → {pulledDiameterMm(rod).toFixed(1)} mm · {rod.pullRatio} : 1 · ≈{' '}
+              {(pulledLengthMm(rod) / 1000).toFixed(1)} m
+              {extrusion.twistDegrees ? ` · ${turnsLabel(extrusion.twistDegrees)}` : ''}
+            </>
+          )}
         </p>
       </FieldHeader>
 
@@ -114,10 +129,10 @@ export function PlanPage({ design, vessel, onEdit }) {
         </div>
         <button
           type="button"
-          onClick={onEdit}
+          onClick={reticello ? onEditVessel : onEdit}
           className="rounded-lg px-2 py-2 text-sm font-semibold whitespace-nowrap text-mute hover:text-ink sm:px-3"
         >
-          Edit<span className="max-sm:hidden"> design</span>
+          Edit<span className="max-sm:hidden"> {reticello ? 'vessel' : 'design'}</span>
         </button>
         {view === 'sheet' && (
           <button
@@ -134,9 +149,9 @@ export function PlanPage({ design, vessel, onEdit }) {
 
       <div className="px-4 py-8 sm:px-8 sm:py-10 print:p-0">
         {view === 'sheet' ? (
-          <PlanSheet design={design} steps={steps} warnings={warnings} colorants={colorants} />
+          <PlanSheet design={design} steps={steps} warnings={warnings} colorants={colorants} reticello={reticello} />
         ) : (
-          <ShopChecklist design={design} steps={steps} warnings={warnings} />
+          <ShopChecklist design={design} steps={steps} warnings={warnings} finish={finish} />
         )}
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { findColorant } from '../../engine/murrini/rod'
 import { renderCanePlate, renderSlicePlate } from '../../engine/murrini/slicePlate'
 
 // The vessel a pick-up step blows out to: its real outline, as clear glass
@@ -27,6 +28,27 @@ function renderVesselPlate({ outline, height, size, backdrop }) {
   return canvas
 }
 
+// A reticello rib cane end on: one colored thread cased in clear.
+function renderRibPlate({ colorantId, size, backdrop }) {
+  const canvas = document.createElement('canvas')
+  canvas.width = canvas.height = size
+  const ctx = canvas.getContext('2d')
+  const c = size / 2
+  ctx.fillStyle = backdrop
+  ctx.beginPath()
+  ctx.arc(c, c, c, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.fillStyle = 'rgb(207 220 216 / 0.35)'
+  ctx.beginPath()
+  ctx.arc(c, c, c * 0.62, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.fillStyle = findColorant(colorantId)?.swatch ?? '#f5f5f4'
+  ctx.beginPath()
+  ctx.arc(c, c, c * 0.24, 0, Math.PI * 2)
+  ctx.fill()
+  return canvas
+}
+
 // The thumbnail that proves a step: the cane it pulls, the rod as it is
 // once that step is done, or the vessel it ends in. Drawn from the real
 // design, never illustrated.
@@ -34,7 +56,9 @@ export function StepPlate({ plate, design, size, backdrop = '#3a3d45', className
   const src = useMemo(() => {
     const px = size * 2
     let canvas
-    if (plate.kind === 'vessel') {
+    if (plate.kind === 'rib') {
+      canvas = renderRibPlate({ colorantId: plate.colorantId, size: px, backdrop })
+    } else if (plate.kind === 'vessel') {
       canvas = renderVesselPlate({ outline: plate.outline, height: plate.height, size: px, backdrop })
     } else if (plate.kind === 'cane') {
       canvas = renderCanePlate({ elements: plate.elements, size: px, backdrop })
@@ -54,7 +78,9 @@ export function StepPlate({ plate, design, size, backdrop = '#3a3d45', className
   // The step's own title already says what this shows; the alt names
   // the kind of picture so it isn't skipped as decoration.
   const alt =
-    plate.kind === 'vessel'
+    plate.kind === 'rib'
+      ? 'A rib cane, end on: a colored thread in clear'
+      : plate.kind === 'vessel'
       ? 'Outline of the finished vessel'
       : plate.kind === 'cane'
         ? 'The cane, end on'
