@@ -1,11 +1,12 @@
-import { turnsLabel } from '../../engine/murrini/shopPlan'
+import { twistLabel } from '../../engine/murrini/shopPlan'
 import { Panel, Slider } from './Panel'
 
 // Twist in the same words the plan uses, so Advanced, Simple and the
 // printed sheet all say "half a turn" for the same cane.
-const twistDisplay = (degrees) => (degrees ? `${turnsLabel(degrees)}, ${degrees > 0 ? 'right' : 'left'}` : 'None')
+const twistDisplay = (rod, degrees) =>
+  degrees ? `${twistLabel(rod, degrees).replace('a turn every', '1 turn /')}, ${degrees > 0 ? 'right' : 'left'}` : 'None'
 
-export function ExtrusionControls({ extrusion, onChange }) {
+export function ExtrusionControls({ extrusion, rod, onChange }) {
   const setField = (key, value) => onChange({ ...extrusion, [key]: value })
 
   return (
@@ -14,7 +15,7 @@ export function ExtrusionControls({ extrusion, onChange }) {
         id="extrusion-twist"
         label="Twist"
         value={extrusion.twistDegrees}
-        display={twistDisplay(extrusion.twistDegrees)}
+        display={twistDisplay(rod, extrusion.twistDegrees)}
         min={-720}
         max={720}
         step={90}
@@ -60,7 +61,8 @@ export function ExtrusionControls({ extrusion, onChange }) {
       </div>
       <p className="text-[0.8rem] leading-relaxed text-mute">
         Twist spirals off-centre canes along the rod, the way a zanfirico is made; a cane on the centre has nothing
-        to spiral. Taper narrows the far end. View length and direction only change the Rod 3D view.
+        to spiral. The value is the real rate on the pulled cane; Rod 3D squeezes it into a short stub so you can
+        see it. Taper narrows the far end. View length and direction only change the Rod 3D view.
       </p>
     </Panel>
   )

@@ -4,7 +4,7 @@ import { FieldHeader } from '../components/plan/FieldHeader'
 import { PlanSheet } from '../components/plan/PlanSheet'
 import { ShopChecklist } from '../components/plan/ShopChecklist'
 import { pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
-import { buildShopPlan, shopPlanWarnings, turnsLabel, usedColorants } from '../engine/murrini/shopPlan'
+import { buildShopPlan, shopPlanWarnings, twistLabel, usedColorants } from '../engine/murrini/shopPlan'
 import { planPickup, planReticello } from '../engine/vessel/pickup'
 
 const VIEW_KEY = 'before-the-heat:plan-view'
@@ -99,7 +99,7 @@ export function PlanPage({ design, vessel, onEdit, onEditVessel }) {
             <>
               Ø {rod.gatherDiameterMm} → {pulledDiameterMm(rod).toFixed(1)} mm · {rod.pullRatio} : 1 · ≈{' '}
               {(pulledLengthMm(rod) / 1000).toFixed(1)} m
-              {extrusion.twistDegrees ? ` · ${turnsLabel(extrusion.twistDegrees)}` : ''}
+              {extrusion.twistDegrees ? ` · twist ${twistLabel(rod, extrusion.twistDegrees)}` : ''}
             </>
           )}
         </p>

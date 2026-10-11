@@ -329,7 +329,7 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
           onSelectAccentColorant={setAccentColorantId}
         />
         <PatternControls pattern={pattern} onChange={setPattern} />
-        <ExtrusionControls extrusion={extrusion} onChange={setExtrusion} />
+        <ExtrusionControls extrusion={extrusion} rod={rod} onChange={setExtrusion} />
         <TechniqueReference elements={elements} shape={selectedShape} params={params} />
       </aside>
 

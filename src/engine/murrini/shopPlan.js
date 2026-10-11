@@ -1,7 +1,7 @@
 import { computeBuildPlan, MURRINI_TECHNIQUES } from '../../content/murrineTechniques'
 import { COMPOUND_SHAPE_TYPES } from './compoundShapes'
 import { checkColorCompatibility } from './colorCompatibility'
-import { findColorant, mmPerWorldUnit, pulledDiameterMm, pulledLengthMm } from './rod'
+import { findColorant, mmPerWorldUnit, pulledDiameterMm, pulledLengthMm, twistPitchMm } from './rod'
 import { computeShapeReach, SHAPE_TYPES } from './shapes'
 
 // How many copies of the drawn base cell the repeat produces.
@@ -25,6 +25,11 @@ export function turnsLabel(twistDegrees) {
   const whole = Math.floor(turns)
   const part = { 0.25: '¼', 0.5: '½', 0.75: '¾' }[turns - whole]
   return part && whole ? `${whole}${part} turns` : `${fmt(turns)} turns`
+}
+// The cane's twist as a rate you can measure on the cane itself.
+export function twistLabel(rod, twistDegrees) {
+  if (!twistDegrees) return ''
+  return `a turn every ${fmt(twistPitchMm(rod, twistDegrees))}\u00a0mm`
 }
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`
 
@@ -282,14 +287,18 @@ export function buildShopPlan({ elements, pattern, rod, casing, extrusion }) {
   if (steps.length) {
     // The twist is the whole technique for a zanfirico or any spiral cane:
     // it has to be in the instruction, not only in the preview.
-    const twist = turnsLabel(extrusion?.twistDegrees ?? 0)
+    const twistDegrees = extrusion?.twistDegrees ?? 0
+    const twist = twistLabel(rod, twistDegrees)
+    const totalTurns = twistDegrees ? Math.round(pulledLengthMm(rod) / twistPitchMm(rod, twistDegrees)) : 0
     steps.push({
       key: 'pull',
       title: twist
         ? `Pull to Ø ${fmt(pulledDiameterMm(rod))} mm, twisting ${twist}`
         : `Pull to Ø ${fmt(pulledDiameterMm(rod))} mm`,
       detail: `${rod.pullRatio} : 1 from a ${rod.gatherDiameterMm} mm × ${rod.gatherLengthMm} mm gather gives about ${fmt(pulledLengthMm(rod) / 1000)} m of cane to slice.${
-        twist ? ' Keep turning the same way as you pull, so the twist spreads evenly along the cane.' : ''
+        twist
+          ? ` That's about ${totalTurns} turns over the whole pull: keep turning the same way as you walk it out, so the twist stays even.`
+          : ''
       }`,
       colorantIds: [],
       plate: { kind: 'slice', casingUpTo: casing.length - 1 },
