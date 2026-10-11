@@ -26,8 +26,50 @@ export function ColorantDots({ ids, size = 14 }) {
   )
 }
 
+// The sheet's left column for a reticello vessel: the piece and the two
+// sets of rib canes, in place of the cane's slice, pull and casing.
+function ReticelloSide({ reticello, design }) {
+  const { perSide, names, colorantIds, wall, form } = reticello
+  return (
+    <div className="flex flex-col gap-5">
+      <StepPlate
+        plate={{ kind: 'vessel', outline: reticello.outline, height: wall.height }}
+        design={design}
+        size={240}
+        className="self-center"
+      />
+      <section>
+        <h3 className="mb-2 text-xs font-bold tracking-[0.08em] text-[#454a72] uppercase">Rib canes</h3>
+        <table className="w-full text-sm">
+          <tbody>
+            {names.map((name, index) => (
+              <tr key={name + index} className="border-b border-[#d9dae6]">
+                <td className="py-1.5">
+                  <span
+                    className="mr-2 inline-block h-3.5 w-5 rounded-sm align-[-2px] shadow-[inset_0_0_0_1px_rgb(0_0_0/0.2)]"
+                    style={{ background: findColorant(colorantIds[index])?.swatch }}
+                  />
+                  {perSide} {name}
+                </td>
+                <td className="py-1.5 text-right">{index === 0 ? 'twist one way' : 'the other way'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h3 className="mb-2 text-xs font-bold tracking-[0.08em] text-[#454a72] uppercase">Finished piece</h3>
+        <p className="font-mono text-base font-semibold">
+          {fmt(wall.height)} mm tall · Ø {fmt(wall.rimRadius * 2)} mm rim
+        </p>
+        <p className="text-xs text-[#454a72]">Blown out to {form}.</p>
+      </section>
+    </div>
+  )
+}
+
 // The printable shop plan: paper-white, Primary-navy ink, one page.
-export function PlanSheet({ design, steps, warnings, colorants }) {
+export function PlanSheet({ design, steps, warnings, colorants, reticello = null }) {
   const { rod, casing } = design
   const plate = useMemo(
     () =>
@@ -49,6 +91,9 @@ export function PlanSheet({ design, steps, warnings, colorants }) {
         <p className="text-sm text-[#454a72]">Before The Heat · {today}</p>
       </header>
 
+      {reticello ? (
+        <ReticelloSide reticello={reticello} design={design} />
+      ) : (
       <div className="flex flex-col gap-5">
         <img
           src={plate}
@@ -110,6 +155,7 @@ export function PlanSheet({ design, steps, warnings, colorants }) {
           )}
         </section>
       </div>
+      )}
 
       <section>
         <h3 className="mb-1 text-xs font-bold tracking-[0.08em] text-[#454a72] uppercase">Build order</h3>
