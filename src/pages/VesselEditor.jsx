@@ -235,6 +235,10 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
 
           {vessel.pattern === 'reticello' && (
             <div className="mt-3.5 flex flex-col gap-3">
+              <p className="rounded-[10px] border border-line px-3 py-2.5 text-[0.8rem] leading-relaxed text-ink-soft">
+                While Reticello is chosen, your plan is the reticello, not your cane. Choose None or Murrini to get the
+                cane plan back.
+              </p>
               <RangeField
                 label="Rib canes around"
                 value={vessel.ribsAround}

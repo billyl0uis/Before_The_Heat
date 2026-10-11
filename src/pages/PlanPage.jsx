@@ -32,7 +32,7 @@ function planTitle(design, reticello) {
   return `${name} · Ø ${pulledDiameterMm(design.rod).toLocaleString('en', { maximumFractionDigits: 1 })} mm`
 }
 
-export function PlanPage({ design, vessel, onEdit, onEditVessel }) {
+export function PlanPage({ design, vessel, onEdit, onEditVessel, onCanePlan }) {
   const [view, setView] = useState(readView)
   const { elements, pattern, rod, casing, extrusion } = design
   // A murrini pick-up chosen on the Vessel page ends the plan.
@@ -153,6 +153,15 @@ export function PlanPage({ design, vessel, onEdit, onEditVessel }) {
         >
           Edit<span className="max-sm:hidden"> {reticello ? 'vessel' : 'design'}</span>
         </button>
+        {reticello && onCanePlan && (
+          <button
+            type="button"
+            onClick={onCanePlan}
+            className="rounded-lg px-2 py-2 text-sm font-semibold whitespace-nowrap text-accent underline underline-offset-[3px] max-sm:min-h-[44px] sm:px-3"
+          >
+            Show the cane plan
+          </button>
+        )}
         {view === 'sheet' && (
           <button
             type="button"
