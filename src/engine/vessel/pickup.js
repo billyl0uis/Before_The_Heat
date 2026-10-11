@@ -140,7 +140,7 @@ export function planPickup(vessel, design) {
       detail: lines.join(' '),
       lines,
       colorantIds: [],
-      plate: vesselPlate,
+      plate: { kind: 'vessel', outline, height: wall.height },
     },
   }
 }
