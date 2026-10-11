@@ -153,12 +153,14 @@ function compoundCaneSteps(cluster, copies, rod) {
     const n = threads.length
     const steps = [
       {
+        count: copies,
         title: `Pull ${copies} ${colourName(core)} core cane${copies === 1 ? '' : 's'}, ${sizePhrase(core, mmPerUnit)}`,
         detail: 'The core the threads sit round.',
         colorantIds: ids([core]),
         elements: [core],
       },
       {
+        count: n * copies,
         title: `Pull ${n * copies} ${colourName(threads[0])} thread canes, ${sizePhrase(threads[0], mmPerUnit)}`,
         detail: `All the same size: ${n} for each zanfirico, touching each other and the core.`,
         colorantIds: ids(threads),
@@ -228,6 +230,7 @@ export function buildShopPlan({ elements, pattern, rod, casing, extrusion }) {
           key: `cane-${steps.length}`,
           title: part.title,
           detail: part.detail,
+          count: part.count,
           colorantIds: part.colorantIds,
           plate: { kind: 'cane', elements: part.elements },
         })
@@ -244,6 +247,7 @@ export function buildShopPlan({ elements, pattern, rod, casing, extrusion }) {
           key: `cane-${steps.length}`,
           title: part.title,
           detail: part.detail,
+          count: part.count,
           colorantIds: part.colorantIds,
           plate: { kind: 'cane', elements: part.elements },
         })
@@ -255,6 +259,7 @@ export function buildShopPlan({ elements, pattern, rod, casing, extrusion }) {
       key: `cane-${steps.length}`,
       title,
       detail,
+      count,
       colorantIds: step.colorantIds,
       plate: { kind: 'cane', elements: step.elements },
     })

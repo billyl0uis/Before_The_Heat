@@ -5,6 +5,7 @@ import { PlanSheet } from '../components/plan/PlanSheet'
 import { ShopChecklist } from '../components/plan/ShopChecklist'
 import { pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
 import { buildShopPlan, shopPlanWarnings, twistLabel, usedColorants } from '../engine/murrini/shopPlan'
+import { designSignature, RECIPES } from '../engine/murrini/recipes'
 import { planPickup, planReticello } from '../engine/vessel/pickup'
 
 const VIEW_KEY = 'before-the-heat:plan-view'
@@ -15,6 +16,20 @@ function readView() {
   } catch {
     return 'sheet'
   }
+}
+
+// What the sheet is for, in a line you could write on a jar of cane: the
+// recipe's name while the design is still Simple's, then the finished Ø.
+function planTitle(design, reticello) {
+  if (reticello) return `Reticello ${reticello.form.replace(/^the /, '').replace('your form', 'vessel')}`
+  let name = 'Your murrine'
+  try {
+    const simple = JSON.parse(window.localStorage.getItem('before-the-heat:simple'))
+    if (simple?.signature === designSignature(design) && RECIPES[simple.recipe]) name = `${RECIPES[simple.recipe].name} murrine`
+  } catch {
+    // Keep the plain name.
+  }
+  return `${name} · Ø ${pulledDiameterMm(design.rod).toLocaleString('en', { maximumFractionDigits: 1 })} mm`
 }
 
 export function PlanPage({ design, vessel, onEdit, onEditVessel }) {
@@ -31,11 +46,15 @@ export function PlanPage({ design, vessel, onEdit, onEditVessel }) {
     // The pull is where the work happens, so the number of pulls the
     // vessel needs is said there too, not only in the pick-up step.
     const pulls = pickup.totals.pulls
-    const withPulls = cane.map((step) =>
-      step.key === 'pull' && pulls > 1
-        ? { ...step, detail: `${step.detail} The vessel pick-up needs ${pulls} of these: build and pull this cane ${pulls} times.` }
-        : step,
-    )
+    const withPulls = cane.map((step) => {
+      if (pulls < 2) return step
+      if (step.key === 'pull') {
+        return { ...step, detail: `${step.detail} The vessel pick-up needs ${pulls} of these: build and pull this cane ${pulls} times.` }
+      }
+      // Every part is needed once per build, so say the total too.
+      if (step.count) return { ...step, detail: `${step.detail} For the vessel: ${step.count * pulls} in all, across ${pulls} builds.` }
+      return step
+    })
     return [...withPulls, pickup.step]
   }, [elements, pattern, rod, casing, extrusion, pickup, reticello])
   // Colors and warnings come from whatever the plan actually uses.
@@ -149,7 +168,15 @@ export function PlanPage({ design, vessel, onEdit, onEditVessel }) {
 
       <div className="px-4 py-8 sm:px-8 sm:py-10 print:p-0">
         {view === 'sheet' ? (
-          <PlanSheet design={design} steps={steps} warnings={warnings} colorants={colorants} reticello={reticello} />
+          <PlanSheet
+            design={design}
+            steps={steps}
+            warnings={warnings}
+            colorants={colorants}
+            reticello={reticello}
+            pickup={reticello ? null : pickup}
+            title={planTitle(design, reticello)}
+          />
         ) : (
           <ShopChecklist design={design} steps={steps} warnings={warnings} finish={finish} />
         )}

@@ -129,6 +129,8 @@ export function planPickup(vessel, design) {
     wall,
     count,
     byHand,
+    // For the sheet: the wall unrolled, with each hand-placed slice on it.
+    map: byHand ? { placements: vessel.placements, widthMm: 2 * Math.PI * wall.meanRadius, heightMm: wall.length } : null,
     sliceDiameterMm,
     pullLengthMm,
     totals,

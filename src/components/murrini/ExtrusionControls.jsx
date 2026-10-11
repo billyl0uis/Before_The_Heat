@@ -23,7 +23,7 @@ export function ExtrusionControls({ extrusion, rod, onChange }) {
       />
       <Slider
         id="extrusion-taper"
-        label="Taper"
+        label="Taper (3D view only)"
         value={extrusion.taper}
         display={extrusion.taper ? `${extrusion.taper}%` : 'None'}
         min={0}
@@ -62,7 +62,7 @@ export function ExtrusionControls({ extrusion, rod, onChange }) {
       <p className="text-[0.8rem] leading-relaxed text-mute">
         Twist spirals off-centre canes along the rod, the way a zanfirico is made; a cane on the centre has nothing
         to spiral. The value is the real rate on the pulled cane; Rod 3D squeezes it into a short stub so you can
-        see it. Taper narrows the far end. View length and direction only change the Rod 3D view.
+        see it. Taper, view length and direction only change the Rod 3D view; they aren't in the plan.
       </p>
     </Panel>
   )
