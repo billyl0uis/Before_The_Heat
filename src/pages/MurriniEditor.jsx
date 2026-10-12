@@ -226,6 +226,17 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
     handlePlace(x, y)
   }
 
+  // A notice describes the last placement, so stepping through history
+  // retires it rather than leaving it about a cane that's gone.
+  const handleUndo = () => {
+    undo()
+    setNotice(null)
+  }
+  const handleRedo = () => {
+    redo()
+    setNotice(null)
+  }
+
   // Say what a placement does to the plan, rather than letting it change
   // quietly: a cane inside another becomes part of it, and canes that cut
   // into each other can't exist in a real bundle.
@@ -234,8 +245,8 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
     if (!result) return setNotice(null)
     setNotice(
       result.kind === 'inside'
-        ? `This sits inside ${result.other}, so the plan pulls them as one cane. ⌘Z to undo.`
-        : `This overlaps ${result.other}. Canes in a bundle can only touch: move it apart, or ⌘Z to undo.`,
+        ? `This sits inside ${result.other}, so the plan pulls them as one cane. Undo to take it back.`
+        : `This overlaps ${result.other}. Canes in a bundle can only touch: move it apart, or undo.`,
     )
   }
 
@@ -278,8 +289,8 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
         tag === 'TEXTAREA' || (tag === 'INPUT' && event.target.type !== 'range' && event.target.type !== 'checkbox')
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'z') {
         event.preventDefault()
-        if (event.shiftKey) redo()
-        else undo()
+        if (event.shiftKey) handleRedo()
+        else handleUndo()
         return
       }
       if (typing || event.metaKey || event.ctrlKey || event.altKey) return
@@ -314,8 +325,8 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
           params={params}
           onParamChange={handleParamChange}
           onClear={handleClear}
-          onUndo={undo}
-          onRedo={redo}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
           canUndo={canUndo}
           canRedo={canRedo}
           selectMode={selectMode}

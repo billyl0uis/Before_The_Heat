@@ -1,17 +1,18 @@
-import { metres, pickupTotals, SAW_KERF_MM } from '../../engine/vessel/pickup'
+import { metres, pickupTotals, planReticello, SAW_KERF_MM } from '../../engine/vessel/pickup'
 
 const fmt = (value, digits = 1) => value.toLocaleString('en', { maximumFractionDigits: digits })
 const Num = ({ children }) => <b className="font-mono text-[1.05em] font-semibold text-ink">{children}</b>
 
 // The answer the page exists for: how many slices, how much cane, how many
 // pulls. Sits under the vessel so it changes as you shape it.
-export function PickupReadout({ vessel, pickup, hasDesign }) {
+export function PickupReadout({ vessel, pickup, hasDesign, coarse = false }) {
   let sentence
   if (vessel.pattern === 'reticello') {
+    const reticello = planReticello(vessel)
     sentence = (
       <>
-        Reticello, <Num>{vessel.ribsAround / 2}</Num> rib canes each way, twisted in opposite directions. It goes in
-        your plan as its own step.
+        Reticello: <Num>{reticello.perSide}</Num> rib canes each way, <Num>Ø {fmt(reticello.ribMm)} mm</Num>, each cup
+        twisted {reticello.twist}. It replaces the cane plan: the Plan tab shows how to build it.
       </>
     )
   } else if (vessel.pattern !== 'murrini') {
@@ -20,7 +21,7 @@ export function PickupReadout({ vessel, pickup, hasDesign }) {
       : 'Plain glass. Make a cane in the Murrini tab, then choose Murrini here to see how many slices this form takes.'
   } else if (!pickup) {
     sentence = hasDesign
-      ? 'Tap the vessel to place a slice. Each one is drawn at its real size.'
+      ? `${coarse ? 'Tap' : 'Click'} the vessel to place a slice. Each one is drawn at its real size.`
       : 'Make a cane in the Murrini tab first: its slice is what goes on here.'
   } else {
     const { count, totals, byHand, sliceDiameterMm, pullLengthMm } = pickup

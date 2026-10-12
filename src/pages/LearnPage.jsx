@@ -24,7 +24,7 @@ export function LearnPage() {
                 type="button"
                 aria-pressed={item.key === section}
                 onClick={() => setSection(item.key)}
-                className={`rounded-md px-4 py-2 text-sm font-semibold ${
+                className={`min-h-[44px] rounded-md px-4 py-2 text-sm font-semibold ${
                   item.key === section ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
                 }`}
               >

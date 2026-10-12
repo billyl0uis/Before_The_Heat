@@ -67,9 +67,7 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
       : 'Drag to turn · scroll to zoom'
 
   const planMessage =
-    vessel.pattern === 'reticello'
-      ? 'Reticello isn’t added to the plan yet.'
-      : vessel.pattern === 'murrini'
+    vessel.pattern === 'murrini'
         ? hasDesign
           ? 'Place some slices and the pick-up step appears here.'
           : 'Make a cane in the Murrini tab first.'
@@ -105,7 +103,7 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
             {hint}
           </p>
         </div>
-        <PickupReadout vessel={vessel} pickup={pickup} hasDesign={hasDesign} />
+        <PickupReadout vessel={vessel} pickup={pickup} hasDesign={hasDesign} coarse={coarse} />
       </section>
 
       <aside

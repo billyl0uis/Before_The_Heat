@@ -1,7 +1,7 @@
 import { findColorant, pulledDiameterMm, pulledLengthMm } from '../murrini/rod'
 import { turnsLabel } from '../murrini/shopPlan'
 import { VESSEL_FORM_PRESETS, vesselRadiusFunction } from './profile'
-import { threadDriftTurns } from './reticello'
+import { THREAD_MM, threadDriftTurns } from './reticello'
 
 // A murrini pick-up, worked out from the vessel's own outside wall: how
 // many slices of the pulled cane cover it, how much cane that takes, and
@@ -199,7 +199,19 @@ export function planReticello(vessel) {
     colorantIds: [id, 'clear'].filter((c, i, all) => findColorant(c) && all.indexOf(c) === i),
     plate: { kind: 'rib', colorantId: id },
   })
-  const vesselPlate = { kind: 'vessel', outline, height: wall.height }
+  // The finished piece with its threads, drawn as the preview draws them.
+  const vesselPlate = {
+    kind: 'vessel',
+    outline,
+    height: wall.height,
+    threads: {
+      perSide,
+      drift: threadDriftTurns(wall),
+      threadMm: THREAD_MM,
+      colorA: findColorant(vessel.ribA)?.swatch ?? '#f5f5f4',
+      colorB: findColorant(vessel.ribB)?.swatch ?? '#1e3a8a',
+    },
+  }
   const steps = [
     rib(vessel.ribA, a),
     rib(vessel.ribB, b),

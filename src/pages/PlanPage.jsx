@@ -163,7 +163,7 @@ export function PlanPage({ design, vessel, onEdit, onEditVessel, onCanePlan }) {
             onClick={onCanePlan}
             className="rounded-lg px-2 py-2 text-sm font-semibold whitespace-nowrap text-accent underline underline-offset-[3px] max-sm:min-h-[44px] sm:px-3"
           >
-            Show the cane plan
+            Turn off reticello<span className="max-sm:hidden"> for the cane plan</span>
           </button>
         )}
         {view === 'sheet' && (
@@ -171,7 +171,7 @@ export function PlanPage({ design, vessel, onEdit, onEditVessel, onCanePlan }) {
             type="button"
             onClick={() => window.print()}
             aria-label="Print plan"
-            className="ml-auto flex items-center gap-2 rounded-lg bg-accent px-3 py-2.5 font-bold text-accent-ink sm:px-4"
+            className="ml-auto flex min-h-[44px] items-center gap-2 rounded-lg bg-accent px-3 py-2.5 font-bold text-accent-ink sm:px-4"
           >
             {/* On a phone this opens the share / save-as-PDF sheet. */}
             <Icon name="print" size={18} /> <span className="max-sm:sr-only">Print plan</span>

@@ -12,7 +12,7 @@
 // wall and v up its length (see engine/vessel/pickup.js measureWall), and
 // drawn in millimetres so threads and bubbles come out their real size.
 
-const THREAD_MM = 1.1
+export const THREAD_MM = 1.1
 const STRIPE_STEP_MM = 1.5
 export const ANGLE_DEG = 42
 

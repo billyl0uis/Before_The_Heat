@@ -8,6 +8,13 @@ import { StepPlate } from './StepPlate'
 const fmt = (value) => value.toLocaleString('en', { maximumFractionDigits: 1 })
 const PAPER_CLEAR_BACKDROP = '#3a3d45'
 
+// A casing layer's swatch on paper: clear is tinted over the dark backdrop
+// so it reads as glass rather than as blank paper.
+const layerSwatch = (colorantId) =>
+  colorantId === 'clear'
+    ? `linear-gradient(rgb(207 220 216 / 0.28), rgb(207 220 216 / 0.28)), ${PAPER_CLEAR_BACKDROP}`
+    : findColorant(colorantId)?.swatch
+
 export function ColorantDots({ ids, size = 14 }) {
   if (!ids.length) return null
   return (
@@ -33,7 +40,7 @@ function ReticelloSide({ reticello, design }) {
   return (
     <div className="flex flex-col gap-5">
       <StepPlate
-        plate={{ kind: 'vessel', outline: reticello.outline, height: wall.height }}
+        plate={reticello.step.plate}
         design={design}
         size={240}
         className="self-center"
@@ -69,32 +76,60 @@ function ReticelloSide({ reticello, design }) {
 }
 
 // Hand-placed slices on the wall unrolled flat, base at the bottom, so
-// they can be laid out on the kiln shelf the same way.
+// they can be laid out on the kiln shelf the same way. Drawn in mm: the
+// front of the piece (the side facing you in the Vessel view) is the
+// centre line, so a design laid on the front stays in one piece, and the
+// seam where the patch closes is at both edges, round the back.
+const GRID_MM = 10
+
 function PlacementMap({ map, sliceDiameterMm }) {
-  const width = 320
-  const height = Math.max(60, Math.min(260, (map.heightMm / map.widthMm) * width))
-  const scale = width / map.widthMm
+  const w = map.widthMm
+  const h = map.heightMm
+  // Room round the drawing for its labels, in the same mm units.
+  const pad = { top: 9, side: 4, bottom: 15 }
+  const vw = w + pad.side * 2
+  const vh = h + pad.top + pad.bottom
+  const label = { fontSize: 5, fill: '#454a72', fontFamily: 'Hanken Grotesk, ui-sans-serif, sans-serif' }
+  const scaleMm = w >= 150 ? 50 : 20
+  const lines = []
+  for (let x = GRID_MM; x < w; x += GRID_MM) lines.push(<line key={`x${x}`} x1={x} y1={0} x2={x} y2={h} />)
+  for (let y = GRID_MM; y < h; y += GRID_MM) lines.push(<line key={`y${y}`} x1={0} y1={h - y} x2={w} y2={h - y} />)
+
   return (
     <section className="md:col-span-2 break-inside-avoid">
       <h3 className="mb-2 text-xs font-bold tracking-[0.08em] text-[#454a72] uppercase">Placement map</h3>
       <svg
-        viewBox={`0 0 ${width} ${height}`}
-        className="w-full max-w-md rounded border border-[#d9dae6]"
+        viewBox={`${-pad.side} ${-pad.top} ${vw} ${vh}`}
+        className="max-h-[22rem] w-full max-w-2xl"
         role="img"
-        aria-label={`${map.placements.length} slices on the vessel wall, unrolled flat`}
+        aria-label={`${map.placements.length} slices on the vessel wall, unrolled flat: ${Math.round(w)} by ${Math.round(h)} mm, front in the middle, seam at both edges, base at the bottom, ${GRID_MM} mm grid.`}
       >
+        <rect x={0} y={0} width={w} height={h} fill="none" stroke="#454a72" strokeWidth={0.5} />
+        <g stroke="#d9dae6" strokeWidth={0.3}>{lines}</g>
+        <line x1={w / 2} y1={0} x2={w / 2} y2={h} stroke="#454a72" strokeWidth={0.4} strokeDasharray="2 1.5" />
         {map.placements.map((p, i) => (
           <circle
             key={i}
-            cx={p.u * width}
-            cy={(1 - p.v) * height}
-            r={Math.max(1.5, (sliceDiameterMm / 2) * scale)}
+            cx={(((p.u + 0.5) % 1) + 1) % 1 * w}
+            cy={(1 - p.v) * h}
+            r={sliceDiameterMm / 2}
             fill="#1430d8"
           />
         ))}
+        <text x={w / 2} y={-3} textAnchor="middle" {...label}>Rim · front</text>
+        <text x={0} y={-3} {...label}>Seam</text>
+        <text x={w} y={-3} textAnchor="end" {...label}>Seam</text>
+        <text x={w / 2} y={h + 6} textAnchor="middle" {...label}>Base</text>
+        <g transform={`translate(0 ${h + 9})`}>
+          <line x1={0} y1={0} x2={scaleMm} y2={0} stroke="#0b0e2e" strokeWidth={0.6} />
+          <line x1={0} y1={-1.2} x2={0} y2={1.2} stroke="#0b0e2e" strokeWidth={0.6} />
+          <line x1={scaleMm} y1={-1.2} x2={scaleMm} y2={1.2} stroke="#0b0e2e" strokeWidth={0.6} />
+          <text x={scaleMm + 2} y={1.7} {...label} fill="#0b0e2e">{scaleMm} mm</text>
+        </g>
       </svg>
       <p className="mt-1 text-xs text-[#454a72]">
-        The wall unrolled: about {Math.round(map.widthMm)} × {Math.round(map.heightMm)} mm, base at the bottom.
+        The wall unrolled, about {Math.round(w)} × {Math.round(h)} mm, on a {GRID_MM} mm grid. Lay the patch out the
+        same way: its two ends meet at the seam, round the back.
       </p>
     </section>
   )
@@ -170,12 +205,7 @@ export function PlanSheet({ design, steps, warnings, colorants, reticello = null
                     <td className="py-1.5">
                       <span
                         className="mr-2 inline-block h-3.5 w-5 rounded-sm align-[-2px] shadow-[inset_0_0_0_1px_rgb(0_0_0/0.2)]"
-                        style={{
-                          background:
-                            inner.colorantId === 'clear'
-                              ? `linear-gradient(rgb(207 220 216 / 0.28), rgb(207 220 216 / 0.28)), ${PAPER_CLEAR_BACKDROP}`
-                              : findColorant(inner.colorantId)?.swatch,
-                        }}
+                        style={{ background: layerSwatch(inner.colorantId) }}
                       />
                       1. {inner.name}, round the threads
                     </td>
@@ -187,12 +217,7 @@ export function PlanSheet({ design, steps, warnings, colorants, reticello = null
                     <td className="py-1.5">
                       <span
                         className="mr-2 inline-block h-3.5 w-5 rounded-sm align-[-2px] shadow-[inset_0_0_0_1px_rgb(0_0_0/0.2)]"
-                        style={{
-                          background:
-                            layer.colorantId === 'clear'
-                              ? `linear-gradient(rgb(207 220 216 / 0.28), rgb(207 220 216 / 0.28)), ${PAPER_CLEAR_BACKDROP}`
-                              : findColorant(layer.colorantId)?.swatch,
-                        }}
+                        style={{ background: layerSwatch(layer.colorantId) }}
                       />
                       {index + 1 + (inner ? 1 : 0)}. {findColorant(layer.colorantId)?.name}
                     </td>

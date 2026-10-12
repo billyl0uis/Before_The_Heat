@@ -341,7 +341,7 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
                 Choose the colors
               </h1>
               <p className="mt-1.5 text-mute">
-                One color for each part of the {recipe.name.toLowerCase()}. Tap a part to change it.
+                One color for each part of the {recipe.name.toLowerCase()}. Choose a part to change it.
               </p>
               <div className="mt-5 flex flex-col gap-2.5">
                 {Object.entries(recipe.slots).map(([key, slot]) => {
