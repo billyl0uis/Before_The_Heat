@@ -58,8 +58,23 @@ const TABS = [
   ...(SAVING_ON ? [{ key: 'vault', label: 'Saved' }] : []),
 ]
 
-function TabLoadingFallback() {
-  return <div className="flex justify-center p-16 text-base text-mute">Loading…</div>
+// Names what's on its way, so a slow connection doesn't look like a
+// blank page.
+const LOADING_LABELS = {
+  murrini: 'Loading the cane editor…',
+  vessel: 'Loading the vessel…',
+  plan: 'Loading your plan…',
+  learn: 'Loading Learn…',
+  about: 'Loading About…',
+  vault: 'Loading saved designs…',
+}
+
+function TabLoadingFallback({ tab }) {
+  return (
+    <div role="status" className="flex justify-center p-16 text-base text-mute">
+      {LOADING_LABELS[tab] ?? 'Loading…'}
+    </div>
+  )
 }
 
 const MODE_KEY = 'before-the-heat:mode'
@@ -236,7 +251,7 @@ function App() {
       <LoadingField trigger={transition.count} section={transition.section} design={design} />
       <main>
       <ErrorBoundary key={activeTab}>
-        <Suspense fallback={<TabLoadingFallback />}>
+        <Suspense fallback={<TabLoadingFallback tab={activeTab} />}>
           {activeTab === 'murrini' &&
             (mode === 'simple' ? (
               <SimpleBuilder design={design} onOpenPlan={openPlan} onMode={setMode} />

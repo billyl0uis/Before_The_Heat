@@ -109,7 +109,7 @@ export const GLASS_COLOR_INDEX = [
     caution: null,
     hazard: null,
     notes:
-      'Same element does double duty: enough manganese gives a purple/violet glass, but small amounts are also used as a decolorizer to cancel out the green tint that iron impurities cause in "clear" glass. Some specific commercial purples are documented as notably prone to devitrification with repeated flame exposure. This varies by manufacturer, not by manganese content alone.',
+      'Same element does double duty: enough manganese gives a purple/violet glass, but small amounts are also used as a decolorizer to cancel out the green tint that iron impurities cause in "clear" glass. Some specific commercial purples are documented as notably prone to devitrification with repeated reheating. This varies by manufacturer, not by manganese content alone.',
   },
   {
     id: 'chromium-green',
@@ -187,7 +187,7 @@ export const GLASS_COLOR_INDEX = [
     caution: null,
     hazard: null,
     notes:
-      "Not a tint but an opacifier. It works by growing microscopic crystals in the glass that scatter light instead of transmitting it, which is what makes it opaque rather than colored. Opal and opaque whites are commonly documented as the colors most prone to devitrification (a whitish, rough, crazed surface) after too much time in the flame, so plan shorter reheats around it.",
+      "Not a tint but an opacifier. It works by growing microscopic crystals in the glass that scatter light instead of transmitting it, which is what makes it opaque rather than colored. Opal and opaque whites are commonly documented as the colors most prone to devitrification (a whitish, rough, crazed surface) after too much time in the heat, so plan shorter reheats around it.",
   },
   {
     id: 'silver-stain-yellow',
@@ -277,5 +277,5 @@ export const COE_NOTE = {
 
 export const ENCASEMENT_NOTE = {
   title: 'Does a murrino need a clear casing layer?',
-  body: "Often yes, for two documented reasons, not just convention. First, encasing a cane in clear glass protects a striking color's pattern through the repeated reheating and handling a pull requires; striking colors (like the cadmium and copper-red entries below) specifically need that controlled reheat to develop, so shielding the pattern during it matters. Second, some colors (notably opal whites and certain commercial purples) are documented as prone to devitrification with repeated flame exposure; a clear casing cuts down how much direct flame time that color sees. Not every color needs it, and encasement always changes a cane's size and proportions, so it's a real design tradeoff, not a free win.",
+  body: "Often yes, for two documented reasons, not just convention. First, encasing a cane in clear glass protects a striking color's pattern through the repeated reheating and handling a pull requires; striking colors (like the cadmium and copper-red entries below) specifically need that controlled reheat to develop, so shielding the pattern during it matters. Second, some colors (notably opal whites and certain commercial purples) are documented as prone to devitrification with repeated reheating; a clear casing cuts down how much direct heat that color sees. Not every color needs it, and encasement always changes a cane's size and proportions, so it's a real design tradeoff, not a free win.",
 }

@@ -34,7 +34,7 @@ export const GLOSSARY = {
   devitrification: {
     term: 'Devitrification',
     definition:
-      'A cloudy, crystal-like skin some glasses grow after too long in the flame. Opal whites are prone to it; casing them in clear helps.',
+      'A cloudy, crystal-like skin some glasses grow after too much time in the heat. Opal whites are prone to it; casing them in clear helps.',
   },
   filigree: {
     term: 'Filigree (filigrana)',

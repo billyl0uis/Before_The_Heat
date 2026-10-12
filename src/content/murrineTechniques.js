@@ -103,7 +103,7 @@ export const MURRINI_TECHNIQUES = {
   embeddedThread: {
     title: 'Embedded Thread',
     summary:
-      "A thin thread trailed into a gather at one spot, then covered back over: an accent color sitting inside the glass at one point, not sheeting all the way around it the way a full casing does, and not a full ring of threads the way the Zanfirico tool builds. On its own it's just an inclusion; twist the bundle while pulling (the Rod Extrusion twist) and that off-center thread spirals into a visible helix.",
+      "A thin thread trailed into a gather at one spot, then covered back over: an accent color sitting inside the glass at one point, rather than sheeting all the way round like a casing or forming a full ring of threads like a zanfirico. On its own it's an inclusion; twist the cane as it's pulled and that off-center thread spirals into a visible helix.",
     steps: [
       'Gather the base color first.',
       'Trail a thin thread of the accent color onto one spot on the gather and marver it in so it fuses with the surface.',
@@ -125,7 +125,7 @@ export const MURRINI_TECHNIQUES = {
   multiCasing: {
     title: 'Double/Triple Casing',
     summary:
-      "Real cane construction doesn't stop at one casing: a second (or third) contrasting color can be gathered over a core that's already been cased once, before anything is pulled. Glass-cane design software like VirtualGlass models casings as an ordered list for exactly this reason: each layer is its own color and thickness, stacked in build order. Slicing the finished cane shows every shell nested around the core, one inside the next.",
+      "Cane doesn't stop at one casing: a second or third contrasting color can be gathered over a core that's already been cased, before anything is pulled. Each layer has its own color and thickness, stacked in the order you gather them, and slicing the finished cane shows every shell nested around the core.",
     steps: [
       'Gather the base/core color first.',
       'Dip that gather into the first casing color, coating it evenly, and reheat.',
@@ -136,7 +136,7 @@ export const MURRINI_TECHNIQUES = {
   tripod: {
     title: 'Tripod Bundle',
     summary:
-      "A center cane surrounded by a ring of three more canes, all the same diameter, packed so every cane touches its neighbors, not just three canes alone with no center. Glass-cane design software (VirtualGlass) models Tripod and Cross as the same underlying template (a center plus one or more rings of canes), differing only in how many canes wrap each ring: three here. A second ring can be added further out for a denser bundle.",
+      "A center cane surrounded by a ring of three more canes, all the same diameter, packed so every cane touches its neighbors. It's built the same way as the Cross, a center plus rings of canes, with three canes in each ring here. A second ring can go further out for a denser bundle.",
     steps: [
       'Pull a center cane and three (or more, in a second ring) outer canes, all matching diameter.',
       'Pack the outer canes around the center one so each touches its neighbors, forming a tight ring.',
@@ -147,7 +147,7 @@ export const MURRINI_TECHNIQUES = {
   cross: {
     title: 'Cross Bundle',
     summary:
-      'A center cane surrounded by a ring of four more canes at north, south, east, and west, so the fused bundle reads as a plus-shaped cross in cross-section. Cross and star motifs are a recognized family of historical Venetian murrini patterns, and glass-cane design software (VirtualGlass) models this as the same template as Tripod (a center plus one or more rings), just with four canes per ring instead of three.',
+      'A center cane surrounded by four more canes at north, south, east and west, so the fused bundle reads as a plus-shaped cross in cross-section. Cross and star motifs are a recognized family of historical Venetian murrini patterns. It is built like the Tripod, with four canes per ring instead of three.',
     steps: [
       'Pull a center cane and four (or more, in a second ring) outer canes, all matching diameter.',
       'Pack the outer canes against the center one at the four compass points, so the group forms a plus/cross shape.',
@@ -158,7 +158,7 @@ export const MURRINI_TECHNIQUES = {
   row: {
     title: 'Row Bundle',
     summary:
-      "Several already-pulled canes packed edge-to-edge in a straight line rather than a radial cluster, then fused and drawn out as one new rod. A genuinely different real arrangement from Tripod/Cross's rings, not just a cosmetic variant. Glass-cane design software (VirtualGlass) catalogs it as its own named template (\"Horizontal Line\").",
+      "Several already-pulled canes packed edge to edge in a straight line rather than a ring, then fused and drawn out as one new rod.",
     steps: [
       'Pull each cane in the row to matching diameter.',
       'Line the canes up edge-to-edge in a single row, alternating colors as wanted.',
@@ -169,7 +169,7 @@ export const MURRINI_TECHNIQUES = {
   grid: {
     title: 'Square Grid Bundle',
     summary:
-      'A square grid of already-pulled canes, every row and column the same count, fused and drawn out as one new composite rod, reading as a checkerboard in cross-section. Glass-cane design software (VirtualGlass) catalogs this as its own named template ("Square of Circles"), distinct from a radial bundle like Tripod/Cross or a single line like the Row Bundle.',
+      'A square grid of already-pulled canes, the same count in every row and column, fused and drawn out as one new rod. In cross-section it reads as a checkerboard.',
     steps: [
       'Pull every cane in the grid to matching diameter.',
       'Arrange the canes in a square grid, alternating colors in a checkerboard pattern.',
@@ -180,7 +180,7 @@ export const MURRINI_TECHNIQUES = {
   frame: {
     title: 'Surrounding Square Bundle',
     summary:
-      'A square center cane framed by a ring of small round canes evenly spaced along its perimeter, fused and drawn out as one new composite rod. Genuinely different from a radial ring like Tripod/Cross (framing a POINT) or a uniform checkerboard like the Cane Grid (all one shape): here a square cane is framed by round ones. Glass-cane design software (VirtualGlass) catalogs this as its own named template ("Surrounding Square").',
+      'A square center cane framed by a ring of small round canes spaced evenly along its edges, fused and drawn out as one new rod.',
     steps: [
       'Marver the center cane into a square cross-section (see Marvering) and pull the small round frame canes to matching diameter.',
       "Pack the round canes evenly along all four sides of the square cane's perimeter, each touching its neighbors.",

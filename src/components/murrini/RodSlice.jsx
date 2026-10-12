@@ -65,7 +65,7 @@ export function RodSlice({ canvas, elements, slice, rod, pullRod = rod, onPlace,
         {/* The gather the layers really make, which is smaller than the
             drawn rod when a recipe leaves a gap and it isn't filled. */}
         <Readout value={fmt(pullRod.gatherDiameterMm)} label={<><Term id="gather" align="center">gather</Term> Ø mm</>} />
-        <Readout value={`${rod.pullRatio}:1`} label={<Term id="pullRatio" align="center">pull ratio</Term>} />
+        <Readout value={`${rod.pullRatio} : 1`} label={<Term id="pullRatio" align="center">pull ratio</Term>} />
         <Readout value={fmt(pulledDiameterMm(pullRod))} label="pulled Ø mm" emphasis />
       </figcaption>
     </figure>
