@@ -43,12 +43,6 @@ const RESEARCH_SOURCES = [
     url: 'https://www.glassofvenice.com/blog/murano-glass-making-techniques-filigrana/',
     note: 'Overview of filigrana/zanfirico and related Murano cane techniques.',
   },
-  {
-    label: 'r/glassblowing: “De-bubbling cane bundles”',
-    url: 'https://www.reddit.com/r/glassblowing/comments/1wyuhmd/debubbling_can_bundles/',
-    note:
-      "A thread of working glassblowers' advice on getting trapped air out of a cane bundle: filling gaps with thin rod, picking up on a blowpipe or a grooved post, and marvering from the tip back. It's where the bundle plan's air step and the Bundling tips in Learn come from. Shop practice rather than a published method.",
-  },
 ]
 
 const linkClass = 'font-semibold text-accent underline decoration-accent/40 underline-offset-[3px] hover:decoration-accent'

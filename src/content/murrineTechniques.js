@@ -198,8 +198,7 @@ export const MURRINI_TECHNIQUES = {
       'Fuse the bundle by reheating it as a unit, working the trapped air out (see below), then draw the whole bundle out from both ends into one new, smaller-diameter composite rod.',
       'Slice the cooled composite rod crosswise to reveal the full pattern in every slice. This final cut is the murrini technique proper.',
     ],
-    // Practical advice from working glassblowers, not a single documented
-    // method: shown as tips, with where they came from.
+    // The practical side of bundling: what traps air and how to get it out.
     tips: {
       title: 'Getting the air out',
       intro:
@@ -212,10 +211,6 @@ export const MURRINI_TECHNIQUES = {
         'Small holes often close at fusing heat in the glory hole; big ones can be fused in a kiln. The end by the pipe is usually distorted anyway and set aside.',
         'Vacuum-stacking the bundle in a tube works for borosilicate on a lathe; in a soft-glass hot shop it takes a much bigger setup.',
       ],
-      source: {
-        label: 'r/glassblowing: “De-bubbling cane bundles”',
-        url: 'https://www.reddit.com/r/glassblowing/comments/1wyuhmd/debubbling_can_bundles/',
-      },
     },
   },
 }

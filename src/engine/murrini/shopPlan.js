@@ -235,7 +235,8 @@ function compoundCaneSteps(cluster, copies, rod) {
       title: `Lay the ${n} threads round the core and case in ${casing ? colourName(casing) : 'clear'}${
         casing ? `, ${sizePhrase(casing, mmPerUnit)}` : ''
       }${times}`,
-      detail: 'Threads touching all the way round. The casing locks them in place before the twist.',
+      detail:
+        'Threads touching all the way round. Round threads leave air between them, so marver from the tip back toward the pipe to push it out before the casing seals it in. The casing locks them in place before the twist.',
       colorantIds: ids(casing ? [casing] : []),
       elements: cluster,
     })
@@ -342,7 +343,7 @@ export function buildShopPlan({ elements, pattern, rod, casing, extrusion, repea
       plate: { kind: 'slice', casingUpTo: -1 },
     })
     // Round canes leave air between them; if the outside seals first it
-    // stays in the rod. Shop advice, credited in Learn → Bundling.
+    // stays in the rod. The same advice is in Learn → Bundling.
     steps.push({
       key: 'air',
       title: 'Work the air out before it seals',

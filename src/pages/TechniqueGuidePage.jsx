@@ -59,17 +59,6 @@ function TechniqueCard({ techniqueKey, params }) {
               <li key={tip}>{tip}</li>
             ))}
           </ul>
-          <p className="mt-2 text-sm text-mute">
-            Advice from working glassblowers:{' '}
-            <a
-              href={technique.tips.source.url}
-              target="_blank"
-              rel="noreferrer"
-              className="font-semibold text-accent underline decoration-accent/40 underline-offset-[3px] hover:decoration-accent"
-            >
-              {technique.tips.source.label}
-            </a>
-          </p>
         </section>
       )}
     </article>
