@@ -19,6 +19,7 @@ import { buildShopPlan, pullRodOf } from '../engine/murrini/shopPlan'
 import { renderSlicePlate } from '../engine/murrini/slicePlate'
 import { useResponsiveCanvasSize } from '../hooks/useResponsiveCanvasSize'
 import { useSliceGeometry } from '../hooks/useSliceGeometry'
+import { Term } from '../components/Term'
 
 const STORE_KEY = 'before-the-heat:simple'
 const STEPS = ['Recipe', 'Colors', 'Size', 'Plan']
@@ -436,8 +437,12 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
                   className="h-8 w-full cursor-pointer"
                 />
                 <p className="text-mute">
-                  From a <span className="font-mono text-ink">{fmt(design.rod.gatherDiameterMm)} mm</span> gather pulled{' '}
-                  <span className="font-mono text-ink">{choice.ratio} : 1</span>, about{' '}
+                  From a <span className="font-mono text-ink">{fmt(design.rod.gatherDiameterMm)} mm</span>{' '}
+                  <Term id="gather">gather</Term> <Term id="pull">pulled</Term>{' '}
+                  <Term id="pullRatio">
+                    <span className="font-mono text-ink">{choice.ratio} : 1</span>
+                  </Term>
+                  , about{' '}
                   <span className="font-mono text-ink">{fmt(pulledLengthMm(design.rod) / 1000)} m</span> of cane.{' '}
                   <button
                     type="button"

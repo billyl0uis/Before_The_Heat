@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { pulledDiameterMm, ROD_WORLD_RADIUS } from '../../engine/murrini/rod'
 import { MurriniCanvas } from './MurriniCanvas'
+import { Term } from '../Term'
 
 const fmt = (value, digits = 1) =>
   value.toLocaleString('en', { minimumFractionDigits: digits, maximumFractionDigits: digits })
@@ -63,8 +64,8 @@ export function RodSlice({ canvas, elements, slice, rod, pullRod = rod, onPlace,
       <figcaption className={`flex gap-4 text-center sm:gap-8 ${readoutsClassName}`}>
         {/* The gather the layers really make, which is smaller than the
             drawn rod when a recipe leaves a gap and it isn't filled. */}
-        <Readout value={fmt(pullRod.gatherDiameterMm)} label="gather Ø mm" />
-        <Readout value={`${rod.pullRatio}:1`} label="pull ratio" />
+        <Readout value={fmt(pullRod.gatherDiameterMm)} label={<><Term id="gather" align="center">gather</Term> Ø mm</>} />
+        <Readout value={`${rod.pullRatio}:1`} label={<Term id="pullRatio" align="center">pull ratio</Term>} />
         <Readout value={fmt(pulledDiameterMm(pullRod))} label="pulled Ø mm" emphasis />
       </figcaption>
     </figure>

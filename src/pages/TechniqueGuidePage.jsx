@@ -34,7 +34,7 @@ function TechniqueCard({ techniqueKey, params }) {
   if (!technique) return null
 
   return (
-    <article className="flex flex-col gap-3 rounded-xl border border-line bg-panel p-5">
+    <article id={`technique-${techniqueKey}`} className="flex scroll-mt-20 flex-col gap-3 rounded-xl border border-line bg-panel p-5">
       <div className="flex items-center gap-4">
         <TechniqueDiagram techniqueKey={techniqueKey} params={params} />
         <h2 className="text-base leading-snug font-semibold text-ink">{technique.title}</h2>
@@ -72,6 +72,23 @@ export function TechniqueGuidePage() {
         title="Cane and murrini techniques"
         lede="The real glassblowing methods behind every tool in the editor, in the order you'd learn them: single canes first, bundles last."
       />
+      {/* Eighteen techniques is a long scroll on a phone: jump straight to one. */}
+      <nav aria-label="Techniques on this page" className="mx-auto mb-6 w-full max-w-5xl px-4 sm:px-8">
+        <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          {TECHNIQUE_ORDER.map(({ key }) =>
+            MURRINI_TECHNIQUES[key] ? (
+              <li key={key}>
+                <a
+                  href={`#technique-${key}`}
+                  className="inline-flex min-h-[44px] items-center font-semibold text-accent underline decoration-accent/40 underline-offset-[3px] hover:decoration-accent sm:min-h-0 sm:py-1"
+                >
+                  {MURRINI_TECHNIQUES[key].title}
+                </a>
+              </li>
+            ) : null,
+          )}
+        </ul>
+      </nav>
       <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-4 px-4 sm:px-8 lg:grid-cols-2">
         {TECHNIQUE_ORDER.map(({ key, params }) => (
           <TechniqueCard key={key} techniqueKey={key} params={params} />

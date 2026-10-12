@@ -7,6 +7,7 @@ import { pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
 import { buildShopPlan, gatherBalance, isFiligreeCane, shopPlanWarnings, twistLabel, usedColorants } from '../engine/murrini/shopPlan'
 import { designSignature, RECIPES } from '../engine/murrini/recipes'
 import { planPickup, planReticello } from '../engine/vessel/pickup'
+import { Term } from '../components/Term'
 
 const VIEW_KEY = 'before-the-heat:plan-view'
 
@@ -51,7 +52,8 @@ function FillChoice({ balance, rod, onChange }) {
       className="mx-auto mb-8 w-full max-w-[860px] rounded-xl border border-line bg-panel p-5 sm:p-6"
     >
       <h2 id="fill-choice-title" className="text-lg font-bold">
-        Your design is Ø {fmtMm(contentMm)} mm. With its casing, that's a Ø {fmtMm(naturalMm)} mm gather, not{' '}
+        Your design is Ø {fmtMm(contentMm)} mm. With its <Term id="casing">casing</Term>, that's a Ø{' '}
+        {fmtMm(naturalMm)} mm <Term id="gather">gather</Term>, not{' '}
         {fmtMm(rod.gatherDiameterMm)}.
       </h2>
       <div className="mt-4 grid gap-5 text-sm leading-relaxed text-ink-soft md:grid-cols-2">
@@ -59,7 +61,9 @@ function FillChoice({ balance, rod, onChange }) {
           <p className="font-semibold text-ink">Fill out with clear to Ø {fmtMm(fillToMm)} mm if you want</p>
           <ul className="mt-1.5 list-disc pl-5">
             <li>the cane to pull to the size you set, Ø {fmtMm(rod.gatherDiameterMm / rod.pullRatio)} mm</li>
-            <li>more clear round the pattern, so marvering and reheats don't reach it</li>
+            <li>
+              more clear round the pattern, so <Term id="marver">marvering</Term> and reheats don't reach it
+            </li>
             <li>slices with a clear border, which read cleanly when they're laid edge to edge</li>
           </ul>
         </div>

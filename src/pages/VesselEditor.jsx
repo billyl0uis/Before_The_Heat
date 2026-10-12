@@ -11,6 +11,7 @@ import { renderSlicePlate } from '../engine/murrini/slicePlate'
 import { caneShowColour, measureWall, metres, murriniLayout, planPickup, planReticello, vesselName } from '../engine/vessel/pickup'
 import { isFiligreeCane } from '../engine/murrini/shopPlan'
 import { vesselRadiusFunction } from '../engine/vessel/profile'
+import { Term } from '../components/Term'
 
 // The gather under the pattern. Transparent colors only, so the pattern
 // still shows through.
@@ -163,7 +164,8 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
             })}
           </div>
           <p className="mt-2 text-[0.8rem] leading-relaxed text-mute">
-            The gather your pattern goes onto. Transparent colors only, so the pattern still shows.
+            The <Term id="gather">gather</Term> your pattern goes onto. Transparent colors only, so the pattern still
+            shows.
           </p>
         </RailSection>
 
@@ -182,7 +184,8 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
 
           {vessel.pattern === 'murrini' && hasDesign && isFiligreeCane(design.elements) && (
             <p className="mt-3.5 rounded-[10px] border border-line px-3 py-2.5 text-[0.8rem] leading-relaxed text-ink-soft">
-              Your cane is a zanfirico. Filigree like this is usually picked up as lengths, not sliced:{' '}
+              Your cane is a <Term id="zanfirico">zanfirico</Term>. Filigree like this is usually{' '}
+              <Term id="pickup">picked up</Term> as lengths, not sliced:{' '}
               <button
                 type="button"
                 onClick={() => update({ pattern: 'canes' })}
@@ -197,8 +200,9 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
           {vessel.pattern === 'canes' &&
             (hasDesign ? (
               <p className="mt-3.5 rounded-[10px] border border-line px-3 py-2.5 text-[0.8rem] leading-relaxed text-ink-soft">
-                Lengths of your Ø {fmt(sliceDiameterMm, 1)} mm cane, laid side by side and rolled up on the gather: how
-                filigree cane like a zanfirico is used. The count is how many close round the first cup.
+                Lengths of your Ø {fmt(sliceDiameterMm, 1)} mm cane, laid side by side and{' '}
+                <Term id="pickup">picked up</Term> on the gather: how filigree cane like a{' '}
+                <Term id="zanfirico">zanfirico</Term> is used. The count is how many close round the first cup.
               </p>
             ) : (
               <div className="mt-3.5 flex flex-col items-start gap-2 rounded-[10px] border border-line px-3 py-2.5">
@@ -306,7 +310,7 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
           {vessel.pattern === 'reticello' && (
             <div className="mt-3.5 flex flex-col gap-3">
               <p className="rounded-[10px] border border-line px-3 py-2.5 text-[0.8rem] leading-relaxed text-ink-soft">
-                Reticello gets its own plan, built from plain rib canes. Your cane plan stays as it is: switch between the
+                <Term id="reticello">Reticello</Term> gets its own plan, built from plain rib canes. Your cane plan stays as it is: switch between the
                 two at the top of the Plan tab.
               </p>
               <RangeField
