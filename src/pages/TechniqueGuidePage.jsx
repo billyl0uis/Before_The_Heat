@@ -48,6 +48,30 @@ function TechniqueCard({ techniqueKey, params }) {
           </li>
         ))}
       </ol>
+      {technique.tips && (
+        <section className="mt-1 border-t border-line pt-3" aria-labelledby={`${techniqueKey}-tips`}>
+          <h3 id={`${techniqueKey}-tips`} className="text-base font-semibold text-ink">
+            {technique.tips.title}
+          </h3>
+          <p className="mt-1 text-base leading-relaxed text-ink-soft">{technique.tips.intro}</p>
+          <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-5 text-base leading-relaxed text-ink-soft marker:text-accent">
+            {technique.tips.items.map((tip) => (
+              <li key={tip}>{tip}</li>
+            ))}
+          </ul>
+          <p className="mt-2 text-sm text-mute">
+            Advice from working glassblowers:{' '}
+            <a
+              href={technique.tips.source.url}
+              target="_blank"
+              rel="noreferrer"
+              className="font-semibold text-accent underline decoration-accent/40 underline-offset-[3px] hover:decoration-accent"
+            >
+              {technique.tips.source.label}
+            </a>
+          </p>
+        </section>
+      )}
     </article>
   )
 }

@@ -195,9 +195,28 @@ export const MURRINI_TECHNIQUES = {
     steps: [
       'Pull each individual cane first, as its own technique: simple, cased, faceted, or chevron.',
       'Cut the finished canes to matching lengths and pack them together in a bundle, often around a central cane or side by side.',
-      'Fuse the bundle by reheating it as a unit, then draw the whole bundle out from both ends into one new, smaller-diameter composite rod.',
+      'Fuse the bundle by reheating it as a unit, working the trapped air out (see below), then draw the whole bundle out from both ends into one new, smaller-diameter composite rod.',
       'Slice the cooled composite rod crosswise to reveal the full pattern in every slice. This final cut is the murrini technique proper.',
     ],
+    // Practical advice from working glassblowers, not a single documented
+    // method: shown as tips, with where they came from.
+    tips: {
+      title: 'Getting the air out',
+      intro:
+        "Round canes don't tile, so a bundle always traps air in the gaps between them. If the outside seals before that air gets out, it stays in the rod as bubbles and holes in the slices.",
+      items: [
+        'Fill the bigger gaps with thinner rod (2–3 mm) before you pick the bundle up.',
+        'Give the air a way out: pick the bundle up on a blowpipe with a collar, so it can escape down the pipe, or score grooves across the face of the post first.',
+        'Marver from the tip back toward the pipe, slowly and the same way each time, so the air is pushed back and out rather than shut in. Pressing with the edge of the marver, rolling over a large pipe or round bar, or running the jacks lightly from tip to collar does the same with more control.',
+        'Keep the back cooler until the front half to two-thirds is sealed, and give it soaking heats so the core is hot before you tool it.',
+        'Small holes often close at fusing heat in the glory hole; big ones can be fused in a kiln. The end by the pipe is usually distorted anyway and set aside.',
+        'Vacuum-stacking the bundle in a tube works for borosilicate on a lathe; in a soft-glass hot shop it takes a much bigger setup.',
+      ],
+      source: {
+        label: 'r/glassblowing: “De-bubbling cane bundles”',
+        url: 'https://www.reddit.com/r/glassblowing/comments/1wyuhmd/debubbling_can_bundles/',
+      },
+    },
   },
 }
 

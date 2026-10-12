@@ -48,6 +48,16 @@ export function useVessel() {
   // follow the hand directly.
   const [morph, setMorph] = useState(0)
 
+  // Keep up with a vessel changed in another tab of the app, rather than
+  // writing an older one back over it.
+  useEffect(() => {
+    const onStorage = (event) => {
+      if (event.key === STORAGE_KEY && event.newValue) setVessel(readVessel())
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
+
   useEffect(() => {
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(vessel))

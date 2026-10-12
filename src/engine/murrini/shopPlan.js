@@ -337,7 +337,17 @@ export function buildShopPlan({ elements, pattern, rod, casing, extrusion, repea
         bundleLabels.size === 1 && !looseCanes
           ? `Bundle the ${caneTotal} canes into the ${[...bundleLabels][0]}`
           : `Bundle all ${caneTotal} canes`,
-      detail: 'Lay them out as the slice shows, then pick them up together and fuse them into one rod.',
+      detail: 'Lay them out as the slice shows, then pick them up together and fuse them into one rod. Fill any big gaps between round canes with thinner rod (2–3 mm) first.',
+      colorantIds: [],
+      plate: { kind: 'slice', casingUpTo: -1 },
+    })
+    // Round canes leave air between them; if the outside seals first it
+    // stays in the rod. Shop advice, credited in Learn → Bundling.
+    steps.push({
+      key: 'air',
+      title: 'Work the air out before it seals',
+      detail:
+        'Pick the bundle up on a blowpipe with a collar, or on a post with grooves scored across its face, so the air has a way out. Marver from the tip back toward the pipe, keeping the back cooler until the front is sealed. The end by the pipe usually traps some air: plan to set it aside.',
       colorantIds: [],
       plate: { kind: 'slice', casingUpTo: -1 },
     })

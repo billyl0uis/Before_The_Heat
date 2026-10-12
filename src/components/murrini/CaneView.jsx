@@ -18,15 +18,22 @@ const FOV = 28
 // coloured transparent glass tints it, opaque glass hides it.
 function glassOpacity(colorant) {
   if (!colorant || colorant.id === 'clear') return 0.18
-  return colorant.family === 'opaque' ? 1 : 0.55
+  // Coloured transparent glass is dense enough in a thread or core to read
+  // as its own colour; thinner than this, the studio reflections wash a
+  // deep colour like cobalt out to a pale tint it doesn't have.
+  return colorant.family === 'opaque' ? 1 : 0.82
 }
 
 function glassMaterial(color, opacity) {
+  const clear = opacity < 0.3
   return new THREE.MeshPhysicalMaterial({
     color,
     roughness: 0.18,
     clearcoat: 1,
     clearcoatRoughness: 0.08,
+    // Reflections belong to the clear casing; on coloured glass they lift
+    // its colour toward white.
+    envMapIntensity: clear ? 1 : 0.45,
     transparent: opacity < 1,
     opacity,
     depthWrite: opacity >= 1,

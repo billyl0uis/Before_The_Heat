@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ColourChip, RailSection, RangeField, Segmented } from '../components/vessel/controls'
 import { PickupReadout } from '../components/vessel/PickupReadout'
 import { PickupStepCard } from '../components/vessel/PickupStepCard'
@@ -67,6 +67,12 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
   )
 
   const placing = vessel.pattern === 'murrini' && vessel.place === 'hand' && hasDesign
+  const [confirmClear, setConfirmClear] = useState(false)
+  useEffect(() => {
+    if (!confirmClear) return
+    const timer = setTimeout(() => setConfirmClear(false), 4000)
+    return () => clearTimeout(timer)
+  }, [confirmClear])
   const addSliceAtFront = () => {
     // The front of the piece is u = 0. Alternate right and left of it, one
     // slice width apart, so repeated presses make a row, not a stack.
@@ -253,7 +259,11 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
                     <div className="grid grid-cols-2 gap-1.5">
                       {[
                         { label: 'Undo', onClick: undoPlacement },
-                        { label: 'Clear', onClick: clearPlacements },
+                        // Clearing can't be undone, so it asks once: a second
+                        // press within a few seconds clears.
+                        confirmClear
+                          ? { label: `Clear all ${vessel.placements.length}?`, onClick: () => { clearPlacements(); setConfirmClear(false) } }
+                          : { label: 'Clear', onClick: () => setConfirmClear(true) },
                       ].map((action) => (
                         <button
                           key={action.label}

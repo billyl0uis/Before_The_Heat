@@ -215,6 +215,21 @@ export function useMurriniDesign(canvas = DEFAULT_CANVAS) {
     setCasing((prev) => prev.map((layer, i) => (i === index ? { ...layer, ...updates } : layer)))
   }, [])
 
+  // Another tab of the app saved a newer design: take it, so whichever tab
+  // saves next doesn't write over that work with an older one.
+  useEffect(() => {
+    const onStorage = (event) => {
+      if (event.key !== AUTOSAVE_KEY || !event.newValue) return
+      try {
+        loadDesign(JSON.parse(event.newValue))
+      } catch {
+        // Unreadable: keep what this tab has.
+      }
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [loadDesign])
+
   // Debounced so a slider drag writes once when it settles, not 60×/sec.
   useEffect(() => {
     const timer = setTimeout(() => {
