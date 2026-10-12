@@ -69,23 +69,19 @@ export function AboutPage() {
 
       <div className="mx-auto grid w-full max-w-5xl gap-12 px-4 sm:px-8 lg:grid-cols-2 lg:gap-16">
         <section>
-          <h2 className="text-[1.6rem] leading-tight font-bold tracking-tight">Wes and Wesley Hunting</h2>
+          <h2 className="text-[1.6rem] leading-tight font-bold tracking-tight">For Wesley Hunting</h2>
           <div className="mt-4 flex max-w-[62ch] flex-col gap-4 text-base leading-relaxed text-ink-soft">
             <p>
-              Wes Hunting has worked in glass since the 1970s. After graduating from Kent State University in 1976,
-              he studied at Penland School of Crafts and assisted glass artist Richard Ritter, then traveled to
-              Venice and Murano, Italy to study the Italian glass tradition firsthand. In 1982 he founded Hunting
-              Glass Studio in Princeton, Wisconsin, where he still works today, now alongside his son, glass artist
-              Wesley Justin Hunting.
+              I got my start in glass with Wesley Hunting. I worked as his assistant for a while, and most of what I
+              know about murrini I learned from him. He's a great artist and mentor, and murrini are a big part of his
+              work.
             </p>
             <p>
-              Wes is known for his skill with cane and murrini, and for intricate, abstract patterns drawn directly
-              onto hot glass at temperatures over 2000°F. He combines Italian techniques such as millefiori and
-              zanfirico with decorative methods he's developed and refined himself over decades. Together, Wes and
-              Wesley create fluid, vibrant vessels and sculptures, each one-of-a-kind.
+              Wesley works with his father, Wes Hunting, at Hunting Glass Studio in Princeton, Wisconsin.
             </p>
           </div>
-          <ul className="mt-5 flex flex-col gap-2">
+          <p className="mt-5 text-sm font-semibold text-mute">See their work</p>
+          <ul className="mt-2 flex flex-col gap-2">
             {HUNTING_LINKS.map((source) => (
               <li key={source.url}>
                 <a href={source.url} target="_blank" rel="noreferrer" className={linkClass}>
