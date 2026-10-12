@@ -63,12 +63,12 @@ export const GLASS_COLOR_INDEX = [
     swatch: '#be123c',
     colorant: 'Colloidal gold (Purple of Cassius)',
     family: 'transparent',
-    strikes: false,
+    strikes: true,
     devitrifies: false,
     caution: null,
     hazard: null,
     notes:
-      "Color comes from gold metal nanoparticles suspended in the glass, not a simple dissolved tint. Particle size sets the hue, with smaller particles (~60nm) reading red and larger ones shifting toward purple, then blue. Historically one of the most expensive colorants used in glass, which is part of why cranberry glass reads as a luxury color.",
+      "Color comes from gold metal nanoparticles suspended in the glass, not a simple dissolved tint. Particle size sets the hue, with smaller particles (~60nm) reading red and larger ones shifting toward purple, then blue. Historically one of the most expensive colorants used in glass, which is part of why cranberry glass reads as a luxury color. It strikes: gold ruby often comes out of the first heat nearly colorless and only turns red when it's reheated, as the gold particles form.",
   },
   {
     id: 'cadmium-selenium-red',
