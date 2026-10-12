@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { findColorant, pulledDiameterMm, pulledLengthMm } from '../../engine/murrini/rod'
-import { twistLabel } from '../../engine/murrini/shopPlan'
+import { innerCasingOf, twistLabel } from '../../engine/murrini/shopPlan'
 import { renderSlicePlate } from '../../engine/murrini/slicePlate'
 import { Icon } from '../icons'
 import { StepPlate } from './StepPlate'
@@ -29,7 +29,7 @@ export function ColorantDots({ ids, size = 14 }) {
 // The sheet's left column for a reticello vessel: the piece and the two
 // sets of rib canes, in place of the cane's slice, pull and casing.
 function ReticelloSide({ reticello, design }) {
-  const { perSide, names, colorantIds, wall, form } = reticello
+  const { perSide, ribMm, twist, names, colorantIds, wall, form } = reticello
   return (
     <div className="flex flex-col gap-5">
       <StepPlate
@@ -49,9 +49,9 @@ function ReticelloSide({ reticello, design }) {
                     className="mr-2 inline-block h-3.5 w-5 rounded-sm align-[-2px] shadow-[inset_0_0_0_1px_rgb(0_0_0/0.2)]"
                     style={{ background: findColorant(colorantIds[index])?.swatch }}
                   />
-                  {perSide} {name}
+                  {perSide} {name}, Ø {fmt(ribMm)} mm
                 </td>
-                <td className="py-1.5 text-right">{index === 0 ? 'twist one way' : 'the other way'}</td>
+                <td className="py-1.5 text-right">{twist}, {index === 0 ? 'one way' : 'the other way'}</td>
               </tr>
             ))}
           </tbody>
@@ -103,6 +103,7 @@ function PlacementMap({ map, sliceDiameterMm }) {
 // The printable shop plan: paper-white, Primary-navy ink, one page.
 export function PlanSheet({ design, steps, warnings, colorants, reticello = null, pickup = null, title = 'Shop plan' }) {
   const { rod, casing } = design
+  const inner = innerCasingOf(design.elements, rod)
   const plate = useMemo(
     () =>
       renderSlicePlate({
@@ -160,9 +161,27 @@ export function PlanSheet({ design, steps, warnings, colorants, reticello = null
         </section>
         <section>
           <h3 className="mb-2 text-xs font-bold tracking-[0.08em] text-[#454a72] uppercase">Casing, inside to out</h3>
-          {casing.length ? (
+          {casing.length || inner ? (
             <table className="w-full text-sm">
               <tbody>
+                {/* A zanfirico's own casing goes on first, round the threads. */}
+                {inner && (
+                  <tr className="border-b border-[#d9dae6]">
+                    <td className="py-1.5">
+                      <span
+                        className="mr-2 inline-block h-3.5 w-5 rounded-sm align-[-2px] shadow-[inset_0_0_0_1px_rgb(0_0_0/0.2)]"
+                        style={{
+                          background:
+                            inner.colorantId === 'clear'
+                              ? `linear-gradient(rgb(207 220 216 / 0.28), rgb(207 220 216 / 0.28)), ${PAPER_CLEAR_BACKDROP}`
+                              : findColorant(inner.colorantId)?.swatch,
+                        }}
+                      />
+                      1. {inner.name}, round the threads
+                    </td>
+                    <td className="py-1.5 text-right font-mono">to Ø {fmt(inner.diameterMm)} mm</td>
+                  </tr>
+                )}
                 {casing.map((layer, index) => (
                   <tr key={index} className="border-b border-[#d9dae6]">
                     <td className="py-1.5">
@@ -175,7 +194,7 @@ export function PlanSheet({ design, steps, warnings, colorants, reticello = null
                               : findColorant(layer.colorantId)?.swatch,
                         }}
                       />
-                      {index + 1}. {findColorant(layer.colorantId)?.name}
+                      {index + 1 + (inner ? 1 : 0)}. {findColorant(layer.colorantId)?.name}
                     </td>
                     <td className="py-1.5 text-right font-mono">{fmt(layer.thicknessMm)} mm</td>
                   </tr>

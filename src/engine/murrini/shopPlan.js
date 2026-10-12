@@ -134,6 +134,24 @@ function bundleComponents(cluster, pattern, rod) {
   })
 }
 
+// A zanfirico is a filigree cane for pick-ups, not a murrine: it's used as
+// lengths of cane, never sliced.
+export function isFiligreeCane(elements) {
+  return elements.length > 0 && elements.every((element) => element.compoundType === 'zanfirico')
+}
+
+// The casing a zanfirico gets while it's built, round its threads, before
+// any of the rod's own casing layers go on. Null when there isn't one.
+export function innerCasingOf(elements, rod) {
+  const casing = elements.find((e) => e.compoundType === 'zanfirico' && (e.opacity ?? 1) < 1)
+  if (!casing) return null
+  return {
+    colorantId: casing.colorantId,
+    name: colourName(casing),
+    diameterMm: casing.params.radius * 2 * mmPerWorldUnit(rod),
+  }
+}
+
 // Single compound canes (Zanfirico, Jellyroll, Pinwheel) are built from
 // parts before they're pulled. The plan lists the parts and how they go
 // together, read from the same geometry the editor drew.
@@ -278,12 +296,18 @@ export function buildShopPlan({ elements, pattern, rod, casing, extrusion }) {
     })
   }
 
+  // A zanfirico was already cased once round its threads, so the rod's
+  // casing goes over that, not straight onto the threads.
+  const inner = innerCasingOf(elements, rod)
+  const firstOver = inner
+    ? `Over the ${inner.name} casing that locks in the threads, so this is a second layer.`
+    : `The first layer, straight over the ${caneTotal > 1 ? 'bundle' : 'cane'}.`
   casing.forEach((layer, index) => {
     const colorant = findColorant(layer.colorantId)
     steps.push({
       key: `case-${index}`,
       title: `Case in\u00a0${colorant?.name.split(' / ')[0] ?? 'glass'}, ${fmt(layer.thicknessMm)}\u00a0mm`,
-      detail: index === 0 ? `The first layer, straight over the ${caneTotal > 1 ? 'bundle' : 'cane'}.` : `Over layer ${index}.`,
+      detail: index === 0 ? firstOver : `Over layer ${index}.`,
       colorantIds: colorant && colorant.id !== 'clear' ? [colorant.id] : [],
       plate: { kind: 'slice', casingUpTo: index },
     })
@@ -300,7 +324,7 @@ export function buildShopPlan({ elements, pattern, rod, casing, extrusion }) {
       title: twist
         ? `Pull to Ø ${fmt(pulledDiameterMm(rod))} mm, twisting ${twist}`
         : `Pull to Ø ${fmt(pulledDiameterMm(rod))} mm`,
-      detail: `${rod.pullRatio} : 1 from a ${rod.gatherDiameterMm} mm × ${rod.gatherLengthMm} mm gather gives about ${fmt(pulledLengthMm(rod) / 1000)} m of cane to slice.${
+      detail: `${rod.pullRatio} : 1 from a ${rod.gatherDiameterMm} mm × ${rod.gatherLengthMm} mm gather gives about ${fmt(pulledLengthMm(rod) / 1000)} m of cane${isFiligreeCane(elements) ? ' for a pick-up' : ' to slice'}.${
         twist
           ? ` That's about ${totalTurns} turns over the whole pull: keep turning the same way as you walk it out, so the twist stays even.`
           : ''

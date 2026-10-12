@@ -1,6 +1,7 @@
 import { findColorant, pulledDiameterMm, pulledLengthMm } from '../murrini/rod'
 import { turnsLabel } from '../murrini/shopPlan'
 import { VESSEL_FORM_PRESETS, vesselRadiusFunction } from './profile'
+import { threadDriftTurns } from './reticello'
 
 // A murrini pick-up, worked out from the vessel's own outside wall: how
 // many slices of the pulled cane cover it, how much cane that takes, and
@@ -153,6 +154,20 @@ export function ribTwistLabel(degrees) {
   return `${turnsLabel(degrees) || `${fmt(Math.abs(degrees) / 360, 2)} turns`}, ${degrees > 0 ? 'right' : 'left'}`
 }
 
+// How wide the first cup is where the rib canes close round it. The canes
+// lie side by side right round this, so it sets how thick each one is.
+// It's the first gather, not the finished piece: about an inch of glass
+// on the end of the blowpipe, roughly 2.5 in (64 mm) across, whatever
+// form it's blown out to afterwards.
+const FIRST_GATHER_MM = 64
+
+export function firstCupDiameterMm() {
+  return FIRST_GATHER_MM
+}
+
+// Twist to the nearest quarter turn: about as fine as it's turned by hand.
+const quarterTurns = (turns) => Math.max(0.25, Math.round(turns * 4) / 4)
+
 const colourName = (id) => findColorant(id)?.name.split(' / ')[0].replace(/ \(.*\)$/, '') ?? 'glass'
 
 // Reticello as a plan step: two sets of rib canes, each picked up and
@@ -166,19 +181,22 @@ export function planReticello(vessel) {
   const a = colourName(vessel.ribA)
   const b = colourName(vessel.ribB)
   const lengthMm = Math.round((wall.length + 20) / 10) * 10
+  const cupMm = firstCupDiameterMm()
+  const ribMm = Math.max(2, Math.round(((Math.PI * cupMm) / perSide) * 2) / 2)
+  const twist = turnsLabel(quarterTurns(threadDriftTurns(wall)) * 360)
   const outline = []
   for (let j = 0; j <= 24; j++) outline.push(wall.radii[Math.round((j / 24) * wall.rows)])
   const lines = [
-    `Pull ${perSide} ${a} rib canes and ${perSide} ${b} rib canes, each at least ${lengthMm} mm long: the wall's length, ${fmt(wall.length, 0)} mm, plus a little to work with.`,
-    `Lay the ${a} canes side by side on a kiln shelf, heat them, pick them up and close them into a cylinder, then twist it one way as you blow it into a cup. Do the same with the ${b} canes, twisting the other way.`,
+    `Pull ${perSide} ${a} rib canes and ${perSide} ${b} rib canes, each Ø ${fmt(ribMm)} mm and at least ${lengthMm} mm long: the wall's length, ${fmt(wall.length, 0)} mm, plus a little to work with.`,
+    `Lay the ${a} canes side by side on a kiln shelf, heat them, pick them up and close them into a cylinder, then twist it ${twist} one way as you blow it into a cup. Do the same with the ${b} canes, twisting ${twist} the other way.`,
     `Blow one cup inside the other until they meet, so the threads cross and trap a bubble in each diamond. Then blow out to ${formPhrase(vessel)}: ${fmt(wall.height, 0)} mm tall, Ø ${fmt(wall.rimRadius * 2, 0)} mm at the rim.`,
   ]
   const form = formPhrase(vessel)
   const rib = (id, name) => ({
     key: `rib-${id}`,
-    title: `Pull ${perSide} ${name} rib canes, ${lengthMm} mm long`,
-    detail: `Usually a single ${name} thread cased in clear (vetro a fili), all the same thickness: enough to lay side by side right round your first cup. ${lengthMm} mm is the wall's length, ${fmt(wall.length, 0)} mm, plus a little to work with.`,
-    colorantIds: findColorant(id) ? [id] : [],
+    title: `Pull ${perSide} ${name} rib canes, Ø ${fmt(ribMm)} mm, ${lengthMm} mm long`,
+    detail: `A single ${name} thread cased in clear (vetro a fili). At Ø ${fmt(ribMm)} mm, ${perSide} of them lie side by side right round a first cup about Ø ${fmt(cupMm, 0)} mm. ${lengthMm} mm is the wall's length, ${fmt(wall.length, 0)} mm, plus a little to work with.`,
+    colorantIds: [id, 'clear'].filter((c, i, all) => findColorant(c) && all.indexOf(c) === i),
     plate: { kind: 'rib', colorantId: id },
   })
   const vesselPlate = { kind: 'vessel', outline, height: wall.height }
@@ -187,15 +205,15 @@ export function planReticello(vessel) {
     rib(vessel.ribB, b),
     {
       key: 'cup-a',
-      title: `Make the ${a} cup, twisting one way`,
-      detail: `Lay the ${a} canes side by side on a kiln shelf and heat them. Pick them up, close them into a cylinder, and twist it one way as you blow it into a cup.`,
+      title: `Make the ${a} cup, twisting ${twist} one way`,
+      detail: `Lay the ${a} canes side by side on a kiln shelf and heat them. Pick them up, close them into a cylinder, and twist it ${twist} one way as you blow it into a cup. That sets the threads leaning about 42°, as the preview shows.`,
       colorantIds: findColorant(vessel.ribA) ? [vessel.ribA] : [],
       plate: { kind: 'rib', colorantId: vessel.ribA },
     },
     {
       key: 'cup-b',
-      title: `Make the ${b} cup, twisting the other way`,
-      detail: `The same with the ${b} canes, twisting the opposite way, so the two sets of threads will cross.`,
+      title: `Make the ${b} cup, twisting ${twist} the other way`,
+      detail: `The same with the ${b} canes, ${twist} the opposite way, so the two sets of threads will cross.`,
       colorantIds: findColorant(vessel.ribB) ? [vessel.ribB] : [],
       plate: { kind: 'rib', colorantId: vessel.ribB },
     },
@@ -209,8 +227,11 @@ export function planReticello(vessel) {
   ]
   return {
     perSide,
+    ribMm,
+    twist,
     names: [a, b],
-    colorantIds: [vessel.ribA, vessel.ribB].filter((id) => findColorant(id)),
+    // Clear too: every rib is cased in it.
+    colorantIds: [...new Set([vessel.ribA, vessel.ribB, 'clear'])].filter((id) => findColorant(id)),
     form,
     wall,
     outline,

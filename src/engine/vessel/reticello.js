@@ -14,7 +14,15 @@
 
 const THREAD_MM = 1.1
 const STRIPE_STEP_MM = 1.5
-const ANGLE_DEG = 42
+export const ANGLE_DEG = 42
+
+// How far round the wall one thread travels from base to rim, in turns:
+// the twist each cup needs. Blowing out stretches a cup round and up
+// alike, so the turns stay the same from the first cup to the finished
+// piece, and this is the angle the preview draws.
+export function threadDriftTurns(wall) {
+  return (wall.length * Math.tan((ANGLE_DEG * Math.PI) / 180)) / (2 * Math.PI * wall.meanRadius)
+}
 
 function luminance(hex) {
   const n = Number.parseInt(hex.replace('#', ''), 16)
@@ -29,7 +37,7 @@ export function paintReticelloSkin(ctx, size, wall, { ribsAround, colorA, colorB
   const circumference = 2 * Math.PI * wall.meanRadius
   const length = wall.length
   // How far round the wall one thread drifts from base to rim, in turns.
-  const drift = (length * Math.tan((ANGLE_DEG * Math.PI) / 180)) / circumference
+  const drift = threadDriftTurns(wall)
   const pxU = size / circumference
   const pxV = size / length
   const toPx = (xMm, yMm) => [xMm * pxU, size - yMm * pxV]

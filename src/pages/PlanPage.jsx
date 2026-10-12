@@ -4,7 +4,7 @@ import { FieldHeader } from '../components/plan/FieldHeader'
 import { PlanSheet } from '../components/plan/PlanSheet'
 import { ShopChecklist } from '../components/plan/ShopChecklist'
 import { pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
-import { buildShopPlan, shopPlanWarnings, twistLabel, usedColorants } from '../engine/murrini/shopPlan'
+import { buildShopPlan, isFiligreeCane, shopPlanWarnings, twistLabel, usedColorants } from '../engine/murrini/shopPlan'
 import { designSignature, RECIPES } from '../engine/murrini/recipes'
 import { planPickup, planReticello } from '../engine/vessel/pickup'
 
@@ -22,10 +22,12 @@ function readView() {
 // recipe's name while the design is still Simple's, then the finished Ø.
 function planTitle(design, reticello) {
   if (reticello) return `Reticello ${reticello.form.replace(/^the /, '').replace('your form', 'vessel')}`
-  let name = 'Your murrine'
+  // A zanfirico is a cane you pick up in lengths, not a murrine you slice.
+  const kind = isFiligreeCane(design.elements) ? 'cane' : 'murrine'
+  let name = `Your ${kind}`
   try {
     const simple = JSON.parse(window.localStorage.getItem('before-the-heat:simple'))
-    if (simple?.signature === designSignature(design) && RECIPES[simple.recipe]) name = `${RECIPES[simple.recipe].name} murrine`
+    if (simple?.signature === designSignature(design) && RECIPES[simple.recipe]) name = `${RECIPES[simple.recipe].name} ${kind}`
   } catch {
     // Keep the plain name.
   }
@@ -66,7 +68,9 @@ export function PlanPage({ design, vessel, onEdit, onEditVessel, onCanePlan }) {
   const colorants = useMemo(() => usedColorants(used), [used])
   const finish = reticello || pickup
     ? { title: 'Before you start', line: 'Into the annealer, then check the piece against the plan.' }
-    : { title: 'Before you slice the whole cane', line: 'Slice the cane and check a piece against the plan.' }
+    : isFiligreeCane(elements)
+      ? { title: 'Before you use the cane', line: 'Cut a short length and check the threads and twist against the plan.' }
+      : { title: 'Before you slice the whole cane', line: 'Slice the cane and check a piece against the plan.' }
 
   const choose = (next) => {
     setView(next)
