@@ -117,6 +117,7 @@ function pageHtml(base, page) {
     .replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${esc(page.title)}$2`)
     .replace(/(<meta\s+property="og:description"\s+content=")[^"]*(")/, `$1${esc(page.description)}$2`)
     .replaceAll('%SITE_URL%', url)
+    .replaceAll('%SITE_ROOT%', SITE_URL)
     .replace('<div id="root"></div>', `<div id="root"><main class="static-intro">${page.body}\n      </main></div>`)
 }
 
