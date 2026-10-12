@@ -101,14 +101,14 @@ export function PlanPage({ design, vessel, planSource = 'cane', onPlanSource, on
       <div className="mx-auto flex max-w-lg flex-col items-start gap-4 px-6 py-20">
         <h1 className="text-3xl font-extrabold tracking-tight">Nothing to plan yet</h1>
         <p className="text-lg leading-relaxed text-mute">
-          Place at least one cane on the slice and the build order, casing and pull appear here.
+          Pick a recipe or place a cane in Murrini, and its build order, casing and pull show up here.
         </p>
         <button
           type="button"
           onClick={onEdit}
           className="flex items-center gap-2 rounded-lg bg-accent px-5 py-3 font-bold text-accent-ink"
         >
-          Go to the editor <Icon name="arrowRight" size={18} />
+          Start a cane <Icon name="arrowRight" size={18} />
         </button>
       </div>
     )

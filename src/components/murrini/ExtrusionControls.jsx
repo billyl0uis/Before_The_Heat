@@ -10,7 +10,7 @@ export function ExtrusionControls({ extrusion, rod, onChange }) {
   const setField = (key, value) => onChange({ ...extrusion, [key]: value })
 
   return (
-    <Panel title="Rod extrusion">
+    <Panel title="Twist and 3D view">
       <Slider
         id="extrusion-twist"
         label="Twist"
@@ -35,7 +35,9 @@ export function ExtrusionControls({ extrusion, rod, onChange }) {
         id="extrusion-length"
         label="3D view length"
         value={extrusion.length}
-        display={`${extrusion.length}`}
+        // The 3D rod is drawn at the gather's width (2 × 230 units), so its
+        // length reads best as a multiple of that width.
+        display={`${(extrusion.length / 460).toLocaleString('en', { maximumFractionDigits: 1 })}× its width`}
         min={20}
         max={400}
         step={10}
