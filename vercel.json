@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/learn", "destination": "/learn/index.html" },
+    { "source": "/learn/:page", "destination": "/learn/:page/index.html" },
+    { "source": "/((?!assets/|learn).*)", "destination": "/index.html" }
+  ]
+}

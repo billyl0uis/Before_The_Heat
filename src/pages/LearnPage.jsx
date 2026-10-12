@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { AboutPage } from './AboutPage'
 import { ColorIndexPage } from './ColorIndexPage'
 import { GlossaryPage } from './GlossaryPage'
@@ -12,8 +11,10 @@ const SECTIONS = [
 ]
 
 // Reference material lives under one tab so the main nav stays short.
-export function LearnPage() {
-  const [section, setSection] = useState('techniques')
+// Which section and technique are open lives in App, so each has its own
+// address (see routes.js).
+export function LearnPage({ section = 'techniques', technique = null, onOpen }) {
+  const setSection = (next) => onOpen?.(next)
 
   return (
     <div className="flex flex-col pb-16">
@@ -36,7 +37,9 @@ export function LearnPage() {
           </div>
         </div>
       </div>
-      {section === 'techniques' && <TechniqueGuidePage />}
+      {section === 'techniques' && (
+        <TechniqueGuidePage focus={technique} onOpenTechnique={(key) => onOpen?.('techniques', key)} />
+      )}
       {section === 'colors' && <ColorIndexPage />}
       {section === 'glossary' && <GlossaryPage />}
       {section === 'about' && <AboutPage />}

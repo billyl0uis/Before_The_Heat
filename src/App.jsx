@@ -7,6 +7,8 @@ import { ModeSwitch } from './components/ModeSwitch'
 import { computeRepeatedElements } from './engine/murrini/pattern'
 import { useMurriniDesign } from './hooks/useMurriniDesign'
 import { useVessel } from './hooks/useVessel'
+import { MURRINI_TECHNIQUES } from './content/murrineTechniques'
+import { parsePath, pathFor, titleFor } from './routes'
 
 // Lazy-loaded so each tab's code (and its dependencies) only download when
 // actually visited. The biggest win is Design Vault: it's the only tab
@@ -71,7 +73,12 @@ function readMode() {
 }
 
 function App() {
-  const [activeTab, setActiveTab] = useState('murrini')
+  // Where the address bar says to start: a shared /learn/zanfirico link
+  // opens on that technique, not on the editor.
+  const [start] = useState(() => parsePath(window.location.pathname))
+  const [activeTab, setActiveTab] = useState(start.tab)
+  const [learnSection, setLearnSection] = useState(start.section)
+  const [technique, setTechnique] = useState(start.technique)
   // Simple is the guided recipe flow; Advanced is the full editor. Both
   // edit the same design, so switching never loses anything.
   const [mode, setModeState] = useState(readMode)
@@ -122,6 +129,32 @@ function App() {
     if (key === 'plan' && activeTab === 'vessel') setPlanSource('vessel')
     setActiveTab(key)
     if (claimFirstTransition()) setTransition((t) => ({ count: t.count + 1, section: key }))
+  }
+
+  // The address bar follows the app, so every place can be linked to and
+  // Back steps through them. Only a real change of place adds history.
+  useEffect(() => {
+    const place = { tab: activeTab, section: learnSection, technique }
+    const path = pathFor(place)
+    if (path !== window.location.pathname) window.history.pushState(null, '', path)
+    document.title = titleFor(place, MURRINI_TECHNIQUES)
+  }, [activeTab, learnSection, technique])
+
+  // Back and Forward: go where the address now says, without a reload.
+  useEffect(() => {
+    const onPop = () => {
+      const place = parsePath(window.location.pathname)
+      setActiveTab(place.tab)
+      setLearnSection(place.section)
+      setTechnique(place.technique)
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+
+  const openLearn = (section, key = null) => {
+    setLearnSection(section)
+    setTechnique(key)
   }
 
   // Each section paints the whole page in its own Vortex Garden palette.
@@ -201,7 +234,9 @@ function App() {
             <VesselEditor design={design} vesselState={vesselState} onEditDesign={() => goTo('murrini')} />
           )}
           {activeTab === 'plan' && <PlanPage design={design} vessel={vesselState.vessel} planSource={planSource} onPlanSource={setPlanSource} onEdit={() => goTo('murrini')} onEditVessel={() => goTo('vessel')} />}
-          {activeTab === 'learn' && <LearnPage />}
+          {activeTab === 'learn' && (
+            <LearnPage section={learnSection} technique={technique} onOpen={openLearn} />
+          )}
           {activeTab === 'about' && <AboutPage />}
           {activeTab === 'vault' && (
             <DesignVaultPage

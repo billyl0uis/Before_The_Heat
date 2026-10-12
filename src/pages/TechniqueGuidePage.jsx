@@ -1,33 +1,9 @@
+import { useEffect } from 'react'
 import { PageHeader } from '../components/PageHeader'
 import { TechniqueDiagram } from '../components/murrini/TechniqueDiagram'
 import { MURRINI_TECHNIQUES } from '../content/murrineTechniques'
+import { TECHNIQUE_ORDER, techniqueSlug } from '../routes'
 
-// One entry per technique this app actually simulates, in a deliberate
-// reading order (simple cane through to the most composite techniques)
-// rather than object insertion order — plus whatever params that
-// technique's diagram needs to render its representative default (e.g.
-// marver needs a side count, since a square and a hexagon use the same
-// technique but look different).
-const TECHNIQUE_ORDER = [
-  { key: 'circle', params: {} },
-  { key: 'ring', params: {} },
-  { key: 'multiCasing', params: {} },
-  { key: 'embeddedThread', params: {} },
-  { key: 'zanfirico', params: { threadCount: 3 } },
-  { key: 'marver', params: { sides: 4 } },
-  { key: 'opticMold', params: {} },
-  { key: 'star', params: {} },
-  { key: 'spiral', params: {} },
-  { key: 'jellyroll', params: {} },
-  { key: 'pinwheel', params: { blades: 6 } },
-  { key: 'line', params: {} },
-  { key: 'tripod', params: {} },
-  { key: 'cross', params: {} },
-  { key: 'row', params: {} },
-  { key: 'grid', params: {} },
-  { key: 'frame', params: {} },
-  { key: 'bundle', params: {} },
-]
 
 function TechniqueCard({ techniqueKey, params }) {
   const technique = MURRINI_TECHNIQUES[techniqueKey]
@@ -65,7 +41,13 @@ function TechniqueCard({ techniqueKey, params }) {
   )
 }
 
-export function TechniqueGuidePage() {
+export function TechniqueGuidePage({ focus = null, onOpenTechnique }) {
+  // A technique's own address opens the page scrolled to it.
+  useEffect(() => {
+    if (!focus) return
+    document.getElementById(`technique-${focus}`)?.scrollIntoView({ block: 'start' })
+  }, [focus])
+
   return (
     <>
       <PageHeader
@@ -79,7 +61,13 @@ export function TechniqueGuidePage() {
             MURRINI_TECHNIQUES[key] ? (
               <li key={key}>
                 <a
-                  href={`#technique-${key}`}
+                  href={`/learn/${techniqueSlug(key)}`}
+                  onClick={(event) => {
+                    // A plain click stays in the app; open-in-new-tab still works.
+                    if (event.metaKey || event.ctrlKey || event.shiftKey || !onOpenTechnique) return
+                    event.preventDefault()
+                    onOpenTechnique(key)
+                  }}
                   className="inline-flex min-h-[44px] items-center font-semibold text-accent underline decoration-accent/40 underline-offset-[3px] hover:decoration-accent sm:min-h-0 sm:py-1"
                 >
                   {MURRINI_TECHNIQUES[key].title}
