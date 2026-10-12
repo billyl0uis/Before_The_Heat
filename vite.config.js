@@ -6,7 +6,7 @@ import { GLOSSARY, GLOSSARY_ORDER } from './src/content/glossary.js'
 // The site's public address. Search engines are told this is the one
 // real URL (canonical link, sitemap, robots.txt); change it here if the
 // project moves to a new domain.
-const SITE_URL = 'https://ideal-fishstick-six.vercel.app/'
+const SITE_URL = 'https://before-the-heat.vercel.app/'
 
 const escapeHtml = (text) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
