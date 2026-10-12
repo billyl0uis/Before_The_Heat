@@ -216,7 +216,7 @@ export function PlanSheet({ design, steps, warnings, colorants, reticello = null
                       />
                       1. {inner.name}, round the threads
                     </td>
-                    <td className="py-1.5 text-right font-mono">to Ø {fmt(inner.diameterMm)} mm</td>
+                    <td className="py-1.5 text-right font-mono whitespace-nowrap">to Ø {fmt(inner.diameterMm)} mm</td>
                   </tr>
                 )}
                 {balance?.filled && (
@@ -228,7 +228,7 @@ export function PlanSheet({ design, steps, warnings, colorants, reticello = null
                       />
                       {inner ? 2 : 1}. Clear, fill
                     </td>
-                    <td className="py-1.5 text-right font-mono">to Ø {fmt(balance.fillToMm)} mm</td>
+                    <td className="py-1.5 text-right font-mono whitespace-nowrap">to Ø {fmt(balance.fillToMm)} mm</td>
                   </tr>
                 )}
                 {casing.map((layer, index) => (

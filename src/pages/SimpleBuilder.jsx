@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Icon } from '../components/icons'
 import { ModeSwitch } from '../components/ModeSwitch'
 import { CaneView } from '../components/murrini/CaneView'
@@ -85,6 +85,16 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
   // Slice: the cross-section, end-on. Cane: the pulled cane from the side,
   // where twisted patterns like a zanfirico actually show.
   const [view, setView] = useState('slice')
+  const stepHeading = useRef(null)
+  const firstStep = useRef(true)
+  useEffect(() => {
+    // Not on arrival: only when the user moves between steps.
+    if (firstStep.current) {
+      firstStep.current = false
+      return
+    }
+    stepHeading.current?.focus({ preventScroll: true })
+  }, [step])
   // Saved choices are checked before use: a recipe that no longer exists
   // or a damaged value falls back to the default rather than breaking.
   const [choice, setChoice] = useState(() => {
@@ -338,7 +348,7 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
 
           {step === 0 && (
             <>
-              <h1 className="text-[1.6rem] leading-tight font-extrabold tracking-tight">
+              <h1 ref={stepHeading} tabIndex={-1} className="text-[1.6rem] leading-tight font-extrabold tracking-tight outline-none">
                 What are you making?
               </h1>
               <p className="mt-1.5 text-mute">Start from a real murrine recipe. You can change everything after.</p>
@@ -368,7 +378,7 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
 
           {step === 1 && (
             <>
-              <h1 className="text-[1.6rem] leading-tight font-extrabold tracking-tight">
+              <h1 ref={stepHeading} tabIndex={-1} className="text-[1.6rem] leading-tight font-extrabold tracking-tight outline-none">
                 Choose the colors
               </h1>
               <p className="mt-1.5 text-mute">
@@ -451,7 +461,7 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
 
           {step === 2 && (
             <>
-              <h1 className="text-[1.6rem] leading-tight font-extrabold tracking-tight">
+              <h1 ref={stepHeading} tabIndex={-1} className="text-[1.6rem] leading-tight font-extrabold tracking-tight outline-none">
                 How big a cane?
               </h1>
               <p className="mt-1.5 text-mute">The diameter of the finished cane you'll slice. The rest follows from it.</p>
@@ -560,7 +570,7 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
 
           {step === 3 && (
             <>
-              <h1 className="text-[1.6rem] leading-tight font-extrabold tracking-tight">
+              <h1 ref={stepHeading} tabIndex={-1} className="text-[1.6rem] leading-tight font-extrabold tracking-tight outline-none">
                 Your shop plan
               </h1>
               <p className="mt-1.5 text-mute">

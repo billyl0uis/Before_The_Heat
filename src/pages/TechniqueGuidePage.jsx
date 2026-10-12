@@ -10,10 +10,17 @@ function TechniqueCard({ techniqueKey, params }) {
   if (!technique) return null
 
   return (
-    <article id={`technique-${techniqueKey}`} className="flex scroll-mt-20 flex-col gap-3 rounded-xl border border-line bg-panel p-5">
+    <article
+      id={`technique-${techniqueKey}`}
+      tabIndex={-1}
+      aria-labelledby={`technique-${techniqueKey}-title`}
+      className="flex scroll-mt-20 flex-col gap-3 rounded-xl border border-line bg-panel p-5 outline-none focus:border-accent focus:shadow-[0_0_0_1px_var(--accent)]"
+    >
       <div className="flex items-center gap-4">
         <TechniqueDiagram techniqueKey={techniqueKey} params={params} />
-        <h2 className="text-base leading-snug font-semibold text-ink">{technique.title}</h2>
+        <h2 id={`technique-${techniqueKey}-title`} className="text-base leading-snug font-semibold text-ink">
+          {technique.title}
+        </h2>
       </div>
       <p className="text-base leading-relaxed text-ink-soft">{technique.summary}</p>
       <ol className="flex flex-col gap-1.5 text-base leading-relaxed text-ink-soft">
@@ -45,7 +52,9 @@ export function TechniqueGuidePage({ focus = null, onOpenTechnique }) {
   // A technique's own address opens the page scrolled to it.
   useEffect(() => {
     if (!focus) return
-    document.getElementById(`technique-${focus}`)?.scrollIntoView({ block: 'start' })
+    const card = document.getElementById(`technique-${focus}`)
+    card?.scrollIntoView({ block: 'start' })
+    card?.focus({ preventScroll: true })
   }, [focus])
 
   return (

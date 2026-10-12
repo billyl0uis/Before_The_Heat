@@ -220,26 +220,35 @@ function App() {
         </button>
         <nav className="flex h-full min-w-0 overflow-x-auto [scrollbar-width:none]" aria-label="Sections">
           {TABS.map((tab) => (
-            <button
+            <a
               key={tab.key}
-              type="button"
+              href={pathFor({ tab: tab.key, section: learnSection, technique: tab.key === 'learn' ? technique : null })}
               aria-current={tab.key === activeTab ? 'page' : undefined}
-              onClick={() => goTo(tab.key)}
-              className={`relative shrink-0 px-1.5 text-sm font-semibold transition-colors sm:px-3.5 sm:text-base ${
+              onClick={(event) => {
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return
+                event.preventDefault()
+                goTo(tab.key)
+              }}
+              className={`relative flex shrink-0 items-center px-1.5 text-sm font-semibold transition-colors sm:px-3.5 sm:text-base ${
                 tab.key === activeTab ? 'text-ink' : 'text-mute hover:text-ink'
               } after:absolute after:inset-x-2 after:bottom-0 after:h-[3px] after:rounded-t after:bg-accent ${
                 tab.key === activeTab ? 'after:block' : 'after:hidden'
               }`}
             >
               {tab.label}
-            </button>
+            </a>
           ))}
         </nav>
         <div className="ml-auto flex shrink-0 items-center gap-3 sm:gap-6">
           {/* Simple and Advanced are two ways into the Murrini editor, so the
               switch only belongs there. */}
           {activeTab === 'murrini' && <ModeSwitch mode={mode} onChange={setMode} className="max-sm:hidden" />}
-          <p className="flex shrink-0 items-center gap-2 text-sm text-mute" role="status">
+          <p
+            className={`flex shrink-0 items-center gap-2 text-sm text-mute ${
+              ['murrini', 'vessel', 'plan'].includes(activeTab) ? '' : 'invisible'
+            }`}
+            role="status"
+          >
             <span
               className={`h-2 w-2 rounded-full ${murriniHook.savedLocally ? 'bg-accent-2' : 'bg-faint'}`}
             />
