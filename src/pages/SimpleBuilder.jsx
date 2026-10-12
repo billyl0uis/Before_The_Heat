@@ -85,15 +85,23 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
   // Slice: the cross-section, end-on. Cane: the pulled cane from the side,
   // where twisted patterns like a zanfirico actually show.
   const [view, setView] = useState('slice')
-  const [choice, setChoice] = useState(() => ({
-    recipe: stored?.recipe ?? 'flower',
-    colours: stored?.colours ?? {},
-    finishedMm: stored?.finishedMm ?? DEFAULT_ROD.gatherDiameterMm / DEFAULT_ROD.pullRatio,
-    ratio: stored?.ratio ?? DEFAULT_ROD.pullRatio,
-    // Without this a reload forgot the twist you'd picked, and the next
-    // color change rebuilt the cane untwisted.
-    twist: stored?.twist ?? {},
-  }))
+  // Saved choices are checked before use: a recipe that no longer exists
+  // or a damaged value falls back to the default rather than breaking.
+  const [choice, setChoice] = useState(() => {
+    const object = (value) => (value && typeof value === 'object' && !Array.isArray(value) ? value : {})
+    const number = (value, fallback) => (Number.isFinite(value) && value > 0 ? value : fallback)
+    return {
+      recipe: RECIPES[stored?.recipe] ? stored.recipe : 'flower',
+      colours: object(stored?.colours),
+      finishedMm: number(stored?.finishedMm, DEFAULT_ROD.gatherDiameterMm / DEFAULT_ROD.pullRatio),
+      ratio: number(stored?.ratio, DEFAULT_ROD.pullRatio),
+      // Without this a reload forgot the twist you'd picked, and the next
+      // color change rebuilt the cane untwisted.
+      twist: object(stored?.twist),
+      // Kept across reloads, or a chosen clear border would be grown away.
+      ...(stored?.fill === 'clear' || stored?.fill === 'grow' ? { fill: stored.fill } : {}),
+    }
+  })
 
   // Is the current design still the one Simple mode made? If it was changed
   // in Advanced, nothing here overwrites it until a recipe is picked.

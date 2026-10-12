@@ -35,12 +35,15 @@ const TAB_PATHS = { murrini: '/', vessel: '/vessel', plan: '/plan', vault: '/sav
 
 // The address for a place in the app.
 export function pathFor({ tab, section = 'techniques', technique = null }) {
+  // A mistyped address stays in the address bar, so it can be corrected.
+  if (tab === 'notfound') return null
   if (tab !== 'learn') return TAB_PATHS[tab] ?? '/'
   if (section === 'techniques') return technique ? `/learn/${techniqueSlug(technique)}` : '/learn'
   return `/learn/${section}`
 }
 
-// The place in the app for an address. Anything unknown opens the editor.
+// The place in the app for an address. Anything unknown says so, rather
+// than quietly opening somewhere else.
 export function parsePath(pathname) {
   const parts = pathname.replace(/\/+$/, '').split('/').filter(Boolean)
   const home = { tab: 'murrini', section: 'techniques', technique: null }
@@ -50,10 +53,10 @@ export function parsePath(pathname) {
     if (!sub) return { tab: 'learn', section: 'techniques', technique: null }
     if (LEARN_SECTIONS.includes(sub)) return { tab: 'learn', section: sub, technique: null }
     if (KEY_BY_SLUG.has(sub)) return { tab: 'learn', section: 'techniques', technique: KEY_BY_SLUG.get(sub) }
-    return { tab: 'learn', section: 'techniques', technique: null }
+    return { ...home, tab: 'notfound' }
   }
-  const tab = Object.keys(TAB_PATHS).find((key) => TAB_PATHS[key] === `/${parts[0]}`)
-  return tab ? { ...home, tab } : home
+  const tab = parts.length === 1 && Object.keys(TAB_PATHS).find((key) => TAB_PATHS[key] === `/${parts[0]}`)
+  return tab ? { ...home, tab } : { ...home, tab: 'notfound' }
 }
 
 const SITE = 'Before The Heat'
@@ -67,6 +70,7 @@ export function titleFor({ tab, section, technique }, techniques = {}) {
     if (section === 'about') return `About · ${SITE}`
     return `Cane and murrini techniques · ${SITE}`
   }
+  if (tab === 'notfound') return `Page not found · ${SITE}`
   const names = { vessel: 'Vessel', plan: 'Shop plan', vault: 'Saved designs', about: 'About' }
   return names[tab] ? `${names[tab]} · ${SITE}` : `${SITE} · Murrini and cane planner for glassblowers`
 }

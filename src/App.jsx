@@ -148,7 +148,7 @@ function App() {
   useEffect(() => {
     const place = { tab: activeTab, section: learnSection, technique }
     const path = pathFor(place)
-    if (path !== window.location.pathname) window.history.pushState(null, '', path)
+    if (path && path !== window.location.pathname) window.history.pushState(null, '', path)
     document.title = titleFor(place, MURRINI_TECHNIQUES)
   }, [activeTab, learnSection, technique])
 
@@ -251,6 +251,22 @@ function App() {
             <LearnPage section={learnSection} technique={technique} onOpen={openLearn} />
           )}
           {activeTab === 'about' && <AboutPage />}
+          {activeTab === 'notfound' && (
+            <div className="mx-auto flex max-w-lg flex-col items-start gap-4 px-6 py-20">
+              <h1 className="text-3xl font-extrabold tracking-tight">There's no page at this address</h1>
+              <p className="text-lg leading-relaxed text-mute">
+                It may have been mistyped, or a link may be out of date. Your saved design is still here.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={() => goTo('murrini')} className="min-h-[44px] rounded-lg bg-accent px-5 py-2.5 font-bold text-accent-ink">
+                  Plan a cane
+                </button>
+                <button type="button" onClick={() => goTo('learn')} className="min-h-[44px] rounded-lg bg-raise px-5 py-2.5 font-semibold text-ink">
+                  Learn the techniques
+                </button>
+              </div>
+            </div>
+          )}
           {activeTab === 'vault' && (
             <DesignVaultPage
               design={design}

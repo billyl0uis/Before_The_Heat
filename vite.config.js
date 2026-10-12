@@ -148,6 +148,14 @@ function searchablePages() {
         mkdirSync(dirname(file), { recursive: true })
         writeFileSync(file, pageHtml(base, page))
       }
+      writeFileSync(
+        join(outDir, '404.html'),
+        base
+          .replace('<head>', '<head>\n    <meta name="robots" content="noindex" />')
+          .replace(/<title>[^<]*<\/title>/, '<title>Page not found · Before The Heat</title>')
+          .replaceAll('%SITE_URL%', `${SITE_URL}/`)
+          .replaceAll('%SITE_ROOT%', SITE_URL),
+      )
       writeFileSync(join(outDir, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`)
       writeFileSync(
         join(outDir, 'sitemap.xml'),

@@ -198,12 +198,20 @@ export function VesselCanvas({ vessel, morph, wall, layout, sliceImage, sliceDia
 
     // A tap places a slice; a drag only turns the view.
     let down = null
+    const active = new Set()
     const raycaster = new THREE.Raycaster()
     const onDown = (event) => {
-      down = [event.clientX, event.clientY]
+      active.add(event.pointerId)
+      // A second finger makes it a pinch or turn, not a tap.
+      down = active.size === 1 ? [event.clientX, event.clientY, event.pointerId] : null
+    }
+    const onCancel = (event) => {
+      active.delete(event.pointerId)
+      down = null
     }
     const onUp = (event) => {
-      if (!down || !onPlaceRef.current) return
+      active.delete(event.pointerId)
+      if (!down || down[2] !== event.pointerId || !onPlaceRef.current) return
       if (Math.hypot(event.clientX - down[0], event.clientY - down[1]) > 5) return
       const rect = renderer.domElement.getBoundingClientRect()
       raycaster.setFromCamera(
@@ -218,6 +226,7 @@ export function VesselCanvas({ vessel, morph, wall, layout, sliceImage, sliceDia
     }
     renderer.domElement.addEventListener('pointerdown', onDown)
     renderer.domElement.addEventListener('pointerup', onUp)
+    renderer.domElement.addEventListener('pointercancel', onCancel)
 
     // A mm ruler beside the vessel, following the view as it turns.
     const drawRuler = () => {
@@ -275,6 +284,7 @@ export function VesselCanvas({ vessel, morph, wall, layout, sliceImage, sliceDia
       observer.disconnect()
       renderer.domElement.removeEventListener('pointerdown', onDown)
       renderer.domElement.removeEventListener('pointerup', onUp)
+      renderer.domElement.removeEventListener('pointercancel', onCancel)
       controls.dispose()
       for (const mesh of Object.values(meshes)) {
         mesh.geometry.dispose()

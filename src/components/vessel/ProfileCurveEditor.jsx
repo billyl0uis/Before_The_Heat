@@ -31,7 +31,8 @@ export function ProfileCurveEditor({ controlRadii, onChangeRadius }) {
     event.preventDefault()
     const svg = svgRef.current
     if (!svg) return
-    svg.setPointerCapture(event.pointerId)
+    const id = event.pointerId
+    svg.setPointerCapture(id)
 
     const updateFromEvent = (moveEvent) => {
       const rect = svg.getBoundingClientRect()
@@ -41,13 +42,23 @@ export function ProfileCurveEditor({ controlRadii, onChangeRadius }) {
     }
 
     updateFromEvent(event)
-    const handleMove = (moveEvent) => updateFromEvent(moveEvent)
-    const handleUp = () => {
-      svg.removeEventListener('pointermove', handleMove)
-      svg.removeEventListener('pointerup', handleUp)
+    // Only the finger that started the drag moves the point; a second one
+    // landing mid-drag is ignored.
+    const handleMove = (moveEvent) => {
+      if (moveEvent.pointerId === id) updateFromEvent(moveEvent)
     }
+    const end = (endEvent) => {
+      if (endEvent.pointerId !== id) return
+      svg.removeEventListener('pointermove', handleMove)
+      for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) svg.removeEventListener(type, end)
+      window.removeEventListener('blur', endOnBlur)
+      if (svg.hasPointerCapture?.(id)) svg.releasePointerCapture(id)
+    }
+    // Switching windows mid-drag ends it too.
+    const endOnBlur = () => end({ pointerId: id })
     svg.addEventListener('pointermove', handleMove)
-    svg.addEventListener('pointerup', handleUp)
+    for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) svg.addEventListener(type, end)
+    window.addEventListener('blur', endOnBlur)
   }
 
   return (
