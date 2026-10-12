@@ -39,8 +39,11 @@ export function RangeField({ label, value, display, min, max, step, onChange, di
         step={step}
         value={value}
         disabled={disabled}
+        // Read out what's on screen ("Ø 96 mm"), not the raw value, which
+        // for some controls is a radius.
+        aria-valuetext={typeof display === 'string' ? display : undefined}
         onChange={(event) => onChange(Number(event.target.value))}
-        className="w-full disabled:cursor-not-allowed"
+        className="h-8 w-full disabled:cursor-not-allowed"
       />
     </label>
   )

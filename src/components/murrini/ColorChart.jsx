@@ -1,16 +1,12 @@
 import { GLASS_COLOR_INDEX } from '../../content/glassColorIndex'
+import { colourNote } from '../../engine/murrini/rod'
 import { Panel } from './Panel'
 
 function shortName(name) {
   return name.split(' / ')[0].replace(/ \(.*\)$/, '')
 }
 
-function noteFor(colorant) {
-  if (colorant.hazard === 'cadmium') return 'toxic'
-  if (colorant.hazard === 'radioactive') return 'radioactive'
-  if (colorant.strikes) return 'strikes'
-  return colorant.family === 'opaque' ? 'opaque' : 'transparent'
-}
+const noteFor = colourNote
 
 // Every colour shows its name and its working behaviour on the chip
 // itself, so choosing never depends on telling swatches apart by eye.

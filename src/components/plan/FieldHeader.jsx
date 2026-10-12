@@ -37,9 +37,11 @@ export function FieldHeader({ design, compact = false, children }) {
   }, [design])
 
   return (
-    <div data-print-hide className={`relative overflow-hidden ${compact ? 'h-24 sm:h-36' : 'h-36 sm:h-52'}`}>
+    <div data-print-hide className={`relative flex items-end overflow-hidden ${compact ? 'min-h-24 sm:min-h-36' : 'min-h-36 sm:min-h-52'}`}>
       <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 block h-full w-full" />
-      <div className="absolute inset-x-4 bottom-4 flex flex-wrap items-end gap-3 sm:inset-x-8 sm:bottom-6">
+      {/* In the flow, so a title that wraps on a phone makes the header
+          taller rather than being cut off at the top. */}
+      <div className="relative flex w-full flex-wrap items-end gap-3 px-4 pt-8 pb-4 sm:px-8 sm:pb-6">
         {children}
       </div>
     </div>

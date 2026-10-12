@@ -6,9 +6,10 @@ import { VesselCanvas } from '../components/vessel/VesselCanvas'
 import { VesselControls } from '../components/vessel/VesselControls'
 import { GLASS_COLOR_INDEX } from '../content/glassColorIndex'
 import { findColorant, pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
-import { twistLabel } from '../engine/murrini/shopPlan'
+import { pullRodOf, twistLabel } from '../engine/murrini/shopPlan'
 import { renderSlicePlate } from '../engine/murrini/slicePlate'
-import { measureWall, metres, murriniLayout, planPickup, planReticello, vesselName } from '../engine/vessel/pickup'
+import { caneShowColour, measureWall, metres, murriniLayout, planPickup, planReticello, vesselName } from '../engine/vessel/pickup'
+import { isFiligreeCane } from '../engine/murrini/shopPlan'
 import { vesselRadiusFunction } from '../engine/vessel/profile'
 
 // The gather under the pattern. Transparent colors only, so the pattern
@@ -32,9 +33,17 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
     () => measureWall(vesselRadiusFunction({ params, freeform, controlRadii }), params.height),
     [params, freeform, controlRadii],
   )
-  const sliceDiameterMm = pulledDiameterMm(design.rod)
+  const sliceDiameterMm = pulledDiameterMm(pullRodOf(design))
   const layout = useMemo(() => murriniLayout(wall, sliceDiameterMm), [wall, sliceDiameterMm])
   const pickup = useMemo(() => planPickup(vessel, design), [vessel, design])
+  // Lengths of the cane picked up straight: what the 3D view paints.
+  const canePickup = useMemo(
+    () =>
+      pickup?.canes
+        ? { count: pickup.count, color: caneShowColour(design), twisted: Boolean(design.extrusion?.twistDegrees) }
+        : null,
+    [pickup, design],
+  )
   const reticello = useMemo(() => planReticello(vessel), [vessel])
 
   // A slice of the real cane, the same image the plan prints.
@@ -58,6 +67,14 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
   )
 
   const placing = vessel.pattern === 'murrini' && vessel.place === 'hand' && hasDesign
+  const addSliceAtFront = () => {
+    // The front of the piece is u = 0. Alternate right and left of it, one
+    // slice width apart, so repeated presses make a row, not a stack.
+    const k = vessel.placements.length
+    const step = sliceDiameterMm / (2 * Math.PI * wall.meanRadius)
+    const offset = (k % 2 ? -1 : 1) * Math.ceil(k / 2) * step
+    addPlacement(((offset % 1) + 1) % 1, 0.5)
+  }
   const hint = placing
     ? coarse
       ? 'Tap to place · drag to turn · pinch to zoom'
@@ -67,7 +84,9 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
       : 'Drag to turn · scroll to zoom'
 
   const planMessage =
-    vessel.pattern === 'murrini'
+    vessel.pattern === 'canes'
+      ? 'Make a cane in the Murrini tab first: lengths of it are what go on here.'
+      : vessel.pattern === 'murrini'
         ? hasDesign
           ? 'Place some slices and the pick-up step appears here.'
           : 'Make a cane in the Murrini tab first.'
@@ -89,6 +108,7 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
             sliceDiameterMm={sliceDiameterMm}
             glass={glass}
             ribColors={ribColors}
+            canePickup={canePickup}
             onPlace={placing ? addPlacement : null}
             label={`${vesselName(vessel)}, ${fmt(wall.height)} mm tall. Drag to turn it.`}
           />
@@ -149,9 +169,41 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
             options={[
               { value: 'none', label: 'None' },
               { value: 'murrini', label: 'Murrini' },
+              { value: 'canes', label: 'Canes' },
               { value: 'reticello', label: 'Reticello' },
             ]}
           />
+
+          {vessel.pattern === 'murrini' && hasDesign && isFiligreeCane(design.elements) && (
+            <p className="mt-3.5 rounded-[10px] border border-line px-3 py-2.5 text-[0.8rem] leading-relaxed text-ink-soft">
+              Your cane is a zanfirico. Filigree like this is usually picked up as lengths, not sliced:{' '}
+              <button
+                type="button"
+                onClick={() => update({ pattern: 'canes' })}
+                className="font-semibold text-accent underline underline-offset-[3px]"
+              >
+                plan it as Canes
+              </button>
+              .
+            </p>
+          )}
+
+          {vessel.pattern === 'canes' &&
+            (hasDesign ? (
+              <p className="mt-3.5 rounded-[10px] border border-line px-3 py-2.5 text-[0.8rem] leading-relaxed text-ink-soft">
+                Lengths of your Ø {fmt(sliceDiameterMm, 1)} mm cane, laid side by side and rolled up on the gather: how
+                filigree cane like a zanfirico is used. The count is how many close round the first cup.
+              </p>
+            ) : (
+              <div className="mt-3.5 flex flex-col items-start gap-2 rounded-[10px] border border-line px-3 py-2.5">
+                <p className="text-[0.8rem] leading-relaxed text-ink-soft">
+                  Make a cane in the Murrini tab first: lengths of it are what go on here.
+                </p>
+                <button type="button" onClick={onEditDesign} className="text-sm font-semibold text-accent underline underline-offset-[3px]">
+                  Go to Murrini
+                </button>
+              </div>
+            ))}
 
           {vessel.pattern === 'murrini' &&
             (hasDesign ? (
@@ -174,7 +226,7 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
                 </div>
                 {design.extrusion?.twistDegrees ? (
                   <p className="rounded-[10px] border border-line px-3 py-2.5 text-[0.8rem] leading-relaxed text-ink-soft">
-                    Your cane is twisted, {twistLabel(design.rod, design.extrusion.twistDegrees)}. Murrini are thin slices cut across
+                    Your cane is twisted, {twistLabel(pullRodOf(design), design.extrusion.twistDegrees)}. Murrini are thin slices cut across
                     it, so the twist won’t show: each slice is your pattern, just turned a little.
                   </p>
                 ) : null}
@@ -214,8 +266,18 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
                         </button>
                       ))}
                     </div>
+                    {/* Without a pointer: slices go on at the front, half way up,
+                        working outward one slice width each side. */}
+                    <button
+                      type="button"
+                      onClick={addSliceAtFront}
+                      className="min-h-[44px] rounded-lg border border-line px-3 py-2 text-sm font-semibold text-ink-soft hover:bg-raise"
+                    >
+                      Add a slice at the front
+                    </button>
                     <p className="text-[0.8rem] text-mute">
-                      {coarse ? 'Tap' : 'Click'} the vessel to place a slice. Each one is drawn at its real size.
+                      {coarse ? 'Tap' : 'Click'} the vessel to place a slice, or add one at the front. Each is drawn at its
+                      real size.
                     </p>
                   </>
                 )}
@@ -234,8 +296,8 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
           {vessel.pattern === 'reticello' && (
             <div className="mt-3.5 flex flex-col gap-3">
               <p className="rounded-[10px] border border-line px-3 py-2.5 text-[0.8rem] leading-relaxed text-ink-soft">
-                While Reticello is chosen, your plan is the reticello, not your cane. Choose None or Murrini to get the
-                cane plan back.
+                Reticello gets its own plan, built from plain rib canes. Your cane plan stays as it is: switch between the
+                two at the top of the Plan tab.
               </p>
               <RangeField
                 label="Rib canes around"

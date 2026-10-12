@@ -4,7 +4,7 @@ import { FieldHeader } from '../components/plan/FieldHeader'
 import { PlanSheet } from '../components/plan/PlanSheet'
 import { ShopChecklist } from '../components/plan/ShopChecklist'
 import { pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
-import { buildShopPlan, isFiligreeCane, shopPlanWarnings, twistLabel, usedColorants } from '../engine/murrini/shopPlan'
+import { buildShopPlan, gatherBalance, isFiligreeCane, shopPlanWarnings, twistLabel, usedColorants } from '../engine/murrini/shopPlan'
 import { designSignature, RECIPES } from '../engine/murrini/recipes'
 import { planPickup, planReticello } from '../engine/vessel/pickup'
 
@@ -22,9 +22,11 @@ function readView() {
 // recipe's name while the design is still Simple's, then the finished Ø.
 function planTitle(design, reticello) {
   if (reticello) return `Reticello ${reticello.form.replace(/^the /, '').replace('your form', 'vessel')}`
-  // A zanfirico is a cane you pick up in lengths, not a murrine you slice.
-  const kind = isFiligreeCane(design.elements) ? 'cane' : 'murrine'
-  let name = `Your ${kind}`
+  // A zanfirico is a cane you pick up in lengths, not a murrine you slice,
+  // and the design itself says so: no need to remember the recipe.
+  const filigree = isFiligreeCane(design.elements)
+  const kind = filigree ? 'cane' : 'murrine'
+  let name = filigree ? 'Zanfirico cane' : `Your ${kind}`
   try {
     const simple = JSON.parse(window.localStorage.getItem('before-the-heat:simple'))
     if (simple?.signature === designSignature(design) && RECIPES[simple.recipe]) name = `${RECIPES[simple.recipe].name} ${kind}`
@@ -34,14 +36,82 @@ function planTitle(design, reticello) {
   return `${name} · Ø ${pulledDiameterMm(design.rod).toLocaleString('en', { maximumFractionDigits: 1 })} mm`
 }
 
-export function PlanPage({ design, vessel, onEdit, onEditVessel, onCanePlan }) {
+const fmtMm = (value) => value.toLocaleString('en', { maximumFractionDigits: 1 })
+
+// When the design doesn't reach the gather size that was set, the plan
+// can't quietly assume glass that isn't in it. The user chooses: fill the
+// gap with clear, or pull the smaller rod the layers really make. Either
+// way the numbers on the sheet follow.
+function FillChoice({ balance, rod, onChange }) {
+  const { contentMm, naturalMm, fillToMm, filled } = balance
+  return (
+    <section
+      data-print-hide
+      aria-labelledby="fill-choice-title"
+      className="mx-auto mb-8 w-full max-w-[860px] rounded-xl border border-line bg-panel p-5 sm:p-6"
+    >
+      <h2 id="fill-choice-title" className="text-lg font-bold">
+        Your design is Ø {fmtMm(contentMm)} mm. With its casing, that's a Ø {fmtMm(naturalMm)} mm gather, not{' '}
+        {fmtMm(rod.gatherDiameterMm)}.
+      </h2>
+      <div className="mt-4 grid gap-5 text-sm leading-relaxed text-ink-soft md:grid-cols-2">
+        <div>
+          <p className="font-semibold text-ink">Fill out with clear to Ø {fmtMm(fillToMm)} mm if you want</p>
+          <ul className="mt-1.5 list-disc pl-5">
+            <li>the cane to pull to the size you set, Ø {fmtMm(rod.gatherDiameterMm / rod.pullRatio)} mm</li>
+            <li>more clear round the pattern, so marvering and reheats don't reach it</li>
+            <li>slices with a clear border, which read cleanly when they're laid edge to edge</li>
+          </ul>
+        </div>
+        <div>
+          <p className="font-semibold text-ink">Leave it out if you want</p>
+          <ul className="mt-1.5 list-disc pl-5">
+            <li>the pattern to fill more of each slice</li>
+            <li>less glass to heat and pull, and one step fewer</li>
+            <li>a slightly thinner cane: Ø {fmtMm(naturalMm / rod.pullRatio)} mm at {rod.pullRatio} : 1</li>
+          </ul>
+        </div>
+      </div>
+      <div className="mt-5 inline-flex rounded-lg bg-raise p-0.5" role="group" aria-label="Clear fill">
+        {[
+          { value: false, label: 'Leave it out' },
+          { value: true, label: `Add the clear fill` },
+        ].map((option) => (
+          <button
+            key={option.label}
+            type="button"
+            aria-pressed={filled === option.value}
+            onClick={() => onChange(option.value)}
+            className={`min-h-[44px] rounded-md px-4 py-2 text-sm font-semibold ${
+              filled === option.value ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
+            }`}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+export function PlanPage({ design, vessel, planSource = 'cane', onPlanSource, onEdit, onEditVessel }) {
   const [view, setView] = useState(readView)
   const { elements, pattern, rod, casing, extrusion } = design
+  // Whether the layers fill the gather that was set, and the rod as it
+  // will really be pulled given the user's choice about the gap.
+  const balance = useMemo(
+    () => gatherBalance({ repeatedElements: design.repeatedElements, rod, casing }),
+    [design.repeatedElements, rod, casing],
+  )
+  const pullRod = balance.pullRod
   // A murrini pick-up chosen on the Vessel page ends the plan.
   const pickup = useMemo(() => planPickup(vessel, design), [vessel, design])
-  const reticello = useMemo(() => planReticello(vessel), [vessel])
+  // A reticello vessel has its own plan, separate from the cane's: show
+  // whichever was asked for, and offer the other one by name.
+  const reticelloPlan = useMemo(() => planReticello(vessel), [vessel])
+  const reticello = planSource === 'vessel' ? reticelloPlan : null
   const steps = useMemo(() => {
-    const cane = buildShopPlan({ elements, pattern, rod, casing, extrusion })
+    const cane = buildShopPlan({ elements, pattern, rod, casing, extrusion, balance })
     // Reticello doesn't use the cane at all: the plan is the reticello.
     if (reticello) return reticello.steps
     if (!pickup || !cane.length) return cane
@@ -58,7 +128,7 @@ export function PlanPage({ design, vessel, onEdit, onEditVessel, onCanePlan }) {
       return step
     })
     return [...withPulls, pickup.step]
-  }, [elements, pattern, rod, casing, extrusion, pickup, reticello])
+  }, [elements, pattern, rod, casing, extrusion, balance, pickup, reticello])
   // Colors and warnings come from whatever the plan actually uses.
   const used = useMemo(
     () => (reticello ? { elements: reticello.colorantIds.map((colorantId) => ({ colorantId })), casing: [] } : { elements, casing }),
@@ -120,9 +190,9 @@ export function PlanPage({ design, vessel, onEdit, onEditVessel, onCanePlan }) {
             `${reticello.perSide} + ${reticello.perSide} rib canes · ${reticello.form} · from the Vessel tab`
           ) : (
             <>
-              Ø {rod.gatherDiameterMm} → {pulledDiameterMm(rod).toFixed(1)} mm · {rod.pullRatio} : 1 · ≈{' '}
-              {(pulledLengthMm(rod) / 1000).toFixed(1)} m
-              {extrusion.twistDegrees ? ` · twist ${twistLabel(rod, extrusion.twistDegrees)}` : ''}
+              Ø {pullRod.gatherDiameterMm} → {pulledDiameterMm(pullRod).toFixed(1)} mm · {pullRod.pullRatio} : 1 · ≈{' '}
+              {(pulledLengthMm(pullRod) / 1000).toFixed(1)} m
+              {extrusion.twistDegrees ? ` · twist ${twistLabel(pullRod, extrusion.twistDegrees)}` : ''}
             </>
           )}
         </p>
@@ -132,6 +202,26 @@ export function PlanPage({ design, vessel, onEdit, onEditVessel, onCanePlan }) {
         data-print-hide
         className="flex flex-wrap items-center gap-2 border-b border-line bg-panel px-4 py-3 sm:gap-3 sm:px-8"
       >
+        {reticelloPlan && onPlanSource && (
+          <div className="inline-flex rounded-lg bg-raise p-0.5" role="group" aria-label="Which plan">
+            {[
+              { key: 'cane', label: 'Cane plan' },
+              { key: 'vessel', label: 'Reticello plan' },
+            ].map((option) => (
+              <button
+                key={option.key}
+                type="button"
+                aria-pressed={planSource === option.key}
+                onClick={() => onPlanSource(option.key)}
+                className={`min-h-[44px] rounded-md px-2.5 py-2 text-sm font-semibold whitespace-nowrap sm:px-4 ${
+                  planSource === option.key ? 'bg-ink text-ground' : 'text-mute hover:text-ink'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="inline-flex rounded-lg bg-raise p-0.5" role="group" aria-label="Plan view">
           {[
             { key: 'sheet', label: 'Print sheet' },
@@ -157,15 +247,6 @@ export function PlanPage({ design, vessel, onEdit, onEditVessel, onCanePlan }) {
         >
           Edit<span className="max-sm:hidden"> {reticello ? 'vessel' : 'design'}</span>
         </button>
-        {reticello && onCanePlan && (
-          <button
-            type="button"
-            onClick={onCanePlan}
-            className="rounded-lg px-2 py-2 text-sm font-semibold whitespace-nowrap text-accent underline underline-offset-[3px] max-sm:min-h-[44px] sm:px-3"
-          >
-            Turn off reticello<span className="max-sm:hidden"> for the cane plan</span>
-          </button>
-        )}
         {view === 'sheet' && (
           <button
             type="button"
@@ -180,6 +261,9 @@ export function PlanPage({ design, vessel, onEdit, onEditVessel, onCanePlan }) {
       </div>
 
       <div className="px-4 py-8 sm:px-8 sm:py-10 print:p-0">
+        {!reticello && balance.hasGap && (
+          <FillChoice balance={balance} rod={rod} onChange={(fillToGather) => design.setRod({ ...rod, fillToGather })} />
+        )}
         {view === 'sheet' ? (
           <PlanSheet
             design={design}
@@ -188,7 +272,8 @@ export function PlanPage({ design, vessel, onEdit, onEditVessel, onCanePlan }) {
             colorants={colorants}
             reticello={reticello}
             pickup={reticello ? null : pickup}
-            title={planTitle(design, reticello)}
+            balance={balance}
+            title={planTitle({ ...design, rod: pullRod }, reticello)}
           />
         ) : (
           <ShopChecklist design={design} steps={steps} warnings={warnings} finish={finish} />

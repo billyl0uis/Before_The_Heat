@@ -111,8 +111,15 @@ function App() {
   // the pattern and come back.
   const vesselState = useVessel()
 
+  // Which plan the Plan tab shows when the vessel has its own (reticello):
+  // arriving from the cane editor means the cane plan, from Vessel the
+  // vessel's. Neither ever silently replaces the other.
+  const [planSource, setPlanSource] = useState('cane')
+
   const goTo = (key) => {
     if (key === activeTab) return
+    if (key === 'plan' && activeTab === 'murrini') setPlanSource('cane')
+    if (key === 'plan' && activeTab === 'vessel') setPlanSource('vessel')
     setActiveTab(key)
     if (claimFirstTransition()) setTransition((t) => ({ count: t.count + 1, section: key }))
   }
@@ -150,13 +157,12 @@ function App() {
           <Mark />
           <span className="max-sm:hidden">Before The Heat</span>
         </button>
-        <nav className="flex h-full min-w-0 overflow-x-auto [scrollbar-width:none]" role="tablist" aria-label="Sections">
+        <nav className="flex h-full min-w-0 overflow-x-auto [scrollbar-width:none]" aria-label="Sections">
           {TABS.map((tab) => (
             <button
               key={tab.key}
               type="button"
-              role="tab"
-              aria-selected={tab.key === activeTab}
+              aria-current={tab.key === activeTab ? 'page' : undefined}
               onClick={() => goTo(tab.key)}
               className={`relative shrink-0 px-1.5 text-sm font-semibold transition-colors sm:px-3.5 sm:text-base ${
                 tab.key === activeTab ? 'text-ink' : 'text-mute hover:text-ink'
@@ -182,6 +188,7 @@ function App() {
         </div>
       </header>
       <LoadingField trigger={transition.count} section={transition.section} design={design} />
+      <main>
       <ErrorBoundary key={activeTab}>
         <Suspense fallback={<TabLoadingFallback />}>
           {activeTab === 'murrini' &&
@@ -193,7 +200,7 @@ function App() {
           {activeTab === 'vessel' && (
             <VesselEditor design={design} vesselState={vesselState} onEditDesign={() => goTo('murrini')} />
           )}
-          {activeTab === 'plan' && <PlanPage design={design} vessel={vesselState.vessel} onEdit={() => goTo('murrini')} onEditVessel={() => goTo('vessel')} onCanePlan={() => vesselState.update({ pattern: 'none' })} />}
+          {activeTab === 'plan' && <PlanPage design={design} vessel={vesselState.vessel} planSource={planSource} onPlanSource={setPlanSource} onEdit={() => goTo('murrini')} onEditVessel={() => goTo('vessel')} />}
           {activeTab === 'learn' && <LearnPage />}
           {activeTab === 'about' && <AboutPage />}
           {activeTab === 'vault' && (
@@ -207,6 +214,7 @@ function App() {
           )}
         </Suspense>
       </ErrorBoundary>
+      </main>
     </div>
   )
 }

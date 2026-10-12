@@ -12,10 +12,10 @@ import {
   RECIPE_ORDER,
   RECIPES,
 } from '../engine/murrini/recipes'
-import { CLEAR_GLASS, DEFAULT_ROD, findColorant, pulledLengthMm, twistPitchMm } from '../engine/murrini/rod'
+import { CLEAR_GLASS, DEFAULT_ROD, findColorant, pulledLengthMm, twistPitchMm, colourNote } from '../engine/murrini/rod'
 import { CURRENT_SCHEMA_VERSION } from '../engine/murrini/migrate'
 import { computeRepeatedElements } from '../engine/murrini/pattern'
-import { buildShopPlan } from '../engine/murrini/shopPlan'
+import { buildShopPlan, pullRodOf } from '../engine/murrini/shopPlan'
 import { renderSlicePlate } from '../engine/murrini/slicePlate'
 import { useResponsiveCanvasSize } from '../hooks/useResponsiveCanvasSize'
 import { useSliceGeometry } from '../hooks/useSliceGeometry'
@@ -70,13 +70,6 @@ function writeStore(value) {
 const fmt = (value) => value.toLocaleString('en', { maximumFractionDigits: 1 })
 const shortName = (name) => name.split(' / ')[0].replace(/ \(.*\)$/, '')
 
-function colourNote(colorant) {
-  if (colorant.id === 'clear') return 'no color'
-  if (colorant.hazard === 'cadmium') return 'toxic'
-  if (colorant.hazard === 'radioactive') return 'radioactive'
-  if (colorant.strikes) return 'strikes'
-  return colorant.family
-}
 
 // Guided mode: pick a real recipe, colour its parts, choose a size, get
 // the plan. Every choice rebuilds the same design data the full editor
@@ -216,6 +209,7 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
               elements={design.repeatedElements}
               slice={slice}
               rod={design.rod}
+              pullRod={pullRodOf(design)}
               onPlace={() => {}}
               preview={NO_PREVIEW}
               size={size.width}

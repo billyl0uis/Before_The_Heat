@@ -16,9 +16,10 @@ import { buildCompoundElements, COMPOUND_SHAPE_TYPES } from '../engine/murrini/c
 import { pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
 import { computeShapeReach, SHAPE_TYPES } from '../engine/murrini/shapes'
 import { describePlacement } from '../engine/murrini/placement'
-import { buildShopPlan, shopPlanWarnings, usedColorants } from '../engine/murrini/shopPlan'
+import { buildShopPlan, pullRodOf, shopPlanWarnings, usedColorants } from '../engine/murrini/shopPlan'
 import { useResponsiveCanvasSize } from '../hooks/useResponsiveCanvasSize'
 import { useSliceGeometry } from '../hooks/useSliceGeometry'
+import { UNDO_KEY } from '../components/keys'
 
 const DOCK = [
   { key: 'tools', label: 'Tools', icon: 'tools' },
@@ -134,7 +135,7 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
     [elements, casing],
   )
   const planSteps = useMemo(
-    () => buildShopPlan({ elements, pattern, rod, casing, extrusion }),
+    () => buildShopPlan({ elements, pattern, rod, casing, extrusion, repeatedElements }),
     [elements, pattern, rod, casing, extrusion],
   )
   // Coloured glass only: clear isn't a colorant to test, and the
@@ -143,6 +144,7 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
     () => usedColorants({ elements, casing }).filter((colorant) => colorant.id !== 'clear').length,
     [elements, casing],
   )
+  const pullRod = useMemo(() => pullRodOf({ repeatedElements, rod, casing }), [repeatedElements, rod, casing])
 
   // The rod as the canvas draws it: casing rings in world units and the
   // room left inside them for canes. Memoised so the WebGL scene only
@@ -287,7 +289,8 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
       const tag = event.target.tagName
       const typing =
         tag === 'TEXTAREA' || (tag === 'INPUT' && event.target.type !== 'range' && event.target.type !== 'checkbox')
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'z') {
+      // In a text or number field, undo is the field's own.
+      if (!typing && (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'z') {
         event.preventDefault()
         if (event.shiftKey) handleRedo()
         else handleUndo()
@@ -371,7 +374,8 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
           {onMode && <ModeSwitch mode="advanced" onChange={onMode} className="sm:hidden" />}
           <p className="text-right text-xs text-mute max-sm:hidden">
             {viewMode === 'flat' && 'True scale · 1 tick = 1 mm · '}
-            <kbd className="font-mono">⌘Z</kbd> undo
+            <kbd className="font-mono">{UNDO_KEY}</kbd> undo · <kbd className="font-mono">1–9</kbd> tools ·{' '}
+            <kbd className="font-mono">P</kbd> plan
           </p>
         </div>
 
@@ -382,6 +386,7 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
               elements={repeatedElements}
               slice={slice}
               rod={rod}
+              pullRod={pullRod}
               onPlace={handleCanvasClick}
               preview={preview}
               size={flatSize.width}
@@ -454,7 +459,7 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
         <Stat label="Build" value={planSteps.length ? `${planSteps.length} steps` : 'Place a cane to start'} />
         <Stat
           label="Yield"
-          value={`≈ ${(pulledLengthMm(rod) / 1000).toFixed(1)} m of Ø ${pulledDiameterMm(rod).toFixed(1)} mm`}
+          value={`≈ ${(pulledLengthMm(pullRod) / 1000).toFixed(1)} m of Ø ${pulledDiameterMm(pullRod).toFixed(1)} mm`}
         />
         <Stat
           label="Colors"

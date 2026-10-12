@@ -136,8 +136,12 @@ function PlacementMap({ map, sliceDiameterMm }) {
 }
 
 // The printable shop plan: paper-white, Primary-navy ink, one page.
-export function PlanSheet({ design, steps, warnings, colorants, reticello = null, pickup = null, title = 'Shop plan' }) {
+export function PlanSheet({ design, steps, warnings, colorants, reticello = null, pickup = null, balance = null, title = 'Shop plan' }) {
   const { rod, casing } = design
+  // The rod as it's really pulled: the set gather, or the smaller one the
+  // layers make when the user left the clear fill out.
+  const pull = balance?.pullRod ?? rod
+  const unfilled = Boolean(balance?.hasGap && !balance.filled)
   const inner = innerCasingOf(design.elements, rod)
   const plate = useMemo(
     () =>
@@ -171,32 +175,34 @@ export function PlanSheet({ design, steps, warnings, colorants, reticello = null
         <p className="-mt-3 text-xs leading-snug text-[#454a72]">
           Drawn at true scale. Clear glass, in the core and in any clear casing, is shaded dark grey
           so opal and white canes stay visible on paper.
+          {unfilled &&
+            ` The grey ring inside the casing is the clear fill you left out: the real rod is Ø ${fmt(pull.gatherDiameterMm)} mm.`}
         </p>
         <section>
           <h3 className="mb-2 text-xs font-bold tracking-[0.08em] text-[#454a72] uppercase">Pull</h3>
           <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 font-mono text-base font-semibold">
             <p>
-              Ø {rod.gatherDiameterMm} mm
-              <span className="block font-sans text-xs font-normal text-[#454a72]">{rod.gatherLengthMm} mm gather</span>
+              Ø {fmt(pull.gatherDiameterMm)} mm
+              <span className="block font-sans text-xs font-normal text-[#454a72]">{pull.gatherLengthMm} mm gather</span>
             </p>
             <Icon name="arrowRight" size={18} className="text-[#1430d8]" />
             <p>
-              Ø {fmt(pulledDiameterMm(rod))} mm
+              Ø {fmt(pulledDiameterMm(pull))} mm
               <span className="block font-sans text-xs font-normal text-[#454a72]">
-                ≈ {fmt(pulledLengthMm(rod) / 1000)} m at {rod.pullRatio} : 1
+                ≈ {fmt(pulledLengthMm(pull) / 1000)} m at {pull.pullRatio} : 1
               </span>
             </p>
           </div>
           {design.extrusion?.twistDegrees ? (
             <p className="mt-2 text-sm">
-              <span className="font-semibold">Twist:</span> {twistLabel(rod, design.extrusion.twistDegrees)} of pulled cane, the
+              <span className="font-semibold">Twist:</span> {twistLabel(pull, design.extrusion.twistDegrees)} of pulled cane, the
               same way throughout the pull
             </p>
           ) : null}
         </section>
         <section>
           <h3 className="mb-2 text-xs font-bold tracking-[0.08em] text-[#454a72] uppercase">Casing, inside to out</h3>
-          {casing.length || inner ? (
+          {casing.length || inner || balance?.filled ? (
             <table className="w-full text-sm">
               <tbody>
                 {/* A zanfirico's own casing goes on first, round the threads. */}
@@ -212,6 +218,18 @@ export function PlanSheet({ design, steps, warnings, colorants, reticello = null
                     <td className="py-1.5 text-right font-mono">to Ø {fmt(inner.diameterMm)} mm</td>
                   </tr>
                 )}
+                {balance?.filled && (
+                  <tr className="border-b border-[#d9dae6]">
+                    <td className="py-1.5">
+                      <span
+                        className="mr-2 inline-block h-3.5 w-5 rounded-sm align-[-2px] shadow-[inset_0_0_0_1px_rgb(0_0_0/0.2)]"
+                        style={{ background: layerSwatch('clear') }}
+                      />
+                      {inner ? 2 : 1}. Clear, fill
+                    </td>
+                    <td className="py-1.5 text-right font-mono">to Ø {fmt(balance.fillToMm)} mm</td>
+                  </tr>
+                )}
                 {casing.map((layer, index) => (
                   <tr key={index} className="border-b border-[#d9dae6]">
                     <td className="py-1.5">
@@ -219,7 +237,7 @@ export function PlanSheet({ design, steps, warnings, colorants, reticello = null
                         className="mr-2 inline-block h-3.5 w-5 rounded-sm align-[-2px] shadow-[inset_0_0_0_1px_rgb(0_0_0/0.2)]"
                         style={{ background: layerSwatch(layer.colorantId) }}
                       />
-                      {index + 1 + (inner ? 1 : 0)}. {findColorant(layer.colorantId)?.name}
+                      {index + 1 + (inner ? 1 : 0) + (balance?.filled ? 1 : 0)}. {findColorant(layer.colorantId)?.name}
                     </td>
                     <td className="py-1.5 text-right font-mono">{fmt(layer.thicknessMm)} mm</td>
                   </tr>

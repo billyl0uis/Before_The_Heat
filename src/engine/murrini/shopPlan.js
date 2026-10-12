@@ -1,8 +1,52 @@
 import { computeBuildPlan, MURRINI_TECHNIQUES } from '../../content/murrineTechniques'
 import { COMPOUND_SHAPE_TYPES } from './compoundShapes'
 import { checkColorCompatibility } from './colorCompatibility'
-import { findColorant, mmPerWorldUnit, pulledDiameterMm, pulledLengthMm, twistPitchMm } from './rod'
+import { findColorant, mmPerWorldUnit, pulledDiameterMm, pulledLengthMm, totalCasingMm, twistPitchMm } from './rod'
 import { computeShapeReach, SHAPE_TYPES } from './shapes'
+
+// The design's real size across: the furthest any cane reaches from the
+// centre, in mm. A recipe needn't fill the space inside the casing, and
+// the plan has to say what goes in that gap rather than leave it out.
+export function contentDiameterMm(repeatedElements, rod) {
+  const reach = repeatedElements.reduce(
+    (most, e) => Math.max(most, Math.hypot(e.x, e.y) + computeShapeReach(e.shape, e.params)),
+    0,
+  )
+  return reach * 2 * mmPerWorldUnit(rod)
+}
+
+// Below this the gap is within what marvering takes up anyway.
+const FILL_THRESHOLD_MM = 0.5
+
+// What the layers actually come to, and whether there's a gap between the
+// design and the gather size that was set. `fill` is the user's choice to
+// fill that gap with clear; without it the gather is only as big as the
+// design plus its casing, and the pull follows from that.
+export function gatherBalance({ repeatedElements, rod, casing }) {
+  const contentMm = contentDiameterMm(repeatedElements, rod)
+  const naturalMm = contentMm + 2 * totalCasingMm(casing)
+  const fillToMm = rod.gatherDiameterMm - 2 * totalCasingMm(casing)
+  const gapMm = rod.gatherDiameterMm - naturalMm
+  const hasGap = repeatedElements.length > 0 && gapMm > FILL_THRESHOLD_MM
+  const filled = hasGap && Boolean(rod.fillToGather)
+  return {
+    contentMm,
+    naturalMm,
+    fillToMm,
+    gapMm,
+    hasGap,
+    filled,
+    // The rod as it will really be pulled: the set size, or the smaller
+    // one the layers make.
+    pullRod: hasGap && !filled ? { ...rod, gatherDiameterMm: Math.round(naturalMm * 10) / 10 } : rod,
+  }
+}
+
+// The rod as it will really be pulled, for anything that shows the pulled
+// cane's size: the editors, the Vessel pick-up and the plan all agree.
+export function pullRodOf(design) {
+  return gatherBalance({ repeatedElements: design.repeatedElements ?? [], rod: design.rod, casing: design.casing }).pullRod
+}
 
 // How many copies of the drawn base cell the repeat produces.
 export function repeatCount(pattern) {
@@ -81,9 +125,11 @@ function describeCane(cluster, techniqueKey, count, rod) {
   )
   const outer = colourName(layers[0])
   const inner = layers.slice(1).reverse().map(colourName)
+  const mmPerUnit = mmPerWorldUnit(rod)
+  const sized = [...layers].reverse().map((e) => `${colourName(e)} to ${sizePhrase(e, mmPerUnit)}`)
   return {
     title: `Case ${inner.join(' and ')} in ${outer}${count > 1 ? `\u00a0×${count}` : ''}`,
-    detail: `${inner[0]} at the centre${inner.length > 1 ? `, then ${inner.slice(1).join(', ')}` : ''}, with ${outer} gathered over it, pulled as one cane.`,
+    detail: `Inside to out: ${sized.join(', then ')}. Pulled as one cane.`,
   }
 }
 
@@ -232,7 +278,8 @@ function compoundCaneSteps(cluster, copies, rod) {
 //
 // Each step carries a `plate` saying what its thumbnail shows: a single
 // cane, or the rod up to a given casing layer.
-export function buildShopPlan({ elements, pattern, rod, casing, extrusion }) {
+export function buildShopPlan({ elements, pattern, rod, casing, extrusion, repeatedElements, balance: given = null }) {
+  const balance = given ?? (repeatedElements ? gatherBalance({ repeatedElements, rod, casing }) : null)
   const steps = []
   let caneTotal = 0
   const bundleLabels = new Set()
@@ -296,10 +343,24 @@ export function buildShopPlan({ elements, pattern, rod, casing, extrusion }) {
     })
   }
 
+  // The gap between the design and the gather, filled with clear when the
+  // user chose to: its own step, before the rod's casing.
+  if (balance?.filled) {
+    steps.push({
+      key: 'fill',
+      title: `Fill out with\u00a0Clear to Ø\u00a0${fmt(balance.fillToMm)}\u00a0mm`,
+      detail: `The design is Ø ${fmt(balance.contentMm)} mm across. Gathering clear over it to Ø ${fmt(balance.fillToMm)} mm brings the rod up to the ${fmt(rod.gatherDiameterMm)} mm gather this plan pulls from.`,
+      colorantIds: [],
+      plate: { kind: 'slice', casingUpTo: -1 },
+    })
+  }
+
   // A zanfirico was already cased once round its threads, so the rod's
   // casing goes over that, not straight onto the threads.
   const inner = innerCasingOf(elements, rod)
-  const firstOver = inner
+  const firstOver = balance?.filled
+    ? 'Over the clear fill.'
+    : inner
     ? `Over the ${inner.name} casing that locks in the threads, so this is a second layer.`
     : `The first layer, straight over the ${caneTotal > 1 ? 'bundle' : 'cane'}.`
   casing.forEach((layer, index) => {
@@ -314,17 +375,18 @@ export function buildShopPlan({ elements, pattern, rod, casing, extrusion }) {
   })
 
   if (steps.length) {
+    const pull = balance?.pullRod ?? rod
     // The twist is the whole technique for a zanfirico or any spiral cane:
     // it has to be in the instruction, not only in the preview.
     const twistDegrees = extrusion?.twistDegrees ?? 0
-    const twist = twistLabel(rod, twistDegrees)
-    const totalTurns = twistDegrees ? Math.round(pulledLengthMm(rod) / twistPitchMm(rod, twistDegrees)) : 0
+    const twist = twistLabel(pull, twistDegrees)
+    const totalTurns = twistDegrees ? Math.round(pulledLengthMm(pull) / twistPitchMm(pull, twistDegrees)) : 0
     steps.push({
       key: 'pull',
       title: twist
-        ? `Pull to Ø ${fmt(pulledDiameterMm(rod))} mm, twisting ${twist}`
-        : `Pull to Ø ${fmt(pulledDiameterMm(rod))} mm`,
-      detail: `${rod.pullRatio} : 1 from a ${rod.gatherDiameterMm} mm × ${rod.gatherLengthMm} mm gather gives about ${fmt(pulledLengthMm(rod) / 1000)} m of cane${isFiligreeCane(elements) ? ' for a pick-up' : ' to slice'}.${
+        ? `Pull to Ø ${fmt(pulledDiameterMm(pull))} mm, twisting ${twist}`
+        : `Pull to Ø ${fmt(pulledDiameterMm(pull))} mm`,
+      detail: `${pull.pullRatio} : 1 from a ${fmt(pull.gatherDiameterMm)} mm × ${pull.gatherLengthMm} mm gather gives about ${fmt(pulledLengthMm(pull) / 1000)} m of cane${isFiligreeCane(elements) ? ' for a pick-up' : ' to slice'}.${
         twist
           ? ` That's about ${totalTurns} turns over the whole pull: keep turning the same way as you walk it out, so the twist stays even.`
           : ''

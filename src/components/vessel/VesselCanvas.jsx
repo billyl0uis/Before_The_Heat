@@ -4,7 +4,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { paintBaseSkin, paintMurriniSkin } from '../../engine/vessel/paint'
 import { measureWall } from '../../engine/vessel/pickup'
 import { createBaseSkin, createVesselBody, createWallSkin, vesselRadiusFunction } from '../../engine/vessel/profile'
-import { paintReticelloSkin } from '../../engine/vessel/reticello'
+import { paintReticelloSkin, paintCanePickupSkin } from '../../engine/vessel/reticello'
 import { createStudioEnvironment } from '../three/studio'
 import { WebGLUnavailable } from '../WebGLUnavailable'
 
@@ -83,7 +83,7 @@ function skinMaterial(map, side, opacity) {
   })
 }
 
-export function VesselCanvas({ vessel, morph, wall, layout, sliceImage, sliceDiameterMm, glass, ribColors, onPlace, label }) {
+export function VesselCanvas({ vessel, morph, wall, layout, sliceImage, sliceDiameterMm, glass, ribColors, canePickup = null, onPlace, label }) {
   const mountRef = useRef(null)
   const rulerRef = useRef(null)
   const sceneRef = useRef(null)
@@ -328,6 +328,9 @@ export function VesselCanvas({ vessel, morph, wall, layout, sliceImage, sliceDia
       const slices = place === 'hand' ? { wall: placements, base: [] } : layout
       paintMurriniSkin(wallCtx, SKIN_SIZE, wall, slices?.wall ?? [], sliceImage, sliceDiameterMm)
       paintBaseSkin(baseCtx, BASE_SIZE, wall, slices?.base ?? [], sliceImage, sliceDiameterMm)
+    } else if (pattern === 'canes' && canePickup) {
+      paintCanePickupSkin(wallCtx, SKIN_SIZE, wall, canePickup)
+      baseCtx.clearRect(0, 0, BASE_SIZE, BASE_SIZE)
     } else if (pattern === 'reticello') {
       paintReticelloSkin(wallCtx, SKIN_SIZE, wall, { ribsAround, colorA: ribColors.a, colorB: ribColors.b })
       baseCtx.clearRect(0, 0, BASE_SIZE, BASE_SIZE)
@@ -337,7 +340,7 @@ export function VesselCanvas({ vessel, morph, wall, layout, sliceImage, sliceDia
     }
     state.wallSkin.texture.needsUpdate = true
     state.baseSkin.texture.needsUpdate = true
-  }, [wall, layout, sliceImage, sliceDiameterMm, pattern, place, placements, ribsAround, ribColors.a, ribColors.b])
+  }, [wall, layout, sliceImage, sliceDiameterMm, pattern, place, placements, ribsAround, ribColors.a, ribColors.b, canePickup])
 
   if (webglFailed) return <WebGLUnavailable width={360} height={420} />
 

@@ -1,5 +1,5 @@
 import { findColorant, pulledDiameterMm, pulledLengthMm } from '../murrini/rod'
-import { turnsLabel } from '../murrini/shopPlan'
+import { pullRodOf, turnsLabel } from '../murrini/shopPlan'
 import { VESSEL_FORM_PRESETS, vesselRadiusFunction } from './profile'
 import { THREAD_MM, threadDriftTurns } from './reticello'
 
@@ -101,11 +101,13 @@ export const metres = (mm) => fmt(mm / 1000, mm < 1000 ? 2 : 1)
 // Everything the Vessel page and the plan need about the pick-up, or null
 // when there's nothing to pick up (no cane, no murrini, no slices placed).
 export function planPickup(vessel, design) {
+  if (vessel.pattern === 'canes') return planCanePickup(vessel, design)
   if (vessel.pattern !== 'murrini' || !design.elements.length) return null
   const radiusAt = vesselRadiusFunction(vessel)
   const wall = measureWall(radiusAt, vessel.params.height)
-  const sliceDiameterMm = pulledDiameterMm(design.rod)
-  const pullLengthMm = pulledLengthMm(design.rod)
+  const rod = pullRodOf(design)
+  const sliceDiameterMm = pulledDiameterMm(rod)
+  const pullLengthMm = pulledLengthMm(rod)
   const byHand = vessel.place === 'hand'
   const count = byHand ? vessel.placements.length : murriniLayout(wall, sliceDiameterMm).count
   if (!count) return null
@@ -168,6 +170,19 @@ export function firstCupDiameterMm() {
 // Twist to the nearest quarter turn: about as fine as it's turned by hand.
 const quarterTurns = (turns) => Math.max(0.25, Math.round(turns * 4) / 4)
 
+// How long each cane picked up round the first cup needs to be. Blowing out
+// stretches the cup round and up alike (see reticello.js), so the canes
+// start shorter than the finished wall by the same factor the cup grows
+// round: the wall's length scaled back to the first cup, plus a little to
+// work with.
+export function firstCupLengthMm(wall) {
+  const back = (firstCupDiameterMm() / 2) / Math.max(1, wall.meanRadius)
+  return Math.max(40, Math.round((wall.length * Math.min(1, back) + 20) / 10) * 10)
+}
+
+// How many canes of a given Ø lie side by side right round the first cup.
+const canesRoundCup = (caneMm) => Math.max(4, Math.round((Math.PI * firstCupDiameterMm()) / caneMm))
+
 const colourName = (id) => findColorant(id)?.name.split(' / ')[0].replace(/ \(.*\)$/, '') ?? 'glass'
 
 // Reticello as a plan step: two sets of rib canes, each picked up and
@@ -180,22 +195,25 @@ export function planReticello(vessel) {
   const perSide = Math.max(4, Math.round(vessel.ribsAround / 2))
   const a = colourName(vessel.ribA)
   const b = colourName(vessel.ribB)
-  const lengthMm = Math.round((wall.length + 20) / 10) * 10
+  const lengthMm = firstCupLengthMm(wall)
   const cupMm = firstCupDiameterMm()
   const ribMm = Math.max(2, Math.round(((Math.PI * cupMm) / perSide) * 2) / 2)
   const twist = turnsLabel(quarterTurns(threadDriftTurns(wall)) * 360)
   const outline = []
   for (let j = 0; j <= 24; j++) outline.push(wall.radii[Math.round((j / 24) * wall.rows)])
+  // One description of a rib cane, used everywhere the plan names one.
+  const ribCane = (name) => `${name} rib canes, Ø\u00a0${fmt(ribMm)}\u00a0mm: a single ${name} thread cased in clear (vetro a fili)`
+  const lengthWhy = `${lengthMm}\u00a0mm is the wall's ${fmt(wall.length, 0)}\u00a0mm scaled back to the first cup, plus a little to work with`
   const lines = [
-    `Pull ${perSide} ${a} rib canes and ${perSide} ${b} rib canes, each Ø ${fmt(ribMm)} mm and at least ${lengthMm} mm long: the wall's length, ${fmt(wall.length, 0)} mm, plus a little to work with.`,
+    `Pull ${perSide} ${ribCane(a)}, and ${perSide} ${ribCane(b)}, each ${lengthMm}\u00a0mm long. ${lengthWhy}.`,
     `Lay the ${a} canes side by side on a kiln shelf, heat them, pick them up and close them into a cylinder, then twist it ${twist} one way as you blow it into a cup. Do the same with the ${b} canes, twisting ${twist} the other way.`,
     `Blow one cup inside the other until they meet, so the threads cross and trap a bubble in each diamond. Then blow out to ${formPhrase(vessel)}: ${fmt(wall.height, 0)} mm tall, Ø ${fmt(wall.rimRadius * 2, 0)} mm at the rim.`,
   ]
   const form = formPhrase(vessel)
   const rib = (id, name) => ({
     key: `rib-${id}`,
-    title: `Pull ${perSide} ${name} rib canes, Ø ${fmt(ribMm)} mm, ${lengthMm} mm long`,
-    detail: `A single ${name} thread cased in clear (vetro a fili). At Ø ${fmt(ribMm)} mm, ${perSide} of them lie side by side right round a first cup about Ø ${fmt(cupMm, 0)} mm. ${lengthMm} mm is the wall's length, ${fmt(wall.length, 0)} mm, plus a little to work with.`,
+    title: `Pull ${perSide} ${name} rib canes, Ø\u00a0${fmt(ribMm)}\u00a0mm, ${lengthMm}\u00a0mm long`,
+    detail: `Each a single ${name} thread cased in clear (vetro a fili). At Ø ${fmt(ribMm)} mm, ${perSide} of them lie side by side right round a first cup about Ø ${fmt(cupMm, 0)} mm. ${lengthWhy}.`,
     colorantIds: [id, 'clear'].filter((c, i, all) => findColorant(c) && all.indexOf(c) === i),
     plate: { kind: 'rib', colorantId: id },
   })
@@ -256,6 +274,75 @@ export function planReticello(vessel) {
       lines,
       colorantIds: [vessel.ribA, vessel.ribB].filter((id) => findColorant(id)),
       plate: vesselPlate,
+    },
+  }
+}
+
+// The colour a cane shows on the wall: its most-used colour that isn't
+// clear, so a zanfirico reads as its threads.
+export function caneShowColour(design) {
+  const counts = new Map()
+  for (const e of design.elements) {
+    if (!e.colorantId || e.colorantId === 'clear') continue
+    counts.set(e.colorantId, (counts.get(e.colorantId) ?? 0) + 1)
+  }
+  const [id] = [...counts.entries()].sort((x, y) => y[1] - x[1])[0] ?? []
+  return findColorant(id)?.swatch ?? '#f5f5f4'
+}
+
+// A cane pick-up: lengths of the pulled cane laid side by side and rolled
+// up on the gather, the way filigree (zanfirico) cane is used, rather than
+// sliced into murrini. The canes close round the first cup, like reticello
+// ribs, so their count comes from the cane's Ø.
+export function planCanePickup(vessel, design) {
+  if (vessel.pattern !== 'canes' || !design.elements.length) return null
+  const wall = measureWall(vesselRadiusFunction(vessel), vessel.params.height)
+  const rod = pullRodOf(design)
+  const caneMm = pulledDiameterMm(rod)
+  const pullLengthMm = pulledLengthMm(rod)
+  const count = canesRoundCup(caneMm)
+  const lengthMm = firstCupLengthMm(wall)
+  // Each length costs a saw cut too, the same allowance as a slice.
+  const totals = pickupTotals({ count, thicknessMm: lengthMm, pullLengthMm })
+  const form = formPhrase(vessel)
+  const twisted = Boolean(design.extrusion?.twistDegrees)
+  const lines = [
+    `Cut the Ø ${fmt(caneMm)} mm cane into ${count} lengths of ${lengthMm} mm. That's about ${metres(totals.caneMm)} m of cane${
+      totals.pulls > 1 ? `, so build and pull this cane ${totals.pulls} times` : ', one pull'
+    }. ${lengthMm} mm is the wall's ${fmt(wall.length, 0)} mm scaled back to the first cup, plus a little to work with.`,
+    `Lay them side by side on a kiln shelf, touching all the way along, and heat them through. ${count} of them make a patch that closes right round a first cup about Ø ${fmt(firstCupDiameterMm(), 0)} mm.`,
+    `Roll the collar across to pick them up, close the seam, then blow out to ${form}: ${fmt(wall.height, 0)} mm tall, Ø ${fmt(wall.rimRadius * 2, 0)} mm at the rim.${
+      twisted ? ' Your cane is twisted, so each length shows its spiral up the wall.' : ''
+    }`,
+  ]
+  const outline = []
+  for (let j = 0; j <= 24; j++) outline.push(wall.radii[Math.round((j / 24) * wall.rows)])
+  return {
+    wall,
+    count,
+    byHand: false,
+    canes: true,
+    lengthMm,
+    map: null,
+    sliceDiameterMm: caneMm,
+    pullLengthMm,
+    totals,
+    patch: null,
+    step: {
+      key: 'pickup',
+      after: 'after “Pull”',
+      title: `Cut ${count} lengths of ${lengthMm}\u00a0mm and pick them up`,
+      detail: lines.join(' '),
+      lines,
+      colorantIds: [],
+      plate: {
+        kind: 'vessel',
+        outline,
+        height: wall.height,
+        // Straight canes round the wall, drawn the way the plate draws
+        // reticello threads, one set only.
+        threads: { perSide: count, drift: 0, threadMm: caneMm * 0.5, colorA: caneShowColour(design), colorB: null },
+      },
     },
   }
 }

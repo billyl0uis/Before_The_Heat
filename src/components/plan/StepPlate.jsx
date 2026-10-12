@@ -12,7 +12,7 @@ function drawReticelloThreads(ctx, { outline, scale, cx, yAt, threads }) {
   const sets = [
     { sign: 1, color: colorA },
     { sign: -1, color: colorB },
-  ]
+  ].filter((set) => set.color)
   ctx.lineCap = 'round'
   ctx.lineWidth = threadPx
   for (const front of [false, true]) {
@@ -148,7 +148,9 @@ export function StepPlate({ plate, design, size, backdrop = '#3a3d45', className
       ? 'A rib cane, end on: a colored thread in clear'
       : plate.kind === 'vessel'
       ? plate.threads
-        ? 'The finished vessel, with its reticello threads crossing'
+        ? plate.threads.colorB
+          ? 'The finished vessel, with its reticello threads crossing'
+          : 'The finished vessel, with the picked-up canes running up the wall'
         : 'Outline of the finished vessel'
       : plate.kind === 'cane'
         ? 'The cane, end on'

@@ -15,6 +15,19 @@ export function PickupReadout({ vessel, pickup, hasDesign, coarse = false }) {
         twisted {reticello.twist}. It replaces the cane plan: the Plan tab shows how to build it.
       </>
     )
+  } else if (vessel.pattern === 'canes') {
+    sentence = pickup ? (
+      <>
+        <Num>{pickup.count}</Num> lengths of your Ø {fmt(pickup.sliceDiameterMm)} mm cane, {pickup.lengthMm} mm each. That’s{' '}
+        <Num>{metres(pickup.totals.caneMm)} m</Num> of cane:{' '}
+        <Num>
+          {pickup.totals.pulls} {pickup.totals.pulls === 1 ? 'pull' : 'pulls'}
+        </Num>
+        .
+      </>
+    ) : (
+      'Make a cane in the Murrini tab, then its lengths go on here.'
+    )
   } else if (vessel.pattern !== 'murrini') {
     sentence = hasDesign
       ? 'Plain glass. Choose Murrini to see how many slices of your cane this form takes.'
@@ -63,7 +76,7 @@ export function PickupReadout({ vessel, pickup, hasDesign, coarse = false }) {
           </p>
         </>
       )}
-      {pickup && !pickup.byHand && pickup.totals.pulls > 3 && (
+      {pickup && !pickup.byHand && !pickup.canes && pickup.totals.pulls > 3 && (
         <p className="mt-2 max-w-[44rem] text-[0.8rem] text-ink-soft">
           That’s a lot of cane. Thinner slices use less
           {vessel.thicknessMm > 3 &&
@@ -74,8 +87,9 @@ export function PickupReadout({ vessel, pickup, hasDesign, coarse = false }) {
       )}
       {pickup && !pickup.byHand && (
         <p className="mt-2 max-w-[44rem] text-[0.8rem] text-faint max-lg:hidden">
-          “Up to”, because blowing out after the pick-up stretches the slices, so the real piece takes fewer. Counted
-          with {SAW_KERF_MM} mm lost per saw cut.
+          {pickup.canes
+            ? `Enough lengths to close round the first cup; blowing out stretches them up the wall. Counted with ${SAW_KERF_MM} mm lost per saw cut.`
+            : `“Up to”, because blowing out after the pick-up stretches the slices, so the real piece takes fewer. Counted with ${SAW_KERF_MM} mm lost per saw cut.`}
         </p>
       )}
     </div>

@@ -84,3 +84,15 @@ export function twistPitchMm(rod, twistDegrees) {
   const turns = Math.abs(twistDegrees) / 360
   return turns ? (TWIST_SECTION_DIAMETERS * pulledDiameterMm(rod)) / turns : Infinity
 }
+
+// A colour's working behaviour in a word or two, for its chip: a hazard
+// first, then whether it strikes, so a toxic striking colour says both.
+export function colourNote(colorant) {
+  if (colorant.id === 'clear') return 'no color'
+  const notes = []
+  if (colorant.hazard === 'cadmium') notes.push('toxic')
+  if (colorant.hazard === 'radioactive') notes.push('radioactive')
+  if (colorant.strikes) notes.push('strikes')
+  if (!notes.length) notes.push(colorant.family === 'opaque' ? 'opaque' : 'transparent')
+  return notes.join(' · ')
+}

@@ -118,3 +118,31 @@ export function paintReticelloSkin(ctx, size, wall, { ribsAround, colorA, colorB
     }
   }
 }
+
+// A cane pick-up painted on the wall: each length of cane runs straight up
+// from base to rim, side by side right round, at its real share of the
+// circumference. The cane's colour shows as a band down its middle, with
+// the same fine diagonal stripe a twisted cane shows.
+export function paintCanePickupSkin(ctx, size, wall, { count, color, twisted }) {
+  ctx.clearRect(0, 0, size, size)
+  const circumference = 2 * Math.PI * wall.meanRadius
+  const pxU = size / circumference
+  const pxV = size / wall.length
+  const spacing = circumference / count
+  const band = spacing * 0.5
+  const stripe = luminance(color) > 0.55 ? 'rgba(20,30,50,0.32)' : 'rgba(255,255,255,0.42)'
+  for (let i = 0; i < count; i++) {
+    const x = (i + 0.5) * spacing
+    ctx.fillStyle = color
+    ctx.fillRect((x - band / 2) * pxU, 0, band * pxU, size)
+    if (!twisted) continue
+    ctx.strokeStyle = stripe
+    ctx.lineWidth = Math.max(1, 0.28 * pxU)
+    ctx.beginPath()
+    for (let y = 0; y < wall.length; y += STRIPE_STEP_MM * 2) {
+      ctx.moveTo((x - band / 2) * pxU, size - y * pxV)
+      ctx.lineTo((x + band / 2) * pxU, size - (y + band * 0.8) * pxV)
+    }
+    ctx.stroke()
+  }
+}

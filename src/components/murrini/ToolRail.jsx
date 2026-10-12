@@ -5,6 +5,7 @@ import { SHAPE_ORDER, SHAPE_TYPES } from '../../engine/murrini/shapes'
 import { Icon, ShapeGlyph } from '../icons'
 import { Panel, Slider } from './Panel'
 import { TOOL_KEYS } from './toolKeys'
+import { REDO_KEY, UNDO_KEY } from '../keys'
 
 function shapeDefinition(key) {
   return SHAPE_TYPES[key] ?? COMPOUND_SHAPE_TYPES[key]
@@ -205,7 +206,7 @@ export function ToolRail({
           type="button"
           onClick={onUndo}
           disabled={!canUndo}
-          title="Undo (⌘Z)"
+          title={`Undo (${UNDO_KEY})`}
           className="flex flex-1 items-center justify-center gap-1.5 rounded-md bg-raise py-2 text-sm text-ink max-sm:min-h-[44px] disabled:opacity-40"
         >
           <Icon name="undo" size={16} /> Undo
@@ -214,7 +215,7 @@ export function ToolRail({
           type="button"
           onClick={onRedo}
           disabled={!canRedo}
-          title="Redo (⇧⌘Z)"
+          title={`Redo (${REDO_KEY})`}
           className="flex flex-1 items-center justify-center gap-1.5 rounded-md bg-raise py-2 text-sm text-ink max-sm:min-h-[44px] disabled:opacity-40"
         >
           <Icon name="redo" size={16} /> Redo
