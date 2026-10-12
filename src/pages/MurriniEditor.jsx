@@ -16,7 +16,7 @@ import { buildCompoundElements, COMPOUND_SHAPE_TYPES } from '../engine/murrini/c
 import { pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
 import { computeShapeReach, SHAPE_TYPES } from '../engine/murrini/shapes'
 import { describePlacement } from '../engine/murrini/placement'
-import { buildShopPlan, pullRodOf, shopPlanWarnings, usedColorants } from '../engine/murrini/shopPlan'
+import { buildShopPlan, gatherBalance, shopPlanWarnings, usedColorants } from '../engine/murrini/shopPlan'
 import { useResponsiveCanvasSize } from '../hooks/useResponsiveCanvasSize'
 import { useSliceGeometry } from '../hooks/useSliceGeometry'
 import { UNDO_KEY } from '../components/keys'
@@ -144,7 +144,8 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
     () => usedColorants({ elements, casing }).filter((colorant) => colorant.id !== 'clear').length,
     [elements, casing],
   )
-  const pullRod = useMemo(() => pullRodOf({ repeatedElements, rod, casing }), [repeatedElements, rod, casing])
+  const balance = useMemo(() => gatherBalance({ repeatedElements, rod, casing }), [repeatedElements, rod, casing])
+  const pullRod = balance.pullRod
 
   // The rod as the canvas draws it: casing rings in world units and the
   // room left inside them for canes. Memoised so the WebGL scene only
@@ -425,7 +426,7 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
         aria-label="Rod and color"
       >
         <div className={onDock('casing')}>
-          <RodPanel rod={rod} onChange={setRod} />
+          <RodPanel rod={rod} onChange={setRod} balance={balance} />
         </div>
         <div className={onDock('casing')}>
           <CasingPanel

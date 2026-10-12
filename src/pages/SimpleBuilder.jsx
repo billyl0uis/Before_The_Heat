@@ -15,11 +15,12 @@ import {
 import { CLEAR_GLASS, DEFAULT_ROD, findColorant, pulledLengthMm, twistPitchMm, colourNote } from '../engine/murrini/rod'
 import { CURRENT_SCHEMA_VERSION } from '../engine/murrini/migrate'
 import { computeRepeatedElements } from '../engine/murrini/pattern'
-import { buildShopPlan, pullRodOf } from '../engine/murrini/shopPlan'
+import { buildShopPlan, gatherBalance } from '../engine/murrini/shopPlan'
 import { renderSlicePlate } from '../engine/murrini/slicePlate'
 import { useResponsiveCanvasSize } from '../hooks/useResponsiveCanvasSize'
 import { useSliceGeometry } from '../hooks/useSliceGeometry'
 import { Term } from '../components/Term'
+import { FillChoice } from '../components/FillChoice'
 
 const STORE_KEY = 'before-the-heat:simple'
 const STEPS = ['Recipe', 'Colors', 'Size', 'Plan']
@@ -69,7 +70,7 @@ function writeStore(value) {
 }
 
 const fmt = (value) => value.toLocaleString('en', { maximumFractionDigits: 1 })
-const shortName = (name) => name.split(' / ')[0].replace(/ \(.*\)$/, '')
+const shortName = (name) => name.split(' / ')[0].replace(/ \(.*\)$/, '').replace(/\//g, '/\u200b')
 
 
 // Guided mode: pick a real recipe, colour its parts, choose a size, get
@@ -148,6 +149,10 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
   const slice = useSliceGeometry(design.rod, design.casing)
   const { containerRef, size } = useResponsiveCanvasSize(460, 1)
   const plan = useMemo(() => buildShopPlan(design), [design])
+  // Whether the recipe fills the gather; the Size step asks about the gap
+  // so the size picked and the size pulled always agree.
+  const balance = gatherBalance({ repeatedElements: design.repeatedElements, rod: design.rod, casing: design.casing })
+  const pullRod = balance.pullRod
 
   const thumbs = useMemo(
     () =>
@@ -210,7 +215,7 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
               elements={design.repeatedElements}
               slice={slice}
               rod={design.rod}
-              pullRod={pullRodOf(design)}
+              pullRod={pullRod}
               onPlace={() => {}}
               preview={NO_PREVIEW}
               size={size.width}
@@ -336,7 +341,8 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
                 Choose the colors
               </h1>
               <p className="mt-1.5 text-mute">
-                One color for each part of the {recipe.name.toLowerCase()}. Choose a part to change it.
+                One color for each part of the {recipe.name.toLowerCase()}. Choose a part to change it. Under each
+                color is how it behaves: whether it <Term id="strike">strikes</Term>, is toxic, or is opaque.
               </p>
               <div className="mt-5 flex flex-col gap-2.5">
                 {Object.entries(recipe.slots).map(([key, slot]) => {
@@ -395,7 +401,7 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
                                 className="h-5 w-5 shrink-0 rounded-full shadow-[inset_0_0_0_1px_rgb(255_255_255/0.25)]"
                                 style={{ background: colorant.swatch }}
                               />
-                              <span className="min-w-0 [overflow-wrap:anywhere]">
+                              <span className="min-w-0 break-words">
                                 {shortName(colorant.name)}
                                 <span className={`block text-[0.8rem] ${colorant.hazard ? 'text-red-300' : 'text-faint'}`}>
                                   {colourNote(colorant)}
@@ -436,8 +442,13 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
                   onChange={(event) => setFinished(Number(event.target.value))}
                   className="h-8 w-full cursor-pointer"
                 />
+                <FillChoice
+                  balance={balance}
+                  rod={design.rod}
+                  onChange={(fillToGather) => design.setRod({ ...design.rod, fillToGather })}
+                />
                 <p className="text-mute">
-                  From a <span className="font-mono text-ink">{fmt(design.rod.gatherDiameterMm)} mm</span>{' '}
+                  From a <span className="font-mono text-ink">{fmt(pullRod.gatherDiameterMm)} mm</span>{' '}
                   <Term id="gather">gather</Term> <Term id="pull">pulled</Term>{' '}
                   <Term id="pullRatio">
                     <span className="font-mono text-ink">{choice.ratio} : 1</span>

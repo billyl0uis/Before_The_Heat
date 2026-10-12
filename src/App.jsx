@@ -72,10 +72,21 @@ function readMode() {
   }
 }
 
+// Switch the page's palette before the next section renders, so anything
+// that reads a colour while rendering (the slice's mask) gets the new
+// section's, not the one being left.
+function paintSection(key) {
+  document.documentElement.dataset.section = key
+}
+
 function App() {
   // Where the address bar says to start: a shared /learn/zanfirico link
   // opens on that technique, not on the editor.
-  const [start] = useState(() => parsePath(window.location.pathname))
+  const [start] = useState(() => {
+    const place = parsePath(window.location.pathname)
+    paintSection(place.tab)
+    return place
+  })
   const [activeTab, setActiveTab] = useState(start.tab)
   const [learnSection, setLearnSection] = useState(start.section)
   const [technique, setTechnique] = useState(start.technique)
@@ -127,6 +138,7 @@ function App() {
     if (key === activeTab) return
     if (key === 'plan' && activeTab === 'murrini') setPlanSource('cane')
     if (key === 'plan' && activeTab === 'vessel') setPlanSource('vessel')
+    paintSection(key)
     setActiveTab(key)
     if (claimFirstTransition()) setTransition((t) => ({ count: t.count + 1, section: key }))
   }
@@ -144,6 +156,7 @@ function App() {
   useEffect(() => {
     const onPop = () => {
       const place = parsePath(window.location.pathname)
+      paintSection(place.tab)
       setActiveTab(place.tab)
       setLearnSection(place.section)
       setTechnique(place.technique)

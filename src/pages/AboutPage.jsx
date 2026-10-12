@@ -1,7 +1,7 @@
 import { PageHeader } from '../components/PageHeader'
 
 const HUNTING_LINKS = [
-  { label: 'Hunting Studio Glass', url: 'http://weshuntingglass.com/wes-hunting' },
+  { label: 'Hunting Glass Studio', url: 'https://weshuntingglass.com/wes-hunting' },
   { label: 'Philabaum Glass: Wes Hunting', url: 'https://philabaumglass.com/product-category/wes-hunting' },
   { label: 'Corning Museum of Glass Shop: Wes Hunting', url: 'https://shops.cmog.org/artists/glass-artists/wes-hunting' },
 ]

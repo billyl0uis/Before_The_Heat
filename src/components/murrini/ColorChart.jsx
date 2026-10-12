@@ -1,9 +1,10 @@
+import { Term } from '../Term'
 import { GLASS_COLOR_INDEX } from '../../content/glassColorIndex'
 import { colourNote } from '../../engine/murrini/rod'
 import { Panel } from './Panel'
 
 function shortName(name) {
-  return name.split(' / ')[0].replace(/ \(.*\)$/, '')
+  return name.split(' / ')[0].replace(/ \(.*\)$/, '').replace(/\//g, '/\u200b')
 }
 
 const noteFor = colourNote
@@ -41,7 +42,7 @@ export function ColorChart({
               }`}
             >
               <span className="block h-7" style={{ background: colorant.swatch }} />
-              <span className="px-1.5 pt-1 pb-1.5 text-[0.8rem] leading-tight hyphens-auto [overflow-wrap:anywhere]">
+              <span className="px-1.5 pt-1 pb-1.5 text-[0.8rem] leading-tight break-words">
                 {shortName(colorant.name)}
                 <span className={`block text-[0.8rem] ${flagged ? 'text-red-300' : 'text-mute'}`}>
                   {noteFor(colorant)}
@@ -56,8 +57,16 @@ export function ColorChart({
         <div className="flex flex-col gap-1 text-sm">
           <p className="font-semibold">{selected.name}</p>
           <p className="text-mute">{selected.colorant}</p>
-          {selected.strikes && <p className="text-amber-300">Strikes: needs a controlled reheat to show full color.</p>}
-          {selected.devitrifies === true && <p className="text-amber-300">Documented as prone to devitrification.</p>}
+          {selected.strikes && (
+            <p className="text-amber-300">
+              <Term id="strike">Strikes</Term>: needs a controlled reheat to show full color.
+            </p>
+          )}
+          {selected.devitrifies === true && (
+            <p className="text-amber-300">
+              Documented as prone to <Term id="devitrification">devitrification</Term>.
+            </p>
+          )}
           {selected.devitrifies === 'some' && <p className="text-amber-300">Some commercial versions devitrify.</p>}
           {selected.caution && <p className="text-red-300">{selected.caution}</p>}
         </div>

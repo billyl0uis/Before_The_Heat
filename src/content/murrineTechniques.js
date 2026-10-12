@@ -18,7 +18,7 @@ export const MURRINI_TECHNIQUES = {
   ring: {
     title: 'Casing (Overlay)',
     summary:
-      "A contrasting color is gathered over a base color before pulling, so the cane shows a colored ring around a solid core when sliced. The app draws this ring hollow for clarity; in real glass the center stays filled with the core color, it's not an empty hole.",
+      "A contrasting color is gathered over a base color before pulling, so the cane shows a colored ring around a solid core when sliced. In the editor the Ring tool draws just the ring, so you can choose what goes inside it; in real glass the center is always filled with the core color, never an empty hole.",
     steps: [
       'Gather the base/core color first.',
       'Dip that gather into a pot of the casing color, coating it evenly.',

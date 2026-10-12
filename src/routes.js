@@ -10,7 +10,7 @@ export const TECHNIQUE_ORDER = [
   { key: 'ring', params: {} },
   { key: 'multiCasing', params: {} },
   { key: 'embeddedThread', params: {} },
-  { key: 'zanfirico', params: { threadCount: 3 } },
+  { key: 'zanfirico', params: { threadCount: 6 } },
   { key: 'marver', params: { sides: 4 } },
   { key: 'opticMold', params: {} },
   { key: 'star', params: {} },

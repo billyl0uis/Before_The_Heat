@@ -267,7 +267,7 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
                         // press within a few seconds clears.
                         confirmClear
                           ? { label: `Clear all ${vessel.placements.length}?`, onClick: () => { clearPlacements(); setConfirmClear(false) } }
-                          : { label: 'Clear', onClick: () => setConfirmClear(true) },
+                          : { label: 'Clear slices', onClick: () => setConfirmClear(true) },
                       ].map((action) => (
                         <button
                           key={action.label}

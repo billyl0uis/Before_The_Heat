@@ -1,3 +1,4 @@
+import { TermText } from '../Term'
 import { Icon } from '../icons'
 
 function Badge({ children, tone = 'neutral' }) {
@@ -29,12 +30,14 @@ export function ColorSwatchCard({ color }) {
         {color.devitrifies === 'some' && <Badge tone="amber">Devitrifies (some SKUs)</Badge>}
       </div>
 
-      <p className="text-sm leading-relaxed text-ink-soft">{color.notes}</p>
+      <p className="text-sm leading-relaxed text-ink-soft"><TermText>{color.notes}</TermText></p>
 
       {color.caution && (
         <p className="flex gap-2 border-t border-line pt-3 text-sm leading-relaxed text-red-300">
           <Icon name="warning" size={16} className="mt-0.5 shrink-0" />
-          <span>{color.caution}</span>
+          <span>
+            <TermText>{color.caution}</TermText>
+          </span>
         </p>
       )}
     </article>

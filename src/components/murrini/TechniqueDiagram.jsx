@@ -1,6 +1,12 @@
-const BASE = '#d97706'
-const CASING = '#38bdf8'
-const ACCENT = '#f472b6'
+import { CLEAR_GLASS, findColorant } from '../../engine/murrini/rod'
+
+// Diagrams are drawn in real glass colors, like everything else the app
+// shows: a core, a contrasting casing, a thread color, and clear. The mold
+// is steel, not glass, so it stays a neutral grey.
+const BASE = findColorant('silver-stain-yellow').swatch
+const CASING = findColorant('cobalt-blue').swatch
+const ACCENT = findColorant('opal-white').swatch
+const CLEAR = CLEAR_GLASS.swatch
 const MOLD = '#71717a'
 
 function polygonPoints(cx, cy, radius, sides, rotationDeg = -90) {
@@ -139,21 +145,27 @@ const DIAGRAMS = {
       <circle cx="112" cy="80" r="9" fill={CASING} />
     </>
   ),
-  // A ring of parallel threads around a core, cased in clear — real
-  // zanfirico canes read as a full lattice/cage of threads, not one
-  // stripe. Curved slightly to hint at the twist that's applied afterward.
+  // Threads packed edge to edge round a core, touching each other and the
+  // core, cased in clear: the same packing the editor's Zanfirico tool
+  // uses (engine/murrini/compoundShapes.js), so the diagram can't
+  // disagree with the text.
   zanfirico: (params) => {
-    const threadCount = params.threadCount ?? 3
-    const coreRadius = 30
+    const threadCount = Math.max(3, params.threadCount ?? 6)
+    const outer = 46
+    const halfSin = Math.sin(Math.PI / threadCount)
+    const k = halfSin / (1 + halfSin)
+    const threadRadius = k * outer
+    const threadDistance = (1 - k) * outer
+    const coreRadius = (1 - 2 * k) * outer
     return (
       <>
-        <circle cx="80" cy="80" r="46" fill={CASING} opacity="0.45" />
-        <circle cx="80" cy="80" r={coreRadius} fill={BASE} />
+        <circle cx="80" cy="80" r={outer * 1.15} fill={CLEAR} opacity="0.35" />
+        <circle cx="80" cy="80" r={coreRadius} fill={CLEAR} opacity="0.6" />
         {Array.from({ length: threadCount }, (_, i) => {
-          const angle = (i / threadCount) * Math.PI * 2 + 0.3
-          const cx = 80 + Math.cos(angle) * coreRadius
-          const cy = 80 + Math.sin(angle) * coreRadius
-          return <circle key={i} cx={cx} cy={cy} r="6" fill={ACCENT} />
+          const angle = (i / threadCount) * Math.PI * 2
+          const cx = 80 + Math.cos(angle) * threadDistance
+          const cy = 80 + Math.sin(angle) * threadDistance
+          return <circle key={i} cx={cx} cy={cy} r={threadRadius} fill={ACCENT} />
         })}
       </>
     )

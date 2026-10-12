@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { findColorant } from '../../engine/murrini/rod'
 import { Icon } from '../icons'
 import { StepPlate } from './StepPlate'
+import { TermText } from '../Term'
 
 const STEP_KEY = 'before-the-heat:checklist'
 
@@ -81,7 +82,7 @@ export function ShopChecklist({ design, steps, warnings = [], finish }) {
             {warnings.length ? (
               warnings.map((warning) => (
                 <p key={warning.id}>
-                  <span className="font-semibold">{warning.title}.</span> {warning.body}
+                  <span className="font-semibold">{warning.title}.</span> <TermText>{warning.body}</TermText>
                 </p>
               ))
             ) : (

@@ -1,3 +1,4 @@
+import { TermText } from '../components/Term'
 import { ColorSwatchCard } from '../components/color-index/ColorSwatchCard'
 import { PageHeader } from '../components/PageHeader'
 import { COE_NOTE, ENCASEMENT_NOTE, GLASS_COLOR_INDEX } from '../content/glassColorIndex'
@@ -8,7 +9,7 @@ function Note({ note }) {
   return (
     <section>
       <h2 className="text-base font-semibold text-ink">{note.title}</h2>
-      <p className="mt-2 max-w-[62ch] text-base leading-relaxed text-ink-soft">{note.body}</p>
+      <p className="mt-2 max-w-[62ch] text-base leading-relaxed text-ink-soft"><TermText>{note.body}</TermText></p>
     </section>
   )
 }

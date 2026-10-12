@@ -1,5 +1,6 @@
 import { Icon } from '../icons'
 import { Panel } from './Panel'
+import { TermText } from '../Term'
 
 const SEVERITY_STYLES = {
   safety: 'border-red-400/40 bg-red-950/30 text-red-200',
@@ -31,7 +32,9 @@ export function CompatibilityCheck({ warnings, colorantCount = 0 }) {
               className={`rounded-md border p-2.5 text-sm leading-relaxed ${SEVERITY_STYLES[warning.severity]}`}
             >
               <p className="font-semibold">{warning.title}</p>
-              <p className="mt-1 opacity-90">{warning.body}</p>
+              <p className="mt-1 opacity-90">
+                <TermText>{warning.body}</TermText>
+              </p>
             </li>
           ))}
         </ul>

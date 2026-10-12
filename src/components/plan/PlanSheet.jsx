@@ -4,6 +4,7 @@ import { innerCasingOf, twistLabel } from '../../engine/murrini/shopPlan'
 import { renderSlicePlate } from '../../engine/murrini/slicePlate'
 import { Icon } from '../icons'
 import { StepPlate } from './StepPlate'
+import { TermText } from '../Term'
 
 const fmt = (value) => value.toLocaleString('en', { maximumFractionDigits: 1 })
 const PAPER_CLEAR_BACKDROP = '#3a3d45'
@@ -285,7 +286,7 @@ export function PlanSheet({ design, steps, warnings, colorants, reticello = null
             <ul className="flex flex-col gap-1">
               {warnings.map((warning) => (
                 <li key={warning.id}>
-                  <span className="font-semibold">{warning.title}.</span> {warning.body}
+                  <span className="font-semibold">{warning.title}.</span> <TermText>{warning.body}</TermText>
                 </li>
               ))}
             </ul>

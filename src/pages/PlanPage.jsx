@@ -7,7 +7,7 @@ import { pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
 import { buildShopPlan, gatherBalance, isFiligreeCane, shopPlanWarnings, twistLabel, usedColorants } from '../engine/murrini/shopPlan'
 import { designSignature, RECIPES } from '../engine/murrini/recipes'
 import { planPickup, planReticello } from '../engine/vessel/pickup'
-import { Term } from '../components/Term'
+import { FillChoice } from '../components/FillChoice'
 
 const VIEW_KEY = 'before-the-heat:plan-view'
 
@@ -37,66 +37,8 @@ function planTitle(design, reticello) {
   return `${name} · Ø ${pulledDiameterMm(design.rod).toLocaleString('en', { maximumFractionDigits: 1 })} mm`
 }
 
-const fmtMm = (value) => value.toLocaleString('en', { maximumFractionDigits: 1 })
-
-// When the design doesn't reach the gather size that was set, the plan
-// can't quietly assume glass that isn't in it. The user chooses: fill the
-// gap with clear, or pull the smaller rod the layers really make. Either
-// way the numbers on the sheet follow.
-function FillChoice({ balance, rod, onChange }) {
-  const { contentMm, naturalMm, fillToMm, filled } = balance
-  return (
-    <section
-      data-print-hide
-      aria-labelledby="fill-choice-title"
-      className="mx-auto mb-8 w-full max-w-[860px] rounded-xl border border-line bg-panel p-5 sm:p-6"
-    >
-      <h2 id="fill-choice-title" className="text-lg font-bold">
-        Your design is Ø {fmtMm(contentMm)} mm. With its <Term id="casing">casing</Term>, that's a Ø{' '}
-        {fmtMm(naturalMm)} mm <Term id="gather">gather</Term>, not{' '}
-        {fmtMm(rod.gatherDiameterMm)}.
-      </h2>
-      <div className="mt-4 grid gap-5 text-sm leading-relaxed text-ink-soft md:grid-cols-2">
-        <div>
-          <p className="font-semibold text-ink">Fill out with clear to Ø {fmtMm(fillToMm)} mm if you want</p>
-          <ul className="mt-1.5 list-disc pl-5">
-            <li>the cane to pull to the size you set, Ø {fmtMm(rod.gatherDiameterMm / rod.pullRatio)} mm</li>
-            <li>
-              more clear round the pattern, so <Term id="marver">marvering</Term> and reheats don't reach it
-            </li>
-            <li>slices with a clear border, which read cleanly when they're laid edge to edge</li>
-          </ul>
-        </div>
-        <div>
-          <p className="font-semibold text-ink">Leave it out if you want</p>
-          <ul className="mt-1.5 list-disc pl-5">
-            <li>the pattern to fill more of each slice</li>
-            <li>less glass to heat and pull, and one step fewer</li>
-            <li>a slightly thinner cane: Ø {fmtMm(naturalMm / rod.pullRatio)} mm at {rod.pullRatio} : 1</li>
-          </ul>
-        </div>
-      </div>
-      <div className="mt-5 inline-flex rounded-lg bg-raise p-0.5" role="group" aria-label="Clear fill">
-        {[
-          { value: false, label: 'Leave it out' },
-          { value: true, label: `Add the clear fill` },
-        ].map((option) => (
-          <button
-            key={option.label}
-            type="button"
-            aria-pressed={filled === option.value}
-            onClick={() => onChange(option.value)}
-            className={`min-h-[44px] rounded-md px-4 py-2 text-sm font-semibold ${
-              filled === option.value ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-    </section>
-  )
-}
+// Same number format as the sheet: "8 mm", "6.9 mm".
+const fmtNum = (value) => value.toLocaleString('en', { maximumFractionDigits: 1 })
 
 export function PlanPage({ design, vessel, planSource = 'cane', onPlanSource, onEdit, onEditVessel }) {
   const [view, setView] = useState(readView)
@@ -194,7 +136,7 @@ export function PlanPage({ design, vessel, planSource = 'cane', onPlanSource, on
             `${reticello.perSide} + ${reticello.perSide} rib canes · ${reticello.form} · from the Vessel tab`
           ) : (
             <>
-              Ø {pullRod.gatherDiameterMm} → {pulledDiameterMm(pullRod).toFixed(1)} mm · {pullRod.pullRatio} : 1 · ≈{' '}
+              Ø {fmtNum(pullRod.gatherDiameterMm)} → {fmtNum(pulledDiameterMm(pullRod))} mm · {pullRod.pullRatio} : 1 · ≈{' '}
               {(pulledLengthMm(pullRod) / 1000).toFixed(1)} m
               {extrusion.twistDegrees ? ` · twist ${twistLabel(pullRod, extrusion.twistDegrees)}` : ''}
             </>
@@ -265,8 +207,15 @@ export function PlanPage({ design, vessel, planSource = 'cane', onPlanSource, on
       </div>
 
       <div className="px-4 py-8 sm:px-8 sm:py-10 print:p-0">
-        {!reticello && balance.hasGap && (
-          <FillChoice balance={balance} rod={rod} onChange={(fillToGather) => design.setRod({ ...rod, fillToGather })} />
+        {/* Chosen where the size is set; here just a line to check or change
+            it, and never in the furnace checklist. */}
+        {!reticello && view === 'sheet' && (
+          <FillChoice
+            variant="summary"
+            balance={balance}
+            rod={rod}
+            onChange={(fillToGather) => design.setRod({ ...rod, fillToGather })}
+          />
         )}
         {view === 'sheet' ? (
           <PlanSheet

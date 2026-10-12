@@ -54,7 +54,9 @@ export function Term({ id, children, align = 'start' }) {
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
-        className="cursor-help underline decoration-current/50 decoration-dotted underline-offset-[3px] hover:decoration-current"
+        // Inherits the label's lettering (a button wouldn't), and its tap
+        // area reaches 44px tall without moving the text around it.
+        className="relative cursor-help underline decoration-current/50 decoration-dotted underline-offset-[3px] [text-transform:inherit] after:absolute after:-inset-x-1 after:top-1/2 after:h-11 after:-translate-y-1/2 after:content-[''] hover:decoration-current"
       >
         {children ?? entry.term}
       </button>
@@ -72,4 +74,41 @@ export function Term({ id, children, align = 'start' }) {
       )}
     </span>
   )
+}
+
+// Words in running copy that have a glossary entry, each linked the first
+// time it appears in a passage.
+const TERM_PATTERNS = [
+  [/\b(strik(?:e|es|ing)|struck)\b/i, 'strike'],
+  [/\b(devitrif\w*)\b/i, 'devitrification'],
+  [/\b(COE)\b/, 'coe'],
+  [/\b(moil)\b/i, 'moil'],
+  [/\b(marver(?:ing|ed)?)\b/i, 'marver'],
+  [/\b(casing)\b/i, 'casing'],
+]
+
+export function TermText({ children }) {
+  if (typeof children !== 'string') return children
+  const found = []
+  for (const [pattern, id] of TERM_PATTERNS) {
+    const match = pattern.exec(children)
+    if (match && !found.some((f) => match.index < f.end && match.index + match[0].length > f.start)) {
+      found.push({ start: match.index, end: match.index + match[0].length, id, word: match[0] })
+    }
+  }
+  if (!found.length) return children
+  found.sort((a, b) => a.start - b.start)
+  const parts = []
+  let at = 0
+  for (const f of found) {
+    parts.push(children.slice(at, f.start))
+    parts.push(
+      <Term key={f.start} id={f.id}>
+        {f.word}
+      </Term>,
+    )
+    at = f.end
+  }
+  parts.push(children.slice(at))
+  return parts
 }
