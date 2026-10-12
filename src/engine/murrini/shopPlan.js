@@ -19,16 +19,16 @@ export function contentDiameterMm(repeatedElements, rod) {
 const FILL_THRESHOLD_MM = 0.5
 
 // What the layers actually come to, and whether there's a gap between the
-// design and the gather size that was set. `fill` is the user's choice to
-// fill that gap with clear; without it the gather is only as big as the
-// design plus its casing, and the pull follows from that.
+// design and the gather size that was set. A gap is filled with clear, so
+// the cane always pulls to the size that was set; the other way to close
+// it is to grow the design (see fit.js), which removes the gap itself.
 export function gatherBalance({ repeatedElements, rod, casing }) {
   const contentMm = contentDiameterMm(repeatedElements, rod)
   const naturalMm = contentMm + 2 * totalCasingMm(casing)
   const fillToMm = rod.gatherDiameterMm - 2 * totalCasingMm(casing)
   const gapMm = rod.gatherDiameterMm - naturalMm
   const hasGap = repeatedElements.length > 0 && gapMm > FILL_THRESHOLD_MM
-  const filled = hasGap && Boolean(rod.fillToGather)
+  const filled = hasGap
   return {
     contentMm,
     naturalMm,
@@ -36,9 +36,8 @@ export function gatherBalance({ repeatedElements, rod, casing }) {
     gapMm,
     hasGap,
     filled,
-    // The rod as it will really be pulled: the set size, or the smaller
-    // one the layers make.
-    pullRod: hasGap && !filled ? { ...rod, gatherDiameterMm: Math.round(naturalMm * 10) / 10 } : rod,
+    // The rod as it's pulled: always the size that was set.
+    pullRod: rod,
   }
 }
 

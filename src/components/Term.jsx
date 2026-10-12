@@ -85,6 +85,12 @@ const TERM_PATTERNS = [
   [/\b(moil)\b/i, 'moil'],
   [/\b(marver(?:ing|ed)?)\b/i, 'marver'],
   [/\b(casing)\b/i, 'casing'],
+  [/\b(vetro a fili)\b/i, 'vetroAFili'],
+  [/\b(kiln shelf)\b/i, 'kilnShelf'],
+  [/\b(punty)\b/i, 'punty'],
+  [/\b(filigree|filigrana)\b/i, 'filigree'],
+  [/\b(latticino)\b/i, 'latticino'],
+  [/\b(pick-up|picked up|pick (?:it|them) up)\b/i, 'pickup'],
 ]
 
 export function TermText({ children }) {

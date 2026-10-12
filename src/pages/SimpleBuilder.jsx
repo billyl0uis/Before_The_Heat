@@ -21,6 +21,7 @@ import { useResponsiveCanvasSize } from '../hooks/useResponsiveCanvasSize'
 import { useSliceGeometry } from '../hooks/useSliceGeometry'
 import { Term } from '../components/Term'
 import { FillChoice } from '../components/FillChoice'
+import { growToFill } from '../engine/murrini/fit'
 
 const STORE_KEY = 'before-the-heat:simple'
 const STEPS = ['Recipe', 'Colors', 'Size', 'Plan']
@@ -103,7 +104,8 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
   )
   const [setAside, setSetAside] = useState(readSetAside)
 
-  const apply = (next) => {
+  // The recipe as drawn, at the gather the chosen size needs.
+  const buildFrom = (next) => {
     const colours = { ...defaultColours(next.recipe), ...next.colours[next.recipe] }
     const rod = {
       ...design.rod,
@@ -111,7 +113,15 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
       pullRatio: next.ratio,
     }
     const twistDegrees = next.twist?.[next.recipe] ?? defaultTwist(next.recipe)
-    const built = buildRecipe(next.recipe, colours, rod, { twistDegrees })
+    return buildRecipe(next.recipe, colours, rod, { twistDegrees })
+  }
+
+  const apply = (next) => {
+    const drawn = buildFrom(next)
+    // Unless a clear border was chosen, the pattern grows to fill the
+    // gather, so the cane pulls to the size on the slider either way.
+    const grown = (next.fill ?? 'grow') === 'grow' ? growToFill(drawn) : null
+    const built = grown ? { ...drawn, elements: grown.elements, pattern: grown.pattern } : drawn
     // Replacing work done in Advanced: keep it, so it's one tap to undo.
     if (customised) {
       const { canvas, elements, pattern, extrusion, rod: oldRod, casing } = design
@@ -125,9 +135,11 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
     setCustomised(false)
   }
 
-  // A first visit starts from a real recipe rather than an empty rod.
+  // A first visit starts from a real recipe rather than an empty rod; a
+  // recipe saved before the fill choice existed is grown to fill, the
+  // default, so the size on the slider is the size it pulls to.
   useEffect(() => {
-    if (empty && !customised) apply(choice)
+    if ((empty && !customised) || (!customised && choice.fill === undefined && drawnBalance.hasGap)) apply(choice)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -151,8 +163,19 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
   const plan = useMemo(() => buildShopPlan(design), [design])
   // Whether the recipe fills the gather; the Size step asks about the gap
   // so the size picked and the size pulled always agree.
-  const balance = gatherBalance({ repeatedElements: design.repeatedElements, rod: design.rod, casing: design.casing })
-  const pullRod = balance.pullRod
+  // The recipe as drawn, before any growing: whether it leaves a gap
+  // inside the casing for the Size step to ask about.
+  const drawnBalance = useMemo(() => {
+    const drawn = buildFrom(choice)
+    return gatherBalance({
+      repeatedElements: computeRepeatedElements(drawn.elements, drawn.pattern),
+      rod: drawn.rod,
+      casing: drawn.casing,
+    })
+    // buildFrom reads only `choice` and the rod's other settings.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [choice, design.rod.gatherLengthMm])
+  const pullRod = design.rod
 
   const thumbs = useMemo(
     () =>
@@ -442,11 +465,15 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
                   onChange={(event) => setFinished(Number(event.target.value))}
                   className="h-8 w-full cursor-pointer"
                 />
-                <FillChoice
-                  balance={balance}
-                  rod={design.rod}
-                  onChange={(fillToGather) => design.setRod({ ...design.rod, fillToGather })}
-                />
+                {drawnBalance.hasGap && (
+                  <FillChoice
+                    contentMm={drawnBalance.contentMm}
+                    fillToMm={drawnBalance.fillToMm}
+                    finishedMm={choice.finishedMm}
+                    choice={choice.fill ?? 'grow'}
+                    onChoose={(fill) => apply({ ...choice, fill })}
+                  />
+                )}
                 <p className="text-mute">
                   From a <span className="font-mono text-ink">{fmt(pullRod.gatherDiameterMm)} mm</span>{' '}
                   <Term id="gather">gather</Term> <Term id="pull">pulled</Term>{' '}
@@ -506,7 +533,7 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
                           {option.label}
                           {option.degrees ? (
                             <span className="block font-mono text-[0.8rem] font-normal opacity-80">
-                              {Math.round(twistPitchMm(design.rod, option.degrees))} mm
+                              {fmt(twistPitchMm(design.rod, option.degrees))} mm
                             </span>
                           ) : null}
                         </button>
@@ -545,10 +572,10 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
                   onClick={() => onOpenPlan('sheet')}
                   className="flex items-center gap-2 rounded-xl bg-accent px-5 py-3 font-extrabold text-accent-ink"
                 >
-                  <Icon name="print" size={18} /> Print sheet
+                  <Icon name="print" size={18} /> See the sheet to print
                 </button>
                 <button type="button" onClick={() => onOpenPlan('checklist')} className="rounded-xl bg-raise px-5 py-3 font-bold">
-                  Shop checklist
+                  Checklist for the shop
                 </button>
                 <button type="button" onClick={() => onMode('advanced')} className="rounded-xl bg-raise px-5 py-3 font-bold">
                   Fine-tune in Advanced

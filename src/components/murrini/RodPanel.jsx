@@ -1,8 +1,8 @@
 import { pulledLengthMm } from '../../engine/murrini/rod'
-import { FillChoice } from '../FillChoice'
+import { FillGap } from '../FillChoice'
 import { Panel, Slider } from './Panel'
 
-export function RodPanel({ rod, onChange, balance = null }) {
+export function RodPanel({ rod, onChange, balance = null, onGrow = null }) {
   const set = (key) => (value) => onChange({ ...rod, [key]: value })
   const metres = pulledLengthMm(rod) / 1000
 
@@ -17,9 +17,7 @@ export function RodPanel({ rod, onChange, balance = null }) {
         max={60}
         onChange={set('gatherDiameterMm')}
       />
-      {balance && (
-        <FillChoice balance={balance} rod={rod} onChange={(fillToGather) => onChange({ ...rod, fillToGather })} />
-      )}
+      {balance && onGrow && <FillGap balance={balance} onGrow={onGrow} />}
       <Slider
         id="rod-length"
         label="Gather length"

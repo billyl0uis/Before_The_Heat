@@ -12,7 +12,7 @@ export function PickupReadout({ vessel, pickup, hasDesign, coarse = false }) {
     sentence = (
       <>
         Reticello: <Num>{reticello.perSide}</Num> rib canes each way, <Num>Ø {fmt(reticello.ribMm)} mm</Num>, each cup
-        twisted {reticello.twist}. It replaces the cane plan: the Plan tab shows how to build it.
+        twisted {reticello.twist}. It has its own plan beside your cane plan: switch between them on the Plan tab.
       </>
     )
   } else if (vessel.pattern === 'canes') {

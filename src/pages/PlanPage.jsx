@@ -7,7 +7,6 @@ import { pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
 import { buildShopPlan, gatherBalance, isFiligreeCane, shopPlanWarnings, twistLabel, usedColorants } from '../engine/murrini/shopPlan'
 import { designSignature, RECIPES } from '../engine/murrini/recipes'
 import { planPickup, planReticello } from '../engine/vessel/pickup'
-import { FillChoice } from '../components/FillChoice'
 
 const VIEW_KEY = 'before-the-heat:plan-view'
 
@@ -170,8 +169,8 @@ export function PlanPage({ design, vessel, planSource = 'cane', onPlanSource, on
         )}
         <div className="inline-flex rounded-lg bg-raise p-0.5" role="group" aria-label="Plan view">
           {[
-            { key: 'sheet', label: 'Print sheet' },
-            { key: 'checklist', label: 'Shop checklist' },
+            { key: 'sheet', label: 'Sheet' },
+            { key: 'checklist', label: 'Checklist' },
           ].map((option) => (
             <button
               key={option.key}
@@ -209,13 +208,18 @@ export function PlanPage({ design, vessel, planSource = 'cane', onPlanSource, on
       <div className="px-4 py-8 sm:px-8 sm:py-10 print:p-0">
         {/* Chosen where the size is set; here just a line to check or change
             it, and never in the furnace checklist. */}
-        {!reticello && view === 'sheet' && (
-          <FillChoice
-            variant="summary"
-            balance={balance}
-            rod={rod}
-            onChange={(fillToGather) => design.setRod({ ...rod, fillToGather })}
-          />
+        {!reticello && view === 'sheet' && balance.hasGap && (
+          <p data-print-hide className="mx-auto mb-6 w-full max-w-[860px] text-sm text-mute">
+            Your design is Ø {fmtNum(balance.contentMm)} mm, so the plan fills out to Ø {fmtNum(balance.fillToMm)} mm with
+            clear and the cane pulls to Ø {fmtNum(pulledDiameterMm(rod))} mm.{' '}
+            <button
+              type="button"
+              onClick={onEdit}
+              className="inline-flex min-h-[44px] items-center font-semibold text-accent underline underline-offset-[3px] sm:min-h-0"
+            >
+              Grow the design instead
+            </button>
+          </p>
         )}
         {view === 'sheet' ? (
           <PlanSheet
@@ -229,7 +233,23 @@ export function PlanPage({ design, vessel, planSource = 'cane', onPlanSource, on
             title={planTitle({ ...design, rod: pullRod }, reticello)}
           />
         ) : (
-          <ShopChecklist design={design} steps={steps} warnings={warnings} finish={finish} />
+          <ShopChecklist
+            design={design}
+            // At the furnace, checking the colors comes first, not last.
+            steps={[
+              {
+                key: 'test-strip',
+                title: 'Pull a test strip first',
+                detail:
+                  'This plan doesn’t assume a COE. Pull a short strip of these colors together and let it cool: if it cracks or crazes, they don’t match.',
+                colorantIds: colorants.map((colorant) => colorant.id),
+                plate: { kind: 'slice', casingUpTo: casing.length - 1 },
+              },
+              ...steps,
+            ]}
+            warnings={warnings}
+            finish={finish}
+          />
         )}
       </div>
     </div>

@@ -11,6 +11,29 @@ import { computeShapeReach } from './shapes'
 // `casingUpTo` draws only layers 0..n (inside → out), so a step-by-step
 // plan can show the rod as it is after each casing pass; -1 shows the bare
 // bundle. Layers keep their final positions, so the slice never rescales.
+// On a backdrop plate (paper), clear glass is shaded over the backdrop the
+// same way everywhere: a clear cane reads as clear glass, a little lighter
+// than the clear around it so its edge still shows, never as white.
+function hexToRgb(hex) {
+  const n = Number.parseInt(hex.replace('#', ''), 16)
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+}
+function clearOn(backdrop, amount) {
+  const a = hexToRgb(backdrop)
+  const b = hexToRgb(CLEAR_GLASS.swatch)
+  return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * amount)).join(' ')})`
+}
+function shadeClear(elements, backdrop) {
+  if (!backdrop) return elements
+  const color = clearOn(backdrop, 0.4)
+  return elements.map((e) => {
+    if (e.colorantId !== CLEAR_GLASS.id) return e
+    // A see-through clear layer drawn over other canes (a zanfirico's
+    // casing) only tints them faintly, so white threads stay white.
+    return (e.opacity ?? 1) < 1 ? { ...e, color, opacity: 0.12 } : { ...e, color }
+  })
+}
+
 export function renderSlicePlate({
   elements,
   rod,
@@ -44,7 +67,7 @@ export function renderSlicePlate({
   ctx.globalAlpha = 0.28
   ctx.fill()
   ctx.globalAlpha = 1
-  drawElements(ctx, elements)
+  drawElements(ctx, shadeClear(elements, backdrop))
   ctx.restore()
 
   rings.forEach((ring, index) => {
@@ -95,6 +118,6 @@ export function renderCanePlate({ elements, size, backdrop = null }) {
   }
   ctx.scale(scale, -scale)
   ctx.translate(-cx, -cy)
-  drawElements(ctx, elements)
+  drawElements(ctx, shadeClear(elements, backdrop))
   return canvas
 }

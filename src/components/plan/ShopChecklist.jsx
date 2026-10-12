@@ -100,7 +100,7 @@ export function ShopChecklist({ design, steps, warnings = [], finish }) {
             <span className="text-xl font-semibold text-mute">of {steps.length}</span>
           </p>
           <h2 className="mt-3 text-[1.6rem] leading-tight font-bold tracking-tight text-balance">{item.title}</h2>
-          <p className="mt-2 text-base leading-relaxed text-mute">{item.detail}</p>
+          <p className="mt-2 text-base leading-relaxed text-mute"><TermText>{item.detail}</TermText></p>
           {item.colorantIds.length > 0 && (
             <ul className="mt-4 flex flex-wrap gap-2">
               {item.colorantIds.map((id) => (

@@ -264,7 +264,7 @@ export function PlanSheet({ design, steps, warnings, colorants, reticello = null
               <StepPlate plate={step.plate} design={design} size={48} />
               <div>
                 <p className="font-semibold text-balance">{step.title}</p>
-                <p className="text-sm leading-snug text-[#454a72]">{step.detail}</p>
+                <p className="text-sm leading-snug text-[#454a72]"><TermText>{step.detail}</TermText></p>
               </div>
               <ColorantDots ids={step.colorantIds} />
             </li>

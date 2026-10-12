@@ -276,6 +276,8 @@ export function useMurriniDesign(canvas = DEFAULT_CANVAS) {
     updateElementLive,
     commitElementEdit,
     clearElements,
+    // Replace every element in one undoable step (growing a design to fit).
+    replaceElements: applyElements,
     loadDesign,
     undo,
     redo,

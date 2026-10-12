@@ -36,6 +36,11 @@ export const GLOSSARY = {
     definition:
       'A cloudy, crystal-like skin some glasses grow after too long in the flame. Opal whites are prone to it; casing them in clear helps.',
   },
+  filigree: {
+    term: 'Filigree (filigrana)',
+    definition:
+      'Cane with fine threads of color, usually white, running through clear glass. Zanfirico, latticino and vetro a fili are all kinds of filigree.',
+  },
   gather: {
     term: 'Gather',
     definition:
@@ -48,6 +53,16 @@ export const GLOSSARY = {
   jacks: {
     term: 'Jacks',
     definition: 'A tweezer-like steel tool for shaping and necking hot glass.',
+  },
+  kilnShelf: {
+    term: 'Kiln shelf',
+    definition:
+      'A flat plate that canes or murrini are laid out on and heated before a pick-up, so they’re hot enough to stick to the gather.',
+  },
+  latticino: {
+    term: 'Latticino',
+    definition:
+      'Filigree whose threads are milk-white (latte is Italian for milk). Often used for the twisted lattice threads in zanfirico.',
   },
   marver: {
     term: 'Marver',
@@ -63,6 +78,11 @@ export const GLOSSARY = {
     term: 'Murrine (plural murrini)',
     definition:
       'A thin slice cut across a patterned cane, showing the pattern end-on. Laid out and picked up, slices pattern a whole vessel.',
+  },
+  punty: {
+    term: 'Punty',
+    definition:
+      'A solid steel rod used to hold hot glass: to gather on when building a cane, or to hold a piece while its other end is worked.',
   },
   pickup: {
     term: 'Pick-up',
@@ -88,6 +108,11 @@ export const GLOSSARY = {
     term: 'Strike',
     definition:
       'Some colors, like gold ruby and cadmium reds, come out pale and only develop their color when reheated. That reheat is striking.',
+  },
+  vetroAFili: {
+    term: 'Vetro a fili',
+    definition:
+      'Filigree with single straight threads, one thread per cane. Reticello is made from two sets of these canes twisted opposite ways.',
   },
   zanfirico: {
     term: 'Zanfirico',

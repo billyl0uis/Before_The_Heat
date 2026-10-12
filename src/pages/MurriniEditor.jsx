@@ -20,6 +20,7 @@ import { buildShopPlan, gatherBalance, shopPlanWarnings, usedColorants } from '.
 import { useResponsiveCanvasSize } from '../hooks/useResponsiveCanvasSize'
 import { useSliceGeometry } from '../hooks/useSliceGeometry'
 import { UNDO_KEY } from '../components/keys'
+import { growToFill } from '../engine/murrini/fit'
 
 const DOCK = [
   { key: 'tools', label: 'Tools', icon: 'tools' },
@@ -426,7 +427,17 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
         aria-label="Rod and color"
       >
         <div className={onDock('casing')}>
-          <RodPanel rod={rod} onChange={setRod} balance={balance} />
+          <RodPanel
+            rod={rod}
+            onChange={setRod}
+            balance={balance}
+            onGrow={() => {
+              const grown = growToFill({ elements, pattern, rod, casing })
+              if (!grown) return
+              design.replaceElements(grown.elements)
+              setPattern(grown.pattern)
+            }}
+          />
         </div>
         <div className={onDock('casing')}>
           <CasingPanel

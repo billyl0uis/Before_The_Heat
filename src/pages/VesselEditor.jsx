@@ -97,7 +97,7 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
         ? hasDesign
           ? 'Place some slices and the pick-up step appears here.'
           : 'Make a cane in the Murrini tab first.'
-        : 'Nothing to add yet. With a murrini pattern, a pick-up step goes here, after the pull.'
+        : 'Nothing to add yet. With a Murrini or Canes pattern, a pick-up step goes here, after the pull; Reticello gets its own plan.'
 
   return (
     <div className="grid lg:h-[calc(100svh-3.5rem)] lg:grid-cols-[minmax(0,1fr)_384px]">
