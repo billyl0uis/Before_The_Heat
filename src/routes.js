@@ -1,3 +1,5 @@
+import { GLASS_COLOR_INDEX } from './content/glassColorIndex.js'
+
 // Every page has its own address, so a technique or the glossary can be
 // linked to, bookmarked, and found by search engines on its own. Pure
 // data and string work, no React: the build uses it too, to write a real
@@ -26,6 +28,9 @@ export const TECHNIQUE_ORDER = [
   { key: 'bundle', params: {} },
 ]
 
+const COLOR_IDS = new Set(GLASS_COLOR_INDEX.map((color) => color.id))
+const COLOR_BY_ID = new Map(GLASS_COLOR_INDEX.map((color) => [color.id, color]))
+
 // multiCasing → multi-casing: what goes in the address bar.
 export const techniqueSlug = (key) => key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)
 const KEY_BY_SLUG = new Map(TECHNIQUE_ORDER.map(({ key }) => [techniqueSlug(key), key]))
@@ -39,6 +44,9 @@ export function pathFor({ tab, section = 'techniques', technique = null }) {
   if (tab === 'notfound') return null
   if (tab !== 'learn') return TAB_PATHS[tab] ?? '/'
   if (section === 'techniques') return technique ? `/learn/${techniqueSlug(technique)}` : '/learn'
+  // A single color has its own page too; `technique` holds whichever entry
+  // the section is open on.
+  if (section === 'colors' && technique) return `/learn/colors/${technique}`
   return `/learn/${section}`
 }
 
@@ -51,7 +59,10 @@ export function parsePath(pathname) {
   if (parts[0] === 'learn') {
     const sub = parts[1]
     if (!sub) return { tab: 'learn', section: 'techniques', technique: null }
-    if (LEARN_SECTIONS.includes(sub)) return { tab: 'learn', section: sub, technique: null }
+    if (sub === 'colors' && parts[2]) {
+      return COLOR_IDS.has(parts[2]) ? { tab: 'learn', section: 'colors', technique: parts[2] } : { ...home, tab: 'notfound' }
+    }
+    if (LEARN_SECTIONS.includes(sub) && !parts[2]) return { tab: 'learn', section: sub, technique: null }
     if (KEY_BY_SLUG.has(sub)) return { tab: 'learn', section: 'techniques', technique: KEY_BY_SLUG.get(sub) }
     return { ...home, tab: 'notfound' }
   }
@@ -65,6 +76,7 @@ const SITE = 'Before The Heat'
 export function titleFor({ tab, section, technique }, techniques = {}) {
   if (tab === 'learn') {
     if (section === 'techniques' && technique && techniques[technique]) return `${techniques[technique].title} · ${SITE}`
+    if (section === 'colors' && technique && COLOR_BY_ID.has(technique)) return `${COLOR_BY_ID.get(technique).name} glass · ${SITE}`
     if (section === 'colors') return `Glass color index · ${SITE}`
     if (section === 'glossary') return `Glassblowing glossary · ${SITE}`
     if (section === 'about') return `About · ${SITE}`

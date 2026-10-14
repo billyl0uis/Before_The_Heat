@@ -50,9 +50,28 @@ const HOME = {
           <li>Shop plan: a printable sheet and a step-by-step checklist, with color compatibility notes.</li>
           <li>Learn: cane and murrini techniques, a glass color index and a glossary of shop words.</li>
         </ul>
+        <h2>What it works out for you</h2>
+        <ul>
+          <li><strong>Murrini slice calculator:</strong> how many murrini slices cover a tumbler, bowl, vase, pot or plate, how much cane that takes, and how many pulls.</li>
+          <li><strong>Cane pull calculator:</strong> the gather size for the cane diameter you want, and how long the pulled cane will be at your pull ratio.</li>
+          <li><strong>Twist rate:</strong> how tightly to twist as you pull for a zanfirico or spiral cane, as a turn every so many millimetres.</li>
+          <li><strong>Reticello planner:</strong> how many rib canes, how thick, and how far to twist each cup.</li>
+          <li><strong>Glass color compatibility notes:</strong> striking colors, devitrification and toxic colorants flagged before you start.</li>
+        </ul>
         <h2>Glossary of glassblowing terms</h2>
         <dl>${glossaryList}</dl>${learnNav}`,
 }
+
+const colorFacts = (c) =>
+  [
+    `Made with ${c.colorant}.`,
+    c.family === 'opaque' ? 'An opaque color.' : 'A transparent color.',
+    c.strikes ? 'It strikes: it develops its full color when reheated.' : null,
+    c.devitrifies === true ? 'Prone to devitrification with repeated reheating.' : null,
+    c.devitrifies === 'some' ? 'Some versions are prone to devitrification.' : null,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
 // One real HTML page per Learn address, so each can be found and shared
 // on its own. The app takes over as soon as it loads.
@@ -90,6 +109,15 @@ const PAGES = [
     title: 'Glassblowing glossary: cane and murrini terms · Before The Heat',
     description:
       'Plain-language definitions of glassblowing words: gather, pull ratio, casing, marver, pick-up, COE, striking colors, zanfirico, reticello and more.',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: GLOSSARY_ORDER.map((id) => ({
+        '@type': 'Question',
+        name: `What is ${/^[aeiou]/i.test(GLOSSARY[id].term) ? 'an' : 'a'} ${GLOSSARY[id].term.replace(/ \(.*\)$/, '').toLowerCase()} in glassblowing?`,
+        acceptedAnswer: { '@type': 'Answer', text: GLOSSARY[id].definition },
+      })),
+    },
     body: `
         <h1>Glassblowing glossary</h1>
         <p>The shop words used in cane and murrini work, in plain language.</p>
@@ -106,8 +134,22 @@ const PAGES = [
         <p>${esc(COE_NOTE.body)}</p>
         <h2>${esc(ENCASEMENT_NOTE.title)}</h2>
         <p>${esc(ENCASEMENT_NOTE.body)}</p>
-        ${GLASS_COLOR_INDEX.map((c) => `<section><h2>${esc(c.name)}</h2><p>${esc(c.colorant)}${c.strikes ? '. Strikes on reheat' : ''}.</p><p>${esc(c.notes)}</p></section>`).join('\n        ')}${learnNav}`,
+        ${GLASS_COLOR_INDEX.map((c) => `<section><h2><a href="/learn/colors/${c.id}">${esc(c.name)}</a></h2><p>${esc(colorFacts(c))}</p><p>${esc(c.notes)}</p></section>`).join('\n        ')}${learnNav}`,
   },
+  ...GLASS_COLOR_INDEX.map((c) => ({
+    path: `/learn/colors/${c.id}`,
+    title: `${c.name} glass: what it's made of and how it behaves · Before The Heat`,
+    description: shorten(`${c.name} glass is made with ${c.colorant}. ${c.notes}`),
+    body: `
+        <h1>${esc(c.name)} glass</h1>
+        <p>${esc(colorFacts(c))}</p>
+        <p>${esc(c.notes)}</p>${c.caution ? `
+        <h2>Caution</h2>
+        <p>${esc(c.caution)}</p>` : ''}
+        <h2>${esc(COE_NOTE.title)}</h2>
+        <p>${esc(COE_NOTE.body)}</p>
+        <p><a href="/learn/colors">All glass colors</a></p>${learnNav}`,
+  })),
 ]
 
 function pageHtml(base, page) {
@@ -120,6 +162,10 @@ function pageHtml(base, page) {
     .replaceAll('%SITE_URL%', url)
     .replaceAll('%SITE_ROOT%', SITE_URL)
     .replace('<div id="root"></div>', `<div id="root"><main class="static-intro">${page.body}\n      </main></div>`)
+    .replace(
+      '</head>',
+      page.jsonLd ? `    <script type="application/ld+json">${JSON.stringify(page.jsonLd)}</script>\n  </head>` : '</head>',
+    )
 }
 
 // The app draws everything with JavaScript, which leaves crawlers and link

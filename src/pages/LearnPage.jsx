@@ -45,7 +45,7 @@ export function LearnPage({ section = 'techniques', technique = null, onOpen }) 
       {section === 'techniques' && (
         <TechniqueGuidePage focus={technique} onOpenTechnique={(key) => onOpen?.('techniques', key)} />
       )}
-      {section === 'colors' && <ColorIndexPage />}
+      {section === 'colors' && <ColorIndexPage focus={technique} onOpenColor={(id) => onOpen?.('colors', id)} />}
       {section === 'glossary' && <GlossaryPage />}
       {section === 'about' && <AboutPage />}
     </div>

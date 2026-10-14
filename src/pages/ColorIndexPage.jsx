@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { TermText } from '../components/Term'
 import { ColorSwatchCard } from '../components/color-index/ColorSwatchCard'
 import { PageHeader } from '../components/PageHeader'
@@ -14,7 +15,15 @@ function Note({ note }) {
   )
 }
 
-export function ColorIndexPage() {
+export function ColorIndexPage({ focus = null, onOpenColor }) {
+  // A color's own address opens the index scrolled to it, outlined.
+  useEffect(() => {
+    if (!focus) return
+    const card = document.getElementById(`color-${focus}`)
+    card?.scrollIntoView({ block: 'start' })
+    card?.focus({ preventScroll: true })
+  }, [focus])
+
   return (
     <>
       <PageHeader title="Color index" lede="What each glass color is made of, how it behaves at the furnace, and what to watch for." />
@@ -24,7 +33,7 @@ export function ColorIndexPage() {
       </div>
       <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-4 px-4 sm:grid-cols-2 sm:px-8 lg:grid-cols-3">
         {GLASS_COLOR_INDEX.map((color) => (
-          <ColorSwatchCard key={color.id} color={color} />
+          <ColorSwatchCard key={color.id} color={color} active={color.id === focus} onOpen={onOpenColor} />
         ))}
       </div>
     </>

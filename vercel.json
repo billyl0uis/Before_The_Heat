@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/learn", "destination": "/learn/index.html" },
+    { "source": "/learn/colors/:color", "destination": "/learn/colors/:color/index.html" },
     { "source": "/learn/:page", "destination": "/learn/:page/index.html" },
     { "source": "/((?!assets/|learn).*)", "destination": "/index.html" }
   ]
