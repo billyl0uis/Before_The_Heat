@@ -13,15 +13,14 @@ import { WebGLUnavailable } from '../WebGLUnavailable'
 const SECTION_DIAMETERS = TWIST_SECTION_DIAMETERS
 const FOV = 28
 
-// How see-through each glass reads from the side: clear casing lets the
+// How see-through a casing layer reads from the side: clear lets the
 // pattern inside show through (that's how a zanfirico's threads are seen),
-// coloured transparent glass tints it, opaque glass hides it.
+// a transparent color tints it without hiding it, as a thin layer of
+// colored glass does, and an opaque color hides it. (Canes themselves are
+// drawn denser, below, so a cobalt thread still reads as cobalt.)
 function glassOpacity(colorant) {
   if (!colorant || colorant.id === 'clear') return 0.18
-  // Coloured transparent glass is dense enough in a thread or core to read
-  // as its own colour; thinner than this, the studio reflections wash a
-  // deep colour like cobalt out to a pale tint it doesn't have.
-  return colorant.family === 'opaque' ? 1 : 0.82
+  return colorant.family === 'opaque' ? 1 : 0.38
 }
 
 function glassMaterial(color, opacity) {
