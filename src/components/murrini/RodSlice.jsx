@@ -46,7 +46,7 @@ function TickRing({ canvasSize, gatherDiameterMm }) {
   )
 }
 
-export function RodSlice({ canvas, elements, slice, rod, pullRod = rod, onPlace, preview, size, readoutsClassName = '' }) {
+export function RodSlice({ canvas, elements, slice, rod, pullRod = rod, onPlace, preview, size, readoutsClassName = '', description = '' }) {
   return (
     <figure className="flex flex-col items-center gap-2 lg:gap-4">
       <div className="relative" style={{ width: size, height: size }}>
@@ -61,6 +61,7 @@ export function RodSlice({ canvas, elements, slice, rod, pullRod = rod, onPlace,
         />
         <TickRing canvasSize={canvas.width} gatherDiameterMm={rod.gatherDiameterMm} />
       </div>
+      {description && <p className="sr-only">{description}</p>}
       <figcaption className={`flex gap-4 text-center sm:gap-8 ${readoutsClassName}`}>
         {/* The gather the layers really make, which is smaller than the
             drawn rod when a recipe leaves a gap and it isn't filled. */}

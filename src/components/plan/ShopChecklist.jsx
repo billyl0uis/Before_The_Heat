@@ -86,7 +86,7 @@ export function ShopChecklist({ design, steps, warnings = [], finish }) {
                 </p>
               ))
             ) : (
-              <p>Nothing flagged in the documented colorant properties. Still pull a test strip first: this plan doesn't assume a COE.</p>
+              <p>Nothing flagged in the documented colorant properties.</p>
             )}
           </div>
           <button type="button" onClick={() => setStep(0)} className="mt-2 rounded-lg bg-raise px-4 py-2.5 font-semibold">
@@ -140,10 +140,13 @@ export function ShopChecklist({ design, steps, warnings = [], finish }) {
           </button>
         </div>
       )}
-      <p className="order-4 flex items-center gap-2 px-5 pb-5 text-sm text-mute">
-        <Icon name="sun" size={16} />
-        {awake === 'on' ? 'Screen stays on while this is open' : "This browser can't keep the screen on"}
-      </p>
+      {/* Only worth saying when it's true; a 'can't' is no help at the furnace. */}
+      {awake === 'on' && (
+        <p className="order-4 flex items-center gap-2 px-5 pb-5 text-sm text-mute">
+          <Icon name="sun" size={16} />
+          Screen stays on while this is open
+        </p>
+      )}
     </section>
   )
 }

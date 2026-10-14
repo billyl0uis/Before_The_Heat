@@ -2,6 +2,7 @@ import { AboutPage } from './AboutPage'
 import { ColorIndexPage } from './ColorIndexPage'
 import { GlossaryPage } from './GlossaryPage'
 import { TechniqueGuidePage } from './TechniqueGuidePage'
+import { pathFor } from '../routes'
 
 const SECTIONS = [
   { key: 'techniques', label: 'Techniques' },
@@ -20,21 +21,25 @@ export function LearnPage({ section = 'techniques', technique = null, onOpen }) 
     <div className="flex flex-col pb-16">
       <div className="border-b border-line bg-panel px-4 py-3 sm:px-8">
         <div className="mx-auto w-full max-w-5xl">
-          <div className="inline-flex max-w-full overflow-x-auto rounded-lg bg-raise p-0.5 [scrollbar-width:none]" role="group" aria-label="Learn section">
+          <nav className="inline-flex max-w-full overflow-x-auto rounded-lg bg-raise p-0.5 [scrollbar-width:none]" aria-label="Learn section">
             {SECTIONS.map((item) => (
-              <button
+              <a
                 key={item.key}
-                type="button"
-                aria-pressed={item.key === section}
-                onClick={() => setSection(item.key)}
-                className={`min-h-[44px] shrink-0 rounded-md px-3 py-2 text-sm font-semibold sm:px-4 ${
+                href={pathFor({ tab: 'learn', section: item.key })}
+                aria-current={item.key === section ? 'page' : undefined}
+                onClick={(event) => {
+                  if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return
+                  event.preventDefault()
+                  setSection(item.key)
+                }}
+                className={`flex min-h-[44px] shrink-0 items-center rounded-md px-3 py-2 text-sm font-semibold sm:px-4 ${
                   item.key === section ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
                 }`}
               >
                 {item.label}
-              </button>
+              </a>
             ))}
-          </div>
+          </nav>
         </div>
       </div>
       {section === 'techniques' && (

@@ -43,7 +43,7 @@ export function ExtrusionControls({ extrusion, rod, onChange }) {
         step={10}
         onChange={(value) => setField('length', value)}
       />
-      <div className="grid grid-cols-2 rounded-lg bg-raise p-0.5" role="group" aria-label="Rod 3D direction">
+      <div className="grid grid-cols-2 rounded-lg bg-raise p-0.5" role="group" aria-label="Cane view direction">
         {[
           { value: false, label: 'Lengthwise' },
           { value: true, label: 'Sideways' },
@@ -62,9 +62,9 @@ export function ExtrusionControls({ extrusion, rod, onChange }) {
         ))}
       </div>
       <p className="text-[0.8rem] leading-relaxed text-mute">
-        Twist spirals off-centre canes along the rod, the way a zanfirico is made; a cane on the centre has nothing
-        to spiral. The value is the real rate on the pulled cane; Rod 3D squeezes it into a short stub so you can
-        see it. Taper, view length and direction only change the Rod 3D view; they aren't in the plan.
+        Twist spirals off-center canes along the rod, the way a zanfirico is made; a cane on the center has nothing
+        to spiral. The value is the real rate on the pulled cane; the Cane view squeezes it into a short stub so you can
+        see it. Taper, view length and direction only change the Cane view; they aren't in the plan.
       </p>
     </Panel>
   )

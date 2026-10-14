@@ -5,7 +5,7 @@ import { MURRINI_TECHNIQUES } from '../content/murrineTechniques'
 import { TECHNIQUE_ORDER, techniqueSlug } from '../routes'
 
 
-function TechniqueCard({ techniqueKey, params }) {
+function TechniqueCard({ techniqueKey, params, active = false }) {
   const technique = MURRINI_TECHNIQUES[techniqueKey]
   if (!technique) return null
 
@@ -14,7 +14,9 @@ function TechniqueCard({ techniqueKey, params }) {
       id={`technique-${techniqueKey}`}
       tabIndex={-1}
       aria-labelledby={`technique-${techniqueKey}-title`}
-      className="flex scroll-mt-20 flex-col gap-3 rounded-xl border border-line bg-panel p-5 outline-none focus:border-accent focus:shadow-[0_0_0_1px_var(--accent)]"
+      className={`flex scroll-mt-24 flex-col gap-3 rounded-xl border bg-panel p-5 outline-none ${
+        active ? 'border-accent shadow-[0_0_0_1px_var(--accent)]' : 'border-line'
+      }`}
     >
       <div className="flex items-center gap-4">
         <TechniqueDiagram techniqueKey={techniqueKey} params={params} />
@@ -88,7 +90,7 @@ export function TechniqueGuidePage({ focus = null, onOpenTechnique }) {
       </nav>
       <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-4 px-4 sm:px-8 lg:grid-cols-2">
         {TECHNIQUE_ORDER.map(({ key, params }) => (
-          <TechniqueCard key={key} techniqueKey={key} params={params} />
+          <TechniqueCard key={key} techniqueKey={key} params={params} active={key === focus} />
         ))}
       </div>
     </>

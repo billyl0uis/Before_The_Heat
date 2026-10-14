@@ -117,6 +117,19 @@ function App() {
     }
     if (activeTab !== 'murrini') goTo('murrini')
   }
+  // Straight to Simple's Size step, where the clear-or-grow choice lives.
+  const openSize = () => {
+    if (mode === 'simple') {
+      try {
+        const key = 'before-the-heat:simple'
+        const saved = JSON.parse(window.localStorage.getItem(key) ?? 'null')
+        if (saved) window.localStorage.setItem(key, JSON.stringify({ ...saved, step: 2 }))
+      } catch {
+        // It opens on the step it was on.
+      }
+    }
+    goTo('murrini')
+  }
   const openPlan = (view) => {
     try {
       window.localStorage.setItem('before-the-heat:plan-view', view)
@@ -268,9 +281,9 @@ function App() {
               <MurriniEditor design={design} onOpenPlan={() => goTo('plan')} onMode={setMode} />
             ))}
           {activeTab === 'vessel' && (
-            <VesselEditor design={design} vesselState={vesselState} onEditDesign={() => goTo('murrini')} />
+            <VesselEditor design={design} vesselState={vesselState} onEditDesign={() => goTo('murrini')} onOpenPlan={() => goTo('plan')} />
           )}
-          {activeTab === 'plan' && <PlanPage design={design} vessel={vesselState.vessel} planSource={planSource} onPlanSource={setPlanSource} onEdit={() => goTo('murrini')} onEditVessel={() => goTo('vessel')} />}
+          {activeTab === 'plan' && <PlanPage design={design} vessel={vesselState.vessel} planSource={planSource} onPlanSource={setPlanSource} onEdit={() => goTo('murrini')} onEditSize={openSize} onEditVessel={() => goTo('vessel')} />}
           {activeTab === 'learn' && (
             <LearnPage section={learnSection} technique={technique} onOpen={openLearn} />
           )}

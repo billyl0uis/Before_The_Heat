@@ -56,7 +56,7 @@ export function Term({ id, children, align = 'start' }) {
         onClick={() => setOpen((value) => !value)}
         // Inherits the label's lettering (a button wouldn't), and its tap
         // area reaches 44px tall without moving the text around it.
-        className="relative cursor-help underline decoration-current/50 decoration-dotted underline-offset-[3px] [text-transform:inherit] after:absolute after:-inset-x-1 after:top-1/2 after:h-11 after:-translate-y-1/2 after:content-[''] hover:decoration-current"
+        className="relative cursor-help underline decoration-current/50 decoration-dotted underline-offset-[3px] [text-transform:inherit] after:absolute after:top-1/2 after:left-1/2 after:h-11 after:w-[max(100%+0.5rem,2.75rem)] after:-translate-x-1/2 after:-translate-y-1/2 after:content-[''] hover:decoration-current"
       >
         {children ?? entry.term}
       </button>

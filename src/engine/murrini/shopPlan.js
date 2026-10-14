@@ -262,7 +262,7 @@ function compoundCaneSteps(cluster, copies, rod) {
     return [
       {
         title: `Bundle ${cluster.length} ${colours.join(' and ')} wedges into a pinwheel${times}`,
-        detail: `Alternate the ${colours.join(' and ')} wedges round a centre and fuse them. Twist as you pull, so the straight wedges curve.`,
+        detail: `Alternate the ${colours.join(' and ')} wedges round a center and fuse them. Twist as you pull, so the straight wedges curve.`,
         colorantIds: ids(cluster),
         elements: cluster,
       },
@@ -420,4 +420,26 @@ export function usedColorants({ elements, casing }) {
 
 export function shopPlanWarnings({ elements, casing }) {
   return checkColorCompatibility([...elements, ...casing.map((layer) => ({ colorantId: layer.colorantId }))])
+}
+
+// The slice in words, for anyone who can't see it: what's there, how
+// many, what color, and the casing round it.
+export function describeSlice({ repeatedElements, casing }) {
+  if (!repeatedElements.length) return 'An empty slice: no canes placed yet.'
+  const groups = new Map()
+  // A radial repeat lays copies of a center cane on top of each other:
+  // one cane in the glass, so it's counted once.
+  const seen = new Set()
+  for (const e of repeatedElements) {
+    if ((e.opacity ?? 1) < 1) continue
+    const spot = `${Math.round(e.x)}|${Math.round(e.y)}|${e.shape}|${e.colorantId}|${JSON.stringify(e.params)}`
+    if (seen.has(spot)) continue
+    seen.add(spot)
+    const shape = e.shape === 'circle' ? 'round' : (SHAPE_TYPES[e.shape]?.label.toLowerCase() ?? 'shape')
+    const key = `${colourName(e)} ${shape}`
+    groups.set(key, (groups.get(key) ?? 0) + 1)
+  }
+  const parts = [...groups.entries()].map(([name, n]) => `${n} ${name}${n === 1 ? '' : 's'}`)
+  const layers = casing.map((layer) => `${findColorant(layer.colorantId)?.name.split(' / ')[0] ?? 'glass'} ${fmt(layer.thicknessMm)} mm`)
+  return `Slice: ${parts.join(', ')}${layers.length ? `, cased in ${layers.join(', then ')}` : ''}.`
 }

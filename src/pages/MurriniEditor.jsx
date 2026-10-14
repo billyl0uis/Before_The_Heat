@@ -16,7 +16,7 @@ import { buildCompoundElements, COMPOUND_SHAPE_TYPES } from '../engine/murrini/c
 import { pulledDiameterMm, pulledLengthMm } from '../engine/murrini/rod'
 import { computeShapeReach, SHAPE_TYPES } from '../engine/murrini/shapes'
 import { describePlacement } from '../engine/murrini/placement'
-import { buildShopPlan, gatherBalance, shopPlanWarnings, usedColorants } from '../engine/murrini/shopPlan'
+import { buildShopPlan, describeSlice, gatherBalance, shopPlanWarnings, usedColorants } from '../engine/murrini/shopPlan'
 import { useResponsiveCanvasSize } from '../hooks/useResponsiveCanvasSize'
 import { useSliceGeometry } from '../hooks/useSliceGeometry'
 import { UNDO_KEY } from '../components/keys'
@@ -319,6 +319,8 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] lg:h-[calc(100svh-3.5rem)] lg:grid-cols-[232px_minmax(0,1fr)_344px] lg:grid-rows-[minmax(0,1fr)_auto]">
+      {/* The page's name for screen readers; the slice itself is the visual title. */}
+      <h1 className="sr-only">Cane editor, Advanced</h1>
       <aside
         className={`flex min-w-0 flex-col gap-5 overflow-x-hidden overflow-y-auto border-line bg-panel p-4 lg:border-r ${onDock('tools')}`}
         aria-label="Tools"
@@ -358,7 +360,7 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
           <div className="inline-flex rounded-lg bg-raise p-0.5" role="group" aria-label="View">
             {[
               { key: 'flat', label: 'Slice' },
-              { key: 'rod', label: 'Rod 3D' },
+              { key: 'rod', label: 'Cane' },
             ].map((mode) => (
               <button
                 key={mode.key}
@@ -389,6 +391,7 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
               slice={slice}
               rod={rod}
               pullRod={pullRod}
+              description={describeSlice({ repeatedElements, casing })}
               onPlace={handleCanvasClick}
               preview={preview}
               size={flatSize.width}
@@ -436,6 +439,10 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
               if (!grown) return
               design.replaceElements(grown.elements)
               setPattern(grown.pattern)
+              // Say what happened: the panel that offered it is gone now.
+              setNotice(
+                `Grown ${Math.round((grown.factor - 1) * 100)}% to fill the gather, so there's no clear fill. Undo to take it back.`,
+              )
             }}
           />
         </div>

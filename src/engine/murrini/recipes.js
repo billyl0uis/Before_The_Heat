@@ -62,9 +62,9 @@ export const RECIPES = {
   },
   flower: {
     name: 'Flower',
-    blurb: 'Six petals around a centre',
+    blurb: 'Six petals around a center',
     slots: {
-      centre: { label: 'Centre', defaultId: 'silver-stain-yellow' },
+      centre: { label: 'Center', defaultId: 'silver-stain-yellow' },
       petals: { label: 'Petals', defaultId: 'opal-white' },
       casing: { label: 'Casing', defaultId: 'cobalt-blue', allowClear: true },
     },
@@ -91,9 +91,9 @@ export const RECIPES = {
   },
   tripod: {
     name: 'Tripod',
-    blurb: 'Three canes round a centre cane',
+    blurb: 'Three canes round a center cane',
     slots: {
-      centre: { label: 'Centre cane', defaultId: 'copper-turquoise' },
+      centre: { label: 'Center cane', defaultId: 'copper-turquoise' },
       outer: { label: 'Outer canes', defaultId: 'opal-white' },
       casing: { label: 'Casing', defaultId: 'black-glass', allowClear: true },
     },
@@ -101,9 +101,9 @@ export const RECIPES = {
   },
   cross: {
     name: 'Cross',
-    blurb: 'Four canes round a centre cane',
+    blurb: 'Four canes round a center cane',
     slots: {
-      centre: { label: 'Centre cane', defaultId: 'gold-ruby' },
+      centre: { label: 'Center cane', defaultId: 'gold-ruby' },
       outer: { label: 'Outer canes', defaultId: 'opal-white' },
       casing: { label: 'Casing', defaultId: 'clear', allowClear: true },
     },
@@ -111,9 +111,9 @@ export const RECIPES = {
   },
   frame: {
     name: 'Frame',
-    blurb: 'A square centre in a ring of canes',
+    blurb: 'A square center in a ring of canes',
     slots: {
-      centre: { label: 'Centre', defaultId: 'erbium-pink' },
+      centre: { label: 'Center', defaultId: 'erbium-pink' },
       frame: { label: 'Frame canes', defaultId: 'chromium-green' },
       casing: { label: 'Casing', defaultId: 'clear', allowClear: true },
     },

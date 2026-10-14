@@ -1,3 +1,4 @@
+import { useId } from 'react'
 // Small shared controls for the Vessel tool rail.
 
 export function Segmented({ label, options, value, onChange, className = '' }) {
@@ -26,13 +27,19 @@ export function Segmented({ label, options, value, onChange, className = '' }) {
 }
 
 export function RangeField({ label, value, display, min, max, step, onChange, disabled }) {
+  // The label points at the slider by id; wrapped round both, it would
+  // name the readout instead and leave the slider nameless.
+  const id = useId()
   return (
-    <label className={`flex flex-col gap-1.5 ${disabled ? 'opacity-40' : ''}`}>
+    <div className={`flex flex-col gap-1.5 ${disabled ? 'opacity-40' : ''}`}>
       <span className="flex justify-between gap-2.5 text-sm text-ink-soft">
-        <span>{label}</span>
-        <output className="font-mono text-[0.8rem] whitespace-nowrap text-ink">{display}</output>
+        <label htmlFor={id}>{label}</label>
+        <output htmlFor={id} className="font-mono text-[0.8rem] whitespace-nowrap text-ink">
+          {display}
+        </output>
       </span>
       <input
+        id={id}
         type="range"
         min={min}
         max={max}
@@ -45,7 +52,7 @@ export function RangeField({ label, value, display, min, max, step, onChange, di
         onChange={(event) => onChange(Number(event.target.value))}
         className="h-8 w-full disabled:cursor-not-allowed"
       />
-    </label>
+    </div>
   )
 }
 

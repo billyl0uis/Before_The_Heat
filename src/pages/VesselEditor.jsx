@@ -12,6 +12,7 @@ import { caneShowColour, measureWall, metres, murriniLayout, planPickup, planRet
 import { isFiligreeCane } from '../engine/murrini/shopPlan'
 import { vesselRadiusFunction } from '../engine/vessel/profile'
 import { Term } from '../components/Term'
+import { Icon } from '../components/icons'
 
 // The gather under the pattern. Transparent colors only, so the pattern
 // still shows through.
@@ -23,7 +24,7 @@ const CLEAR_SWATCH_EDGE = '#9fb7c2'
 const shortName = (colorant) => colorant?.name.split(' / ')[0].replace(/ \(.*\)$/, '') ?? ''
 const fmt = (value, digits = 0) => value.toLocaleString('en', { maximumFractionDigits: digits })
 
-export function VesselEditor({ design, vesselState, onEditDesign }) {
+export function VesselEditor({ design, vesselState, onEditDesign, onOpenPlan }) {
   const { vessel, morph, update, addPlacement, undoPlacement, clearPlacements } = vesselState
   const { params, freeform, controlRadii } = vessel
   const hasDesign = design.elements.length > 0
@@ -372,6 +373,15 @@ export function VesselEditor({ design, vesselState, onEditDesign }) {
 
         <RailSection title="In your plan">
           <PickupStepCard pickup={pickup ?? reticello} design={design} emptyMessage={planMessage} />
+          {onOpenPlan && (pickup || reticello) && (
+            <button
+              type="button"
+              onClick={onOpenPlan}
+              className="mt-3 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 font-bold text-accent-ink"
+            >
+              Open the {reticello ? 'reticello' : 'shop'} plan <Icon name="arrowRight" size={18} />
+            </button>
+          )}
         </RailSection>
       </aside>
     </div>

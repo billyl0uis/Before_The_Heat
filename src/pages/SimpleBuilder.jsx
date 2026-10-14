@@ -15,7 +15,7 @@ import {
 import { CLEAR_GLASS, DEFAULT_ROD, findColorant, pulledLengthMm, twistPitchMm, colourNote } from '../engine/murrini/rod'
 import { CURRENT_SCHEMA_VERSION } from '../engine/murrini/migrate'
 import { computeRepeatedElements } from '../engine/murrini/pattern'
-import { buildShopPlan, gatherBalance } from '../engine/murrini/shopPlan'
+import { buildShopPlan, describeSlice, gatherBalance } from '../engine/murrini/shopPlan'
 import { renderSlicePlate } from '../engine/murrini/slicePlate'
 import { useResponsiveCanvasSize } from '../hooks/useResponsiveCanvasSize'
 import { useSliceGeometry } from '../hooks/useSliceGeometry'
@@ -79,7 +79,16 @@ const shortName = (name) => name.split(' / ')[0].replace(/ \(.*\)$/, '').replace
 // uses, so the Plan tab, autosave and Advanced mode follow along.
 export function SimpleBuilder({ design, onOpenPlan, onMode }) {
   const [stored] = useState(readStore)
-  const [step, setStep] = useState(0)
+  // Where you were, kept across tabs and reloads: coming back from the
+  // Plan shouldn't mean clicking through Recipe and Colors again.
+  const [step, setStep] = useState(() => {
+    const saved = readStore()?.step
+    return Number.isInteger(saved) && saved >= 0 && saved <= 3 ? saved : 0
+  })
+  useEffect(() => {
+    const store = readStore()
+    if (store && store.step !== step) writeStore({ ...store, step })
+  }, [step])
   const [openSlot, setOpenSlot] = useState(null)
   const [showRatio, setShowRatio] = useState(false)
   // Slice: the cross-section, end-on. Cane: the pulled cane from the side,
@@ -148,7 +157,7 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
       setSetAside(kept)
     }
     design.loadDesign(built)
-    writeStore({ ...next, signature: designSignature(built) })
+    writeStore({ ...next, signature: designSignature(built), step })
     setChoice(next)
     setCustomised(false)
   }
@@ -157,7 +166,10 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
   // recipe saved before the fill choice existed is grown to fill, the
   // default, so the size on the slider is the size it pulls to.
   useEffect(() => {
-    if ((empty && !customised) || (!customised && choice.fill === undefined && drawnBalance.hasGap)) apply(choice)
+    // The grow is saved as a choice, so it happens once, not on every load.
+    if ((empty && !customised) || (!customised && choice.fill === undefined && drawnBalance.hasGap)) {
+      apply({ ...choice, fill: choice.fill ?? 'grow' })
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -257,6 +269,7 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
               slice={slice}
               rod={design.rod}
               pullRod={pullRod}
+              description={describeSlice({ repeatedElements: design.repeatedElements, casing: design.casing })}
               onPlace={() => {}}
               preview={NO_PREVIEW}
               size={size.width}
@@ -559,7 +572,7 @@ export function SimpleBuilder({ design, onOpenPlan, onMode }) {
                     })}
                   </div>
                   <p className="text-sm text-mute">
-                    Twisting the cane as it's pulled winds anything off-centre into a spiral, like a
+                    Twisting the cane as it's pulled winds anything off-center into a spiral, like a
                     zanfirico. The number is how far along the pulled cane one full turn takes. See it with{' '}
                     <span className="font-semibold text-ink">Cane</span> above the slice.
                   </p>

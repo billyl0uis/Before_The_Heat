@@ -33,13 +33,13 @@ function planTitle(design, reticello) {
   } catch {
     // Keep the plain name.
   }
-  return `${name} · Ø ${pulledDiameterMm(design.rod).toLocaleString('en', { maximumFractionDigits: 1 })} mm`
+  return `${name} · Ø\u00a0${pulledDiameterMm(design.rod).toLocaleString('en', { maximumFractionDigits: 1 })}\u00a0mm`
 }
 
 // Same number format as the sheet: "8 mm", "6.9 mm".
 const fmtNum = (value) => value.toLocaleString('en', { maximumFractionDigits: 1 })
 
-export function PlanPage({ design, vessel, planSource = 'cane', onPlanSource, onEdit, onEditVessel }) {
+export function PlanPage({ design, vessel, planSource = 'cane', onPlanSource, onEdit, onEditSize, onEditVessel }) {
   const [view, setView] = useState(readView)
   const { elements, pattern, rod, casing, extrusion } = design
   // Whether the layers fill the gather that was set, and the rod as it
@@ -76,11 +76,34 @@ export function PlanPage({ design, vessel, planSource = 'cane', onPlanSource, on
   }, [elements, pattern, rod, casing, extrusion, balance, pickup, reticello])
   // Colors and warnings come from whatever the plan actually uses.
   const used = useMemo(
-    () => (reticello ? { elements: reticello.colorantIds.map((colorantId) => ({ colorantId })), casing: [] } : { elements, casing }),
-    [reticello, elements, casing],
+    () =>
+      reticello
+        ? { elements: reticello.colorantIds.map((colorantId) => ({ colorantId })), casing: [] }
+        : // The clear fill is glass in the plan too, so it's in the colors used.
+          { elements: balance.filled ? [...elements, { colorantId: 'clear' }] : elements, casing },
+    [reticello, elements, casing, balance.filled],
   )
   const warnings = useMemo(() => shopPlanWarnings(used), [used])
   const colorants = useMemo(() => usedColorants(used), [used])
+  // Checking the colors comes first, on the sheet and the checklist alike,
+  // so step numbers match between the paper and the phone.
+  const planSteps = useMemo(
+    () =>
+      steps.length
+        ? [
+            {
+              key: 'test-strip',
+              title: 'Pull a test strip first',
+              detail:
+                'This plan doesn’t assume a COE. Pull a short strip of these colors together and let it cool: if it cracks or crazes, they don’t match.',
+              colorantIds: colorants.map((colorant) => colorant.id),
+              plate: steps[0].plate,
+            },
+            ...steps,
+          ]
+        : steps,
+    [steps, colorants],
+  )
   const finish = reticello || pickup
     ? { title: 'Before you start', line: 'Into the annealer, then check the piece against the plan.' }
     : isFiligreeCane(elements)
@@ -138,6 +161,7 @@ export function PlanPage({ design, vessel, planSource = 'cane', onPlanSource, on
               Ø {fmtNum(pullRod.gatherDiameterMm)} → {fmtNum(pulledDiameterMm(pullRod))} mm · {pullRod.pullRatio} : 1 · ≈{' '}
               {(pulledLengthMm(pullRod) / 1000).toFixed(1)} m
               {extrusion.twistDegrees ? ` · twist ${twistLabel(pullRod, extrusion.twistDegrees)}` : ''}
+              {pickup && pickup.totals.pulls > 1 ? ` · ${pickup.totals.pulls} pulls for the vessel` : ''}
             </>
           )}
         </p>
@@ -214,7 +238,7 @@ export function PlanPage({ design, vessel, planSource = 'cane', onPlanSource, on
             clear and the cane pulls to Ø {fmtNum(pulledDiameterMm(rod))} mm.{' '}
             <button
               type="button"
-              onClick={onEdit}
+              onClick={onEditSize ?? onEdit}
               className="inline-flex min-h-[44px] items-center font-semibold text-accent underline underline-offset-[3px] sm:min-h-0"
             >
               Grow the design instead
@@ -224,7 +248,7 @@ export function PlanPage({ design, vessel, planSource = 'cane', onPlanSource, on
         {view === 'sheet' ? (
           <PlanSheet
             design={design}
-            steps={steps}
+            steps={planSteps}
             warnings={warnings}
             colorants={colorants}
             reticello={reticello}
@@ -233,23 +257,7 @@ export function PlanPage({ design, vessel, planSource = 'cane', onPlanSource, on
             title={planTitle({ ...design, rod: pullRod }, reticello)}
           />
         ) : (
-          <ShopChecklist
-            design={design}
-            // At the furnace, checking the colors comes first, not last.
-            steps={[
-              {
-                key: 'test-strip',
-                title: 'Pull a test strip first',
-                detail:
-                  'This plan doesn’t assume a COE. Pull a short strip of these colors together and let it cool: if it cracks or crazes, they don’t match.',
-                colorantIds: colorants.map((colorant) => colorant.id),
-                plate: { kind: 'slice', casingUpTo: casing.length - 1 },
-              },
-              ...steps,
-            ]}
-            warnings={warnings}
-            finish={finish}
-          />
+          <ShopChecklist design={design} steps={planSteps} warnings={warnings} finish={finish} />
         )}
       </div>
     </div>

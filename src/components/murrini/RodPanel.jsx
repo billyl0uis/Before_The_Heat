@@ -38,8 +38,14 @@ export function RodPanel({ rod, onChange, balance = null, onGrow = null }) {
         onChange={set('pullRatio')}
       />
       <p className="text-sm leading-relaxed text-mute">
-        Pulling keeps the volume, so length grows by the ratio squared: about{' '}
-        <span className="font-mono text-ink">{metres.toFixed(1)} m</span> of cane.
+        {/* The finished size, so Advanced speaks in the same terms as Simple's
+            Size step: you set the gather, this is the cane it makes. */}
+        Pulls to a{' '}
+        <span className="font-mono text-ink">
+          Ø {(rod.gatherDiameterMm / rod.pullRatio).toLocaleString('en', { maximumFractionDigits: 1 })} mm
+        </span>{' '}
+        cane, about <span className="font-mono text-ink">{metres.toFixed(1)} m</span> of it. Pulling keeps the volume, so
+        length grows by the ratio squared.
       </p>
     </Panel>
   )
