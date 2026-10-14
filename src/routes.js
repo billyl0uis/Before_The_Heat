@@ -72,5 +72,5 @@ export function titleFor({ tab, section, technique }, techniques = {}) {
   }
   if (tab === 'notfound') return `Page not found · ${SITE}`
   const names = { vessel: 'Vessel', plan: 'Shop plan', vault: 'Saved designs', about: 'About' }
-  return names[tab] ? `${names[tab]} · ${SITE}` : `${SITE} · Murrini and cane planner for glassblowers`
+  return names[tab] ? `${names[tab]} · ${SITE}` : `${SITE} · Free murrini app for glass cane design`
 }

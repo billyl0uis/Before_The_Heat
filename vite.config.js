@@ -37,12 +37,13 @@ const glossaryList = GLOSSARY_ORDER.map(
 
 const HOME = {
   path: '/',
-  title: 'Before The Heat · Murrini and cane planner for glassblowers',
+  title: 'Before The Heat · Free murrini app for glass cane design',
   description:
-    'Plan murrini, cane and blown vessels before you get to the furnace. Draw your cane at true scale in real glass colors, then print a shop plan: build order, casing, pull size and twist.',
+    'A free murrini app for glassblowers. Design murrini and glass cane at true scale in real glass colors, see it on a vessel, and print a shop plan: build order, casing, pull size and twist.',
   body: `
-        <h1>Before The Heat: a murrini and cane planner for glassblowers</h1>
-        <p>Plan murrini, cane and blown vessels before you get to the furnace. Before The Heat draws your cane at true scale in real glass colors, then turns it into a shop plan you can print: build order, casing, pull size and twist.</p>
+        <h1>Before The Heat: a free murrini app for designing glass cane</h1>
+        <p>Before The Heat is a free murrini app and glass cane designer for glassblowers. Plan murrini, cane and blown vessels before you get to the furnace: it draws your cane at true scale in real glass colors, then turns it into a shop plan you can print, with build order, casing, pull size and twist.</p>
+        <p>It runs in your browser on a phone, tablet or computer. There's nothing to download and no account to make.</p>
         <ul>
           <li>Murrini and cane: start from a recipe (bullseye, flower, zanfirico, tripod, cross, frame) or build your own cross-section.</li>
           <li>Vessels: see your murrini, cane pick-up or reticello on a tumbler, bowl, vase, pot or plate, with slice and cane counts.</li>
