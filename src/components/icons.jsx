@@ -16,6 +16,7 @@ const PATHS = {
   chevronUp: <path d="M6 15l6-6 6 6" />,
   chevronDown: <path d="M6 9l6 6 6-6" />,
   close: <path d="M6 6l12 12M18 6L6 18" />,
+  chevron: <path d="M9 6l6 6-6 6" />,
   plus: <path d="M12 5v14M5 12h14" />,
   undo: <path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 010 11H11" />,
   redo: <path d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 000 11H13" />,
