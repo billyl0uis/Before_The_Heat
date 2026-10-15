@@ -115,7 +115,8 @@ function describeCane(cluster, techniqueKey, count, rod) {
     const shape = element.shape === 'circle' ? 'round' : (SHAPE_TYPES[element.shape]?.label.toLowerCase() ?? 'cane')
     return {
       title: `Pull ${count} ${colourName(element)} ${shape} cane${count === 1 ? '' : 's'}, ${sizePhrase(element, mmPerWorldUnit(rod))}`,
-      detail: `${shape[0].toUpperCase()}${shape.slice(1)} cross-section in ${colourName(element)}, pulled as a simple cane to this size.`,
+      // The title already says the shape, color and size.
+      detail: '',
     }
   }
   // Nested: biggest piece outside, the rest inside it, smallest at the core.

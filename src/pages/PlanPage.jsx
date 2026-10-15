@@ -66,10 +66,10 @@ export function PlanPage({ design, vessel, planSource = 'cane', onPlanSource, on
     const withPulls = cane.map((step) => {
       if (pulls < 2) return step
       if (step.key === 'pull') {
-        return { ...step, detail: `${step.detail} The vessel pick-up needs ${pulls} of these: build and pull this cane ${pulls} times.` }
+        return { ...step, detail: `${step.detail ? `${step.detail} ` : ''}The vessel pick-up needs ${pulls} of these: build and pull this cane ${pulls} times.` }
       }
       // Every part is needed once per build, so say the total too.
-      if (step.count) return { ...step, detail: `${step.detail} For the vessel: ${step.count * pulls} in all, across ${pulls} builds.` }
+      if (step.count) return { ...step, detail: `${step.detail ? `${step.detail} ` : ''}For the vessel: ${step.count * pulls} in all, across ${pulls} builds.` }
       return step
     })
     return [...withPulls, pickup.step]
@@ -83,7 +83,9 @@ export function PlanPage({ design, vessel, planSource = 'cane', onPlanSource, on
           { elements: balance.filled ? [...elements, { colorantId: 'clear' }] : elements, casing },
     [reticello, elements, casing, balance.filled],
   )
-  const warnings = useMemo(() => shopPlanWarnings(used), [used])
+  // The plan opens with a test strip, which is the compatibility check in
+  // shop terms, so the general COE reminder isn't repeated under it.
+  const warnings = useMemo(() => shopPlanWarnings(used).filter((warning) => warning.id !== 'coe-reminder'), [used])
   const colorants = useMemo(() => usedColorants(used), [used])
   // Checking the colors comes first, on the sheet and the checklist alike,
   // so step numbers match between the paper and the phone.

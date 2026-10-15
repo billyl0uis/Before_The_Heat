@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Icon } from '../components/icons'
 import { PageHeader } from '../components/PageHeader'
 import { TechniqueDiagram } from '../components/murrini/TechniqueDiagram'
 import { MURRINI_TECHNIQUES } from '../content/murrineTechniques'
@@ -25,27 +26,38 @@ function TechniqueCard({ techniqueKey, params, active = false }) {
         </h2>
       </div>
       <p className="text-base leading-relaxed text-ink-soft">{technique.summary}</p>
-      <ol className="flex flex-col gap-1.5 text-base leading-relaxed text-ink-soft">
-        {technique.steps.map((step, index) => (
-          <li key={step} className="grid grid-cols-[1.5rem_1fr] gap-1">
-            <span className="pt-0.5 font-mono text-[0.8rem] font-semibold text-accent">{index + 1}</span>
-            <span>{step}</span>
-          </li>
-        ))}
-      </ol>
-      {technique.tips && (
-        <section className="mt-1 border-t border-line pt-3" aria-labelledby={`${techniqueKey}-tips`}>
-          <h3 id={`${techniqueKey}-tips`} className="text-base font-semibold text-ink">
-            {technique.tips.title}
-          </h3>
-          <p className="mt-1 text-base leading-relaxed text-ink-soft">{technique.tips.intro}</p>
-          <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-5 text-base leading-relaxed text-ink-soft marker:text-accent">
-            {technique.tips.items.map((tip) => (
-              <li key={tip}>{tip}</li>
+      {/* The steps stay in the page (linkable, searchable) but folded, so the
+          list reads as eighteen summaries instead of eighteen essays. A
+          technique's own address opens it unfolded. */}
+      <details open={active} className="group">
+        <summary className="inline-flex min-h-[44px] cursor-pointer list-none items-center gap-2 font-semibold text-accent sm:min-h-0 [&::-webkit-details-marker]:hidden">
+          <Icon name="chevron" size={16} className="transition-transform group-open:rotate-90" />
+          How it&rsquo;s made
+        </summary>
+        <div className="mt-3 flex flex-col gap-3">
+          <ol className="flex flex-col gap-1.5 text-base leading-relaxed text-ink-soft">
+            {technique.steps.map((step, index) => (
+              <li key={step} className="grid grid-cols-[1.5rem_1fr] gap-1">
+                <span className="pt-0.5 font-mono text-[0.8rem] font-semibold text-accent">{index + 1}</span>
+                <span>{step}</span>
+              </li>
             ))}
-          </ul>
-        </section>
-      )}
+          </ol>
+          {technique.tips && (
+            <section className="mt-1 border-t border-line pt-3" aria-labelledby={`${techniqueKey}-tips`}>
+              <h3 id={`${techniqueKey}-tips`} className="text-base font-semibold text-ink">
+                {technique.tips.title}
+              </h3>
+              <p className="mt-1 text-base leading-relaxed text-ink-soft">{technique.tips.intro}</p>
+              <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-5 text-base leading-relaxed text-ink-soft marker:text-accent">
+                {technique.tips.items.map((tip) => (
+                  <li key={tip}>{tip}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+      </details>
     </article>
   )
 }

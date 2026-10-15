@@ -264,7 +264,9 @@ export function PlanSheet({ design, steps, warnings, colorants, reticello = null
               <StepPlate plate={step.plate} design={design} size={48} />
               <div>
                 <p className="font-semibold text-balance">{step.title}</p>
-                <p className="text-sm leading-snug text-[#454a72]"><TermText>{step.detail}</TermText></p>
+                {step.detail && (
+                  <p className="text-sm leading-snug text-[#454a72]"><TermText>{step.detail}</TermText></p>
+                )}
               </div>
               <ColorantDots ids={step.colorantIds} />
             </li>
@@ -276,8 +278,8 @@ export function PlanSheet({ design, steps, warnings, colorants, reticello = null
         <div>
           <p className="font-bold text-[#1f6b3a]">Colors used</p>
           <p>
-            {colorants.map((colorant) => colorant.name).join(', ') || 'None yet'}. This plan doesn't assume
-            a COE: use rods from one compatible system and pull a test strip first.
+            {colorants.map((colorant) => colorant.name).join(', ') || 'None yet'}. Use rods from one
+            compatible system.
           </p>
         </div>
         <div>

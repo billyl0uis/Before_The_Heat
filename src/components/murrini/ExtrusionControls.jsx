@@ -10,7 +10,7 @@ export function ExtrusionControls({ extrusion, rod, onChange }) {
   const setField = (key, value) => onChange({ ...extrusion, [key]: value })
 
   return (
-    <Panel title="Twist and 3D view">
+    <Panel title="Twist">
       <Slider
         id="extrusion-twist"
         label="Twist"
@@ -21,50 +21,9 @@ export function ExtrusionControls({ extrusion, rod, onChange }) {
         step={90}
         onChange={(value) => setField('twistDegrees', value)}
       />
-      <Slider
-        id="extrusion-taper"
-        label="Taper (3D view only)"
-        value={extrusion.taper}
-        display={extrusion.taper ? `${extrusion.taper}%` : 'None'}
-        min={0}
-        max={90}
-        step={5}
-        onChange={(value) => setField('taper', value)}
-      />
-      <Slider
-        id="extrusion-length"
-        label="3D view length"
-        value={extrusion.length}
-        // The 3D rod is drawn at the gather's width (2 × 230 units), so its
-        // length reads best as a multiple of that width.
-        display={`${(extrusion.length / 460).toLocaleString('en', { maximumFractionDigits: 1 })}× its width`}
-        min={20}
-        max={400}
-        step={10}
-        onChange={(value) => setField('length', value)}
-      />
-      <div className="grid grid-cols-2 rounded-lg bg-raise p-0.5" role="group" aria-label="Cane view direction">
-        {[
-          { value: false, label: 'Lengthwise' },
-          { value: true, label: 'Sideways' },
-        ].map((option) => (
-          <button
-            key={option.label}
-            type="button"
-            aria-pressed={Boolean(extrusion.sideways) === option.value}
-            onClick={() => setField('sideways', option.value)}
-            className={`min-w-0 rounded-md px-2 py-1.5 text-sm font-semibold max-sm:min-h-[44px] ${
-              Boolean(extrusion.sideways) === option.value ? 'bg-accent text-accent-ink' : 'text-mute hover:text-ink'
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
       <p className="text-[0.8rem] leading-relaxed text-mute">
-        Twist spirals off-center canes along the rod, the way a zanfirico is made; a cane on the center has nothing
-        to spiral. The value is the real rate on the pulled cane; the Cane view squeezes it into a short stub so you can
-        see it. Taper, view length and direction only change the Cane view; they aren't in the plan.
+        Twist spirals the canes round the center as the cane is pulled, the way a zanfirico is made. The Cane view
+        shows it at this rate.
       </p>
     </Panel>
   )

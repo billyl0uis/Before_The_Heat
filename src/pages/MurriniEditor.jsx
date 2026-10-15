@@ -29,12 +29,11 @@ const DOCK = [
   { key: 'plan', label: 'Plan', icon: 'plan' },
 ]
 
-// Lazy so OrbitControls (and its ~370KB chunk, shared with the Vessel tab)
-// only loads if Rod Preview is actually opened — most visits stay on the
-// flat pattern view and never need it.
-const RodPreviewCanvas = lazy(() =>
-  import('../components/murrini/RodPreviewCanvas').then((m) => ({
-    default: m.RodPreviewCanvas,
+// The same Cane view Simple uses, lazy so three.js only loads when the
+// Cane view is opened; most visits stay on the slice.
+const CaneView = lazy(() =>
+  import('../components/murrini/CaneView').then((m) => ({
+    default: m.CaneView,
   })),
 )
 
@@ -84,7 +83,7 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
   const { containerRef: flatContainerRef, size: flatSize } = useResponsiveCanvasSize(520, 1)
   const [dock, setDock] = useState('tools')
   const [notice, setNotice] = useState(null)
-  const { containerRef: rodContainerRef, size: rodSize } = useResponsiveCanvasSize(360, 420 / 360)
+  const { containerRef: rodContainerRef, size: rodSize } = useResponsiveCanvasSize(460, 0.72)
 
   const [colorantId, setColorantId] = useState(GLASS_COLOR_INDEX[0].id)
   const [useCustomColor, setUseCustomColor] = useState(false)
@@ -266,7 +265,7 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
       // on the first placement (twist still at its default of 0), so it
       // never overwrites a twist you've already dialed in.
       if (selectedShape === 'zanfirico' && extrusion.twistDegrees === 0) {
-        setExtrusion({ ...extrusion, twistDegrees: 360, length: Math.max(extrusion.length, 200) })
+        setExtrusion({ ...extrusion, twistDegrees: 360 })
         setViewMode('rod')
       }
       return
@@ -398,7 +397,7 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
             />
           </div>
         ) : (
-          <div ref={rodContainerRef} className="w-full min-w-0" style={{ maxWidth: 360 }}>
+          <div ref={rodContainerRef} className="w-full min-w-0" style={{ maxWidth: 460 }}>
             <Suspense
               fallback={
                 <div
@@ -409,9 +408,11 @@ export function MurriniEditor({ design, onOpenPlan, onMode }) {
                 </div>
               }
             >
-              <RodPreviewCanvas
+              <CaneView
                 elements={repeatedElements}
-                extrusion={extrusion}
+                rod={rod}
+                casing={casing}
+                twistDegrees={extrusion.twistDegrees}
                 width={rodSize.width}
                 height={rodSize.height}
               />
